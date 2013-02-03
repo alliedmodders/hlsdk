@@ -174,7 +174,8 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	gHUD.m_Spectator.DeathMessage(victim);
 
-	for ( int i = 0; i < MAX_DEATHNOTICES; i++ )
+	int i;
+	for ( i = 0; i < MAX_DEATHNOTICES; i++ )
 	{
 		if ( rgDeathNoticeList[i].iId == 0 )
 			break;

@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -234,7 +234,7 @@ void CHalfLifeMultiplay :: Think ( void )
 
 			if ( pPlayer )
 			{
-				remain = flFragLimit - pPlayer->pev->frags;
+				remain = static_cast<int>(flFragLimit - pPlayer->pev->frags);
 				if ( remain < bestfrags )
 				{
 					bestfrags = remain;
@@ -280,7 +280,7 @@ BOOL CHalfLifeMultiplay::IsDeathmatch( void )
 //=========================================================
 BOOL CHalfLifeMultiplay::IsCoOp( void )
 {
-	return gpGlobals->coop;
+	return static_cast<BOOL>(gpGlobals->coop);
 }
 
 //=========================================================
@@ -439,7 +439,7 @@ void CHalfLifeMultiplay :: InitHUD( CBasePlayer *pl )
 
 			MESSAGE_BEGIN( MSG_ONE, gmsgScoreInfo, NULL, pl->edict() );
 				WRITE_BYTE( i );	// client number
-				WRITE_SHORT( plr->pev->frags );
+				WRITE_SHORT( static_cast<int>(plr->pev->frags) );
 				WRITE_SHORT( plr->m_iDeaths );
 				WRITE_SHORT( plr->pev->playerclass );
 				WRITE_SHORT( plr->pev->team );
@@ -561,7 +561,7 @@ void CHalfLifeMultiplay :: PlayerSpawn( CBasePlayer *pPlayer )
 	
 	addDefault = TRUE;
 
-	while ( pWeaponEntity = UTIL_FindEntityByClassname( pWeaponEntity, "game_player_equip" ))
+	while (( pWeaponEntity = UTIL_FindEntityByClassname( pWeaponEntity, "game_player_equip" )))
 	{
 		pWeaponEntity->Touch( pPlayer );
 		addDefault = FALSE;
@@ -636,10 +636,6 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 
 	const char *killer_weapon_name = "world";		// by default, the player is killed by the world
 	int killer_index = 0;
-	
-	// Hack to fix name change
-	char *tau = "tau_cannon";
-	char *gluon = "gluon gun";
 
 	if ( pKiller->flags & FL_CLIENT )
 	{

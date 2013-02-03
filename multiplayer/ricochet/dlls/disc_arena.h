@@ -77,7 +77,7 @@ public:
 
 	// Multiple Arena handling
 	int  IsFull( void );
-	CBasePlayer *CDiscArena::GetFirstSparePlayer( void );
+	CBasePlayer *GetFirstSparePlayer( void );
 	void PostBattle( void );
 
 	// Game handling

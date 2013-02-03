@@ -14,6 +14,8 @@ typedef unsigned char byte;
 //---------------------------------------------------------------------------
 // client_textmessage_t
 //---------------------------------------------------------------------------
+#ifndef _CLIENT_TEXTMSG_DEFINED_
+#define _CLIENT_TEXTMSG_DEFINED_
 typedef struct client_textmessage_s
 {
 	int		effect;
@@ -28,6 +30,7 @@ typedef struct client_textmessage_s
 	const char *pName;
 	const char *pMessage;
 } client_textmessage_t;
+#endif
 
 
 //--------------------------------------------------------------------------

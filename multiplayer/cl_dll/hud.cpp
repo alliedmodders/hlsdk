@@ -437,7 +437,7 @@ void CHud :: VidInit( void )
 
 			p = m_pSpriteList;
 			int index = 0;
-			for ( j = 0; j < m_iSpriteCountAllRes; j++ )
+			for ( int j = 0; j < m_iSpriteCountAllRes; j++ )
 			{
 				if ( p->iRes == m_iRes )
 				{

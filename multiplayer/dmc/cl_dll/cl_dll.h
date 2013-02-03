@@ -30,6 +30,14 @@ typedef unsigned short word;
 typedef float vec_t;
 typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
+#if defined _MSC_VER && _MSC_VER >= 1400
+	#ifndef _CRT_SECURE_NO_DEPRECATE
+		#define _CRT_SECURE_NO_DEPRECATE
+	#endif
+
+	#pragma warning(disable: 4996) // deprecated functions
+#endif
+
 #include "util_vector.h"
 #define EXPORT	_declspec( dllexport )
 

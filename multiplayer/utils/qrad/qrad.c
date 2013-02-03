@@ -1086,7 +1086,7 @@ readtransfers(char *transferfile, long numpatches)
 {
 	int		handle;
 	long	readpatches = 0, readtransfers = 0, totalbytes = 0;
-	long	start, end;
+	time_t	start, end;
 	time(&start);
 	if ( (handle = _open( transferfile, _O_RDONLY | _O_BINARY )) != -1 )
 	{

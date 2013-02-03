@@ -93,8 +93,8 @@ void CHornet :: Spawn( void )
 	SET_MODEL(ENT( pev ), "models/hornet.mdl");
 	UTIL_SetSize( pev, Vector( -4, -4, -4 ), Vector( 4, 4, 4 ) );
 
-	SetTouch( DieTouch );
-	SetThink( StartTrack );
+	SetTouch( &CHornet::DieTouch );
+	SetThink( &CHornet::StartTrack );
 
 	edict_t *pSoundEnt = pev->owner;
 	if ( !pSoundEnt )
@@ -169,8 +169,8 @@ void CHornet :: StartTrack ( void )
 {
 	IgniteTrail();
 
-	SetTouch( TrackTouch );
-	SetThink( TrackTarget );
+	SetTouch( &CHornet::TrackTouch );
+	SetThink( &CHornet::TrackTarget );
 
 	pev->nextthink = gpGlobals->time + 0.1;
 }
@@ -182,9 +182,9 @@ void CHornet :: StartDart ( void )
 {
 	IgniteTrail();
 
-	SetTouch( DartTouch );
+	SetTouch( &CHornet::DartTouch );
 
-	SetThink( SUB_Remove );
+	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 4;
 }
 
@@ -257,19 +257,19 @@ void CHornet :: TrackTarget ( void )
 	if (gpGlobals->time > m_flStopAttack)
 	{
 		SetTouch( NULL );
-		SetThink( SUB_Remove );
+		SetThink( &CBaseEntity::SUB_Remove );
 		pev->nextthink = gpGlobals->time + 0.1;
 		return;
 	}
 
 	// UNDONE: The player pointer should come back after returning from another level
-	if ( m_hEnemy == NULL )
+	if ( m_hEnemy == 0 )
 	{// enemy is dead.
 		Look( 512 );
 		m_hEnemy = BestVisibleEnemy( );
 	}
 	
-	if ( m_hEnemy != NULL && FVisible( m_hEnemy ))
+	if ( m_hEnemy != 0 && FVisible( m_hEnemy ))
 	{
 		m_vecEnemyLKP = m_hEnemy->BodyTarget( pev->origin );
 	}
@@ -332,7 +332,7 @@ void CHornet :: TrackTarget ( void )
 
 	// if hornet is close to the enemy, jet in a straight line for a half second.
 	// (only in the single player game)
-	if ( m_hEnemy != NULL && !g_pGameRules->IsMultiplayer() )
+	if ( m_hEnemy != 0 && !g_pGameRules->IsMultiplayer() )
 	{
 		if ( flDelta >= 0.4 && ( pev->origin - m_vecEnemyLKP ).Length() <= 300 )
 		{
@@ -413,7 +413,7 @@ void CHornet::DieTouch ( CBaseEntity *pOther )
 	pev->modelindex = 0;// so will disappear for the 0.1 secs we wait until NEXTTHINK gets rid
 	pev->solid = SOLID_NOT;
 
-	SetThink ( SUB_Remove );
+	SetThink ( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 1;// stick around long enough for the sound to finish!
 }
 

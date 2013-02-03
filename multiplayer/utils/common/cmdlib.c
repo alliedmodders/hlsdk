@@ -263,7 +263,7 @@ double I_FloatTime (void)
 	
 	time (&t);
 	
-	return t;
+	return (double)t;
 #if 0
 // more precise, less portable
 	struct timeval tp;
@@ -320,7 +320,7 @@ int	FileTime (char *path)
 	if (stat (path,&buf) == -1)
 		return -1;
 	
-	return buf.st_mtime;
+	return (int)buf.st_mtime;
 }
 
 

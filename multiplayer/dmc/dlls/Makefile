@@ -25,10 +25,11 @@ BASE_CFLAGS=	-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp
 				-DCLIENT_WEAPONS
 
 #safe optimization
-CFLAGS=$(BASE_CFLAGS) -w -m486 -O1
+CFLAGS=$(BASE_CFLAGS) -Wall -Wno-non-virtual-dtor -Wno-invalid-offsetof -Werror -m486 -O1
+C_FLAGS=$(BASE_CFLAGS) -Wall -Werror -m486 -O1
 
 #full optimization
-#CFLAGS=$(BASE_CFLAGS) -w -O1 -m486 -ffast-math -funroll-loops \
+#CFLAGS=$(BASE_CFLAGS) -Wall -Wno-non-virtual-dtor -Wno-invalid-offsetof -Werror -O1 -m486 -ffast-math -funroll-loops \
 	-fomit-frame-pointer -fexpensive-optimizations \
 	-malign-loops=2 -malign-jumps=2 -malign-functions=2
 
@@ -44,6 +45,7 @@ SHLIBCFLAGS=-fPIC
 SHLIBLDFLAGS=-shared
 
 DO_CC=$(CC) $(CFLAGS) $(SHLIBCFLAGS) $(INCLUDEDIRS) -o $@ -c $<
+DO_C=$(CC) $(C_FLAGS) $(SHLIBCFLAGS) $(INCLUDEDIRS) -o $@ -c $<
 
 #############################################################################
 # SETUP AND BUILD
@@ -57,7 +59,7 @@ $(GAME_SHARED_OBJDIR)/%.o: $(GAME_SHARED_SRCDIR)/%.cpp
 	$(DO_CC)
 
 $(PM_SHARED_OBJDIR)/%.o: $(PM_SHARED_SRCDIR)/%.c
-	$(DO_CC)
+	$(DO_C)
 
 OBJ = \
 	$(DLL_OBJDIR)/animating.o \
@@ -113,14 +115,13 @@ $(DLLNAME)_$(ARCH).$(SHLIBEXT) : neat $(OBJ)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) $(LDFLAGS) -o $@ $(OBJ)
 
 neat:
-	-mkdir $(DLL_OBJDIR)
-	-mkdir $(GAME_SHARED_OBJDIR)
-	-mkdir $(PM_SHARED_OBJDIR)
+	-mkdir -p $(DLL_OBJDIR)
+	-mkdir -p $(GAME_SHARED_OBJDIR)
+	-mkdir -p $(PM_SHARED_OBJDIR)
 clean:
 	-rm -f $(OBJ)
 	-rm -f $(DLLNAME)_$(ARCH).$(SHLIBEXT)
 spotless: clean
-	-rm -r $(GAME_SHARED_OBJDIR)
-	-rm -r $(PM_SHARED_OBJDIR)
-	-rm -r $(DLL_OBJDIR)
-
+	-rm -rf $(GAME_SHARED_OBJDIR)
+	-rm -rf $(PM_SHARED_OBJDIR)
+	-rm -rf $(DLL_OBJDIR)

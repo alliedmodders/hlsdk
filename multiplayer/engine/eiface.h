@@ -145,7 +145,7 @@ typedef struct enginefuncs_s
 	void		(*pfnGetAimVector)			(edict_t* ent, float speed, float *rgflReturn);
 	void		(*pfnServerCommand)			(char* str);
 	void		(*pfnServerExecute)			(void);
-	void		(*pfnClientCommand)			(edict_t* pEdict, const char* szFmt, ...);
+	void		(*pfnClientCommand)			(edict_t* pEdict, char* szFmt, ...);
 	void		(*pfnParticleEffect)		(const float *org, const float *dir, float color, float count);
 	void		(*pfnLightStyle)			(int style, char* val);
 	int			(*pfnDecalIndex)			(const char *name);
@@ -165,7 +165,7 @@ typedef struct enginefuncs_s
 	const char*	(*pfnCVarGetString)			(const char *szVarName);
 	void		(*pfnCVarSetFloat)			(const char *szVarName, float flValue);
 	void		(*pfnCVarSetString)			(const char *szVarName, const char *szValue);
-	void		(*pfnAlertMessage)			(ALERT_TYPE atype, const char *szFmt, ...);
+	void		(*pfnAlertMessage)			(ALERT_TYPE atype, char *szFmt, ...);
 	void		(*pfnEngineFprintf)			(void *pfile, char *szFmt, ...);
 	void*		(*pfnPvAllocEntPrivateData)	(edict_t *pEdict, int32 cb);
 	void*		(*pfnPvEntPrivateData)		(edict_t *pEdict);
@@ -413,6 +413,8 @@ typedef struct
 	short			flags;
 } TYPEDESCRIPTION;
 
+// Fix warning in MSVC8
+#undef ARRAYSIZE
 #define ARRAYSIZE(p)		(sizeof(p)/sizeof(p[0]))
 
 typedef struct 

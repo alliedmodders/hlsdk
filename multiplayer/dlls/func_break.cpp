@@ -104,7 +104,7 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 	else if (FStrEq(pkvd->szKeyName, "spawnobject") )
 	{
 		int object = atoi( pkvd->szValue );
-		if ( object > 0 && object < ARRAYSIZE(pSpawnObjects) )
+		if ( object > 0 && object < static_cast<int>(ARRAYSIZE(pSpawnObjects)) )
 			m_iszSpawnObject = MAKE_STRING( pSpawnObjects[object] );
 		pkvd->fHandled = TRUE;
 	}
@@ -164,7 +164,7 @@ void CBreakable::Spawn( void )
 
 	SET_MODEL(ENT(pev), STRING(pev->model) );//set size and link into world.
 
-	SetTouch( BreakTouch );
+	SetTouch( &CBreakable::BreakTouch );
 	if ( FBitSet( pev->spawnflags, SF_BREAK_TRIGGER_ONLY ) )		// Only break on trigger
 		SetTouch( NULL );
 
@@ -283,7 +283,7 @@ void CBreakable::MaterialSoundRandom( edict_t *pEdict, Materials soundMaterial, 
 
 void CBreakable::Precache( void )
 {
-	const char *pGibName;
+	const char *pGibName = NULL;
 
     switch (m_Material) 
 	{
@@ -338,6 +338,8 @@ void CBreakable::Precache( void )
 		
 		PRECACHE_SOUND ("debris/bustceiling.wav");  
 		break;
+	default:
+		break;
 	}
 	MaterialSoundPrecache( m_Material );
 	if ( m_iszGibModel )
@@ -359,7 +361,7 @@ void CBreakable::DamageSound( void )
 	int pitch;
 	float fvol;
 	char *rgpsz[6];
-	int i;
+	int i = 0;
 	int material = m_Material;
 
 //	if (RANDOM_LONG(0,1))
@@ -459,7 +461,7 @@ void CBreakable::BreakTouch( CBaseEntity *pOther )
 		// play creaking sound here.
 		DamageSound();
 
-		SetThink ( Die );
+		SetThink ( &CBreakable::Die );
 		SetTouch( NULL );
 		
 		if ( m_flDelay == 0 )
@@ -515,6 +517,9 @@ void CBreakable::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 			case matUnbreakableGlass:
 				UTIL_Ricochet( ptr->vecEndPos, RANDOM_FLOAT(0.5,1.5) );
 			break;
+
+			default:
+				break;
 		}
 	}
 
@@ -583,7 +588,6 @@ void CBreakable::Die( void )
 {
 	Vector vecSpot;// shard origin
 	Vector vecVelocity;// shard velocity
-	CBaseEntity *pEntity = NULL;
 	char cFlag = 0;
 	int pitch;
 	float fvol;
@@ -596,7 +600,7 @@ void CBreakable::Die( void )
 	// The more negative pev->health, the louder
 	// the sound should be.
 
-	fvol = RANDOM_FLOAT(0.85, 1.0) + (abs(pev->health) / 100.0);
+	fvol = RANDOM_FLOAT(0.85, 1.0) + (abs(static_cast<int>(pev->health)) / 100.0);
 
 	if (fvol > 1.0)
 		fvol = 1.0;
@@ -663,6 +667,9 @@ void CBreakable::Die( void )
 
 	case matCeilingTile:
 		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "debris/bustceiling.wav", fvol, ATTN_NORM, 0, pitch);
+		break;
+
+	default:
 		break;
 	}
     
@@ -743,7 +750,7 @@ void CBreakable::Die( void )
 	// Fire targets on break
 	SUB_UseTargets( NULL, USE_TOGGLE, 0 );
 
-	SetThink( SUB_Remove );
+	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = pev->ltime + 0.1;
 	if ( m_iszSpawnObject )
 		CBaseEntity::Create( (char *)STRING(m_iszSpawnObject), VecBModelOrigin(pev), pev->angles, edict() );
@@ -839,7 +846,7 @@ void CPushable :: Spawn( void )
 	UTIL_SetOrigin( pev, pev->origin );
 
 	// Multiply by area of the box's cross-section (assume 1000 units^3 standard volume)
-	pev->skin = ( pev->skin * (pev->maxs.x - pev->mins.x) * (pev->maxs.y - pev->mins.y) ) * 0.0005;
+	pev->skin = static_cast<int>(( pev->skin * (pev->maxs.x - pev->mins.x) * (pev->maxs.y - pev->mins.y) ) * 0.0005);
 	m_soundTime = 0;
 }
 
@@ -884,7 +891,7 @@ void CPushable :: KeyValue( KeyValueData *pkvd )
 	}
 	else if ( FStrEq(pkvd->szKeyName, "buoyancy") )
 	{
-		pev->skin = atof(pkvd->szValue);
+		pev->skin = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

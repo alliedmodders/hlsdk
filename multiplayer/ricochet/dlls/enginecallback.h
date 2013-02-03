@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -14,9 +14,16 @@
 ****/
 #ifndef ENGINECALLBACK_H
 #define ENGINECALLBACK_H
+#ifdef _WIN32
+#ifndef __MINGW32__
 #pragma once
+#endif /* not __MINGW32__ */
+#endif
 
 #include "event_flags.h"
+
+// Fix warning in MSVC8
+#undef SERVER_EXECUTE
 
 // Must be provided by user of this code
 extern enginefuncs_t g_engfuncs;
@@ -86,6 +93,7 @@ inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin = NU
 #define CVAR_GET_STRING	(*g_engfuncs.pfnCVarGetString)
 #define CVAR_SET_FLOAT	(*g_engfuncs.pfnCVarSetFloat)
 #define CVAR_SET_STRING	(*g_engfuncs.pfnCVarSetString)
+#define CVAR_GET_POINTER (*g_engfuncs.pfnCVarGetPointer)
 #define ALERT			(*g_engfuncs.pfnAlertMessage)
 #define ENGINE_FPRINTF	(*g_engfuncs.pfnEngineFprintf)
 #define ALLOC_PRIVATE	(*g_engfuncs.pfnPvAllocEntPrivateData)
@@ -124,8 +132,6 @@ inline void *GET_PRIVATE( edict_t *pent )
 #define IS_MAP_VALID			(*g_engfuncs.pfnIsMapValid)
 #define NUMBER_OF_ENTITIES		(*g_engfuncs.pfnNumberOfEntities)
 #define IS_DEDICATED_SERVER		(*g_engfuncs.pfnIsDedicatedServer)
-
-#define CVAR_GET_POINTER (*g_engfuncs.pfnCVarGetPointer)
 
 #define PRECACHE_EVENT			(*g_engfuncs.pfnPrecacheEvent)
 #define PLAYBACK_EVENT_FULL		(*g_engfuncs.pfnPlaybackEvent)

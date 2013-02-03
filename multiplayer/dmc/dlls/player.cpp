@@ -447,7 +447,7 @@ int CBasePlayer :: TakeHealth( float flHealth, int bitsDamageType )
 		return 0;
 	if ( !(bitsDamageType & DMG_IGNORE_MAXHEALTH) && (pev->health >= pev->max_health) )
 		return 0;
-	int iHealAmount = ceil(flHealth);
+	int iHealAmount = static_cast<int>(ceil(flHealth));
 
 	pev->health += iHealAmount;
 	if ( !(bitsDamageType & DMG_IGNORE_MAXHEALTH) && (pev->health >= pev->max_health) )
@@ -539,7 +539,7 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 {
 	g_pGameRules->PlayerKilled( this, pevAttacker, g_pevLastInflictor );
 
-	if ( m_pTank != NULL )
+	if ( m_pTank != 0 )
 	{
 		m_pTank->Use( this, this, USE_OFF, 0 );
 		m_pTank = NULL;
@@ -606,7 +606,7 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 	pev->angles.x = 0;
 	pev->angles.z = 0;
 
-	SetThink(PlayerDeathThink);
+	SetThink(&CBasePlayer::PlayerDeathThink);
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
@@ -856,7 +856,7 @@ void CBasePlayer::WaterMove()
 				// track drowning damage, give it back when
 				// player finally takes a breath
 
-				m_idrowndmg += pev->dmg;
+				m_idrowndmg += static_cast<int>(pev->dmg);
 			} 
 		}
 		else
@@ -1121,7 +1121,7 @@ void CBasePlayer::PlayerUse ( void )
 	// Hit Use on a train?
 	if ( m_afButtonPressed & IN_USE )
 	{
-		if ( m_pTank != NULL )
+		if ( m_pTank != 0 )
 		{
 			// Stop controlling the tank
 			// TODO: Send HUD Update
@@ -1144,7 +1144,7 @@ void CBasePlayer::PlayerUse ( void )
 				if ( pTrain && !(pev->button & IN_JUMP) && FBitSet(pev->flags, FL_ONGROUND) && (pTrain->ObjectCaps() & FCAP_DIRECTIONAL_USE) && pTrain->OnControls(pev) )
 				{
 					m_afPhysicsFlags |= PFLAG_ONTRAIN;
-					m_iTrain = TrainSpeed(pTrain->pev->speed, pTrain->pev->impulse);
+					m_iTrain = TrainSpeed(static_cast<int>(pTrain->pev->speed), pTrain->pev->impulse);
 					m_iTrain |= TRAIN_NEW;
 					EMIT_SOUND( ENT(pev), CHAN_ITEM, "plats/train_use1.wav", 0.8, ATTN_NORM);
 					return;
@@ -1315,7 +1315,7 @@ void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore )
 			
 			if ( -score > pev->frags )	// Will this go negative?
 			{
-				score = -pev->frags;		// Sum will be 0
+				score = static_cast<int>(-pev->frags);		// Sum will be 0
 			}
 		}
 	}
@@ -1324,7 +1324,7 @@ void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore )
 
 	MESSAGE_BEGIN( MSG_ALL, gmsgScoreInfo );
 		WRITE_BYTE( ENTINDEX(edict()) );
-		WRITE_SHORT( pev->frags );
+		WRITE_SHORT( static_cast<int>(pev->frags) );
 		WRITE_SHORT( m_iDeaths );
 		WRITE_SHORT( pev->team );
 	MESSAGE_END();
@@ -2029,7 +2029,7 @@ void CBasePlayer::PreThink(void)
 
 		if (vel)
 		{
-			m_iTrain = TrainSpeed(pTrain->pev->speed, pTrain->pev->impulse);
+			m_iTrain = TrainSpeed(static_cast<int>(pTrain->pev->speed), pTrain->pev->impulse);
 			m_iTrain |= TRAIN_ACTIVE|TRAIN_NEW;
 		}
 
@@ -2147,13 +2147,11 @@ void CBasePlayer::CheckTimeBasedDamage()
 	int i;
 	BYTE bDuration = 0;
 
-	static float gtbdPrev = 0.0;
-
 	if (!(m_bitsDamageType & DMG_TIMEBASED))
 		return;
 
 	// only check for time based damage approx. every 2 seconds
-	if (abs(gpGlobals->time - m_tbdPrev) < 2.0)
+	if (abs(static_cast<int>(gpGlobals->time - m_tbdPrev)) < 2.0)
 		return;
 	
 	m_tbdPrev = gpGlobals->time;
@@ -2374,7 +2372,7 @@ void CBasePlayer::CheckSuitUpdate()
 		// play a sentence off of the end of the queue
 		for (i = 0; i < CSUITPLAYLIST; i++)
 			{
-			if (isentence = m_rgSuitPlayList[isearch])
+			if ((isentence = m_rgSuitPlayList[isearch]))
 				break;
 			
 			if (++isearch == CSUITPLAYLIST)
@@ -2532,7 +2530,7 @@ void CBasePlayer::PostThink()
 		goto pt_end;
 
 	// Handle Tank controlling
-	if ( m_pTank != NULL )
+	if ( m_pTank != 0 )
 	{ // if they've moved too far from the gun,  or selected a weapon, unuse the gun
 		if ( m_pTank->OnControls( pev ) && !pev->weaponmodel )
 		{  
@@ -3223,7 +3221,7 @@ void CSprayCan::Think( void )
 	}
 	else
 	{
-		UTIL_PlayerDecalTrace( &tr, playernum, pev->frame, TRUE );
+		UTIL_PlayerDecalTrace( &tr, playernum, static_cast<int>(pev->frame), TRUE );
 		// Just painted last custom frame.
 		if ( pev->frame++ >= (nFrames - 1))
 			UTIL_Remove( this );
@@ -3245,7 +3243,7 @@ void CBloodSplat::Spawn ( entvars_t *pevOwner )
 	pev->angles = pevOwner->v_angle;
 	pev->owner = ENT(pevOwner);
 
-	SetThink ( Spray );
+	SetThink ( &CBloodSplat::Spray );
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
@@ -3260,7 +3258,7 @@ void CBloodSplat::Spray ( void )
 
 		UTIL_BloodDecalTrace( &tr, BLOOD_COLOR_RED );
 	}
-	SetThink ( SUB_Remove );
+	SetThink ( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
@@ -3625,7 +3623,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		if ( pEntity )
 		{
 			if ( pEntity->pev->takedamage )
-				pEntity->SetThink(SUB_Remove);
+				pEntity->SetThink(&CBaseEntity::SUB_Remove);
 		}
 		break;
 	}
@@ -3806,10 +3804,8 @@ Called every frame by the player PostThink
 */
 void CBasePlayer::ItemPostFrame()
 {
-	static int fInSelect = FALSE;
-
 	// check if the player is using a tank
-	if ( m_pTank != NULL )
+	if ( m_pTank != 0 )
 		return;
 
 	// HACKHACK: To make the axe fire 0.3 sec after fire is pressed
@@ -3930,11 +3926,11 @@ void CBasePlayer :: UpdateClientData( void )
 				CClientFog *pFog = (CClientFog *)pEntity;
 
 				//Send as bytes?.
-				WRITE_SHORT ( pFog->pev->rendercolor.x );
-				WRITE_SHORT ( pFog->pev->rendercolor.y );
-				WRITE_SHORT ( pFog->pev->rendercolor.z );
-				WRITE_SHORT ( pFog->m_iStartDist );
-				WRITE_SHORT ( pFog->m_iEndDist );
+				WRITE_SHORT ( static_cast<int>(pFog->pev->rendercolor.x) );
+				WRITE_SHORT ( static_cast<int>(pFog->pev->rendercolor.y) );
+				WRITE_SHORT ( static_cast<int>(pFog->pev->rendercolor.z) );
+				WRITE_SHORT ( static_cast<int>(pFog->m_iStartDist) );
+				WRITE_SHORT ( static_cast<int>(pFog->m_iEndDist) );
 			}
 			else
 				ALERT( at_console, "Map doesn't have any fog!\n" );
@@ -3981,14 +3977,14 @@ void CBasePlayer :: UpdateClientData( void )
 
 	if (pev->health != m_iClientHealth)
 	{
-		int iHealth = max( pev->health, 0 );  // make sure that no negative health values are sent
+		int iHealth = max( static_cast<int>(pev->health), 0 );  // make sure that no negative health values are sent
 
 		// send "health" update message
 		MESSAGE_BEGIN( MSG_ONE, gmsgHealth, NULL, pev );
 			WRITE_BYTE( iHealth );
 		MESSAGE_END();
 
-		m_iClientHealth = pev->health;
+		m_iClientHealth = static_cast<int>(pev->health);
 	}
 
 	// QUAKECLASSIC
@@ -4005,7 +4001,7 @@ void CBasePlayer :: UpdateClientData( void )
 
 	if (pev->armorvalue != m_iClientBattery)
 	{
-		m_iClientBattery = pev->armorvalue;
+		m_iClientBattery = static_cast<int>(pev->armorvalue);
 
 		ASSERT( gmsgBattery > 0 );
 		// send "health" update message
@@ -4032,8 +4028,8 @@ void CBasePlayer :: UpdateClientData( void )
 		int visibleDamageBits = m_bitsDamageType & DMG_SHOWNHUD;
 
 		MESSAGE_BEGIN( MSG_ONE, gmsgDamage, NULL, pev );
-			WRITE_BYTE( pev->dmg_save );
-			WRITE_BYTE( pev->dmg_take );
+			WRITE_BYTE( static_cast<int>(pev->dmg_save) );
+			WRITE_BYTE( static_cast<int>(pev->dmg_take) );
 			WRITE_LONG( visibleDamageBits );
 			WRITE_COORD( damageOrigin.x );
 			WRITE_COORD( damageOrigin.y );
@@ -4096,8 +4092,8 @@ void CBasePlayer :: UpdateClientData( void )
 		// Tell the client about the Quake weapons
 		for (int i = 1; i < 10; i++)
 		{
-			const char *pszName;
-			int iAmmoIndex;
+			const char *pszName = NULL;
+			int iAmmoIndex = 0;
 			int iMaxAmmo = 0;
 			int iCurrentAmmo = 0;
 			int iBit = 0;
@@ -4324,8 +4320,8 @@ Vector CBasePlayer :: GetAutoaimVector( float flDelta )
 		{
 			SET_CROSSHAIRANGLE( edict(), -m_vecAutoAim.x, m_vecAutoAim.y );
 			
-			m_lastx = m_vecAutoAim.x;
-			m_lasty = m_vecAutoAim.y;
+			m_lastx = static_cast<int>(m_vecAutoAim.x);
+			m_lasty = static_cast<int>(m_vecAutoAim.y);
 		}
 	}
 
@@ -4817,9 +4813,9 @@ void CRevertSaved :: KeyValue( KeyValueData *pkvd )
 
 void CRevertSaved :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	UTIL_ScreenFadeAll( pev->rendercolor, Duration(), HoldTime(), pev->renderamt, FFADE_OUT );
+	UTIL_ScreenFadeAll( pev->rendercolor, Duration(), HoldTime(), static_cast<int>(pev->renderamt), FFADE_OUT );
 	pev->nextthink = gpGlobals->time + MessageTime();
-	SetThink( MessageThink );
+	SetThink( &CRevertSaved::MessageThink );
 }
 
 
@@ -4830,7 +4826,7 @@ void CRevertSaved :: MessageThink( void )
 	if ( nextThink > 0 ) 
 	{
 		pev->nextthink = gpGlobals->time + nextThink;
-		SetThink( LoadThink );
+		SetThink( &CRevertSaved::LoadThink );
 	}
 	else
 		LoadThink();

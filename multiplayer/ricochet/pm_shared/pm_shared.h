@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -18,7 +18,11 @@
 //
 #if !defined( PM_SHAREDH )
 #define PM_SHAREDH
+#ifdef _WIN32
+#ifndef __MINGW32__
 #pragma once
+#endif /* not __MINGW32__ */
+#endif
 
 void PM_Init( struct playermove_s *ppmove );
 void PM_Move ( struct playermove_s *ppmove, int server );

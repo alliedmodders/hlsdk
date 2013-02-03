@@ -13,6 +13,14 @@
 #endif /* not __MINGW32__ */
 #endif
 
+#if defined _MSC_VER && _MSC_VER >= 1400
+	#ifndef _CRT_SECURE_NO_DEPRECATE
+		#define _CRT_SECURE_NO_DEPRECATE
+	#endif
+
+	#pragma warning(disable: 4996) // deprecated functions
+#endif
+
 typedef void (*SleepType)(int);
 long Sys_LoadLibrary( char *lib );
 void Sys_FreeLibrary( long library );

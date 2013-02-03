@@ -281,7 +281,7 @@ void CEgon::Fire( const Vector &vecOrigSrc, const Vector &vecDir )
 
 #endif
 
-	float timedist;
+	float timedist = 0.0f;
 
 	switch ( m_fireMode )
 	{
@@ -393,13 +393,13 @@ void CEgon::UpdateEffect( const Vector &startPoint, const Vector &endPoint, floa
 	}
 
 	m_pBeam->SetStartPos( endPoint );
-	m_pBeam->SetBrightness( 255 - (timeBlend*180) );
-	m_pBeam->SetWidth( 40 - (timeBlend*20) );
+	m_pBeam->SetBrightness( static_cast<int>(255 - (timeBlend*180)) );
+	m_pBeam->SetWidth( static_cast<int>(40 - (timeBlend*20)) );
 
 	if ( m_fireMode == FIRE_WIDE )
-		m_pBeam->SetColor( 30 + (25*timeBlend), 30 + (30*timeBlend), 64 + 80*fabs(sin(gpGlobals->time*10)) );
+		m_pBeam->SetColor( static_cast<int>(30 + (25*timeBlend)), static_cast<int>(30 + (30*timeBlend)), static_cast<int>(64 + 80*fabs(sin(gpGlobals->time*10))) );
 	else
-		m_pBeam->SetColor( 60 + (25*timeBlend), 120 + (30*timeBlend), 64 + 80*fabs(sin(gpGlobals->time*10)) );
+		m_pBeam->SetColor( static_cast<int>(60 + (25*timeBlend)), static_cast<int>(120 + (30*timeBlend)), static_cast<int>(64 + 80*fabs(sin(gpGlobals->time*10))) );
 
 
 	UTIL_SetOrigin( m_pSprite->pev, endPoint );

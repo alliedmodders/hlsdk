@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -15,6 +15,9 @@
 //
 // Misc utility code
 //
+
+#include <string.h>
+
 #ifndef ACTIVITY_H
 #include "activity.h"
 #endif
@@ -111,7 +114,7 @@ inline edict_t *ENT(EOFFSET eoffset)			{ return (*g_engfuncs.pfnPEntityOfEntOffs
 inline EOFFSET OFFSET(EOFFSET eoffset)			{ return eoffset; }
 inline EOFFSET OFFSET(const edict_t *pent)	
 { 
-#if _DEBUG
+#ifdef _DEBUG
 	if ( !pent )
 		ALERT( at_error, "Bad ent in OFFSET()\n" );
 #endif
@@ -119,7 +122,7 @@ inline EOFFSET OFFSET(const edict_t *pent)
 }
 inline EOFFSET OFFSET(entvars_t *pev)				
 { 
-#if _DEBUG
+#ifdef _DEBUG
 	if ( !pev )
 		ALERT( at_error, "Bad pev in OFFSET()\n" );
 #endif
@@ -524,7 +527,7 @@ void EMIT_GROUPID_SUIT(edict_t *entity, int isentenceg);
 void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname);
 
 #define PRECACHE_SOUND_ARRAY( a ) \
-	{ for (int i = 0; i < ARRAYSIZE( a ); i++ ) PRECACHE_SOUND((char *) a [i]); }
+	{ for (int i = 0; i < static_cast<int>(ARRAYSIZE( a )); i++ ) PRECACHE_SOUND((char *) a [i]); }
 
 #define EMIT_SOUND_ARRAY_DYN( chan, array ) \
 	EMIT_SOUND_DYN ( ENT(pev), chan , array [ RANDOM_LONG(0,ARRAYSIZE( array )-1) ], 1.0, ATTN_NORM, 0, RANDOM_LONG(95,105) ); 

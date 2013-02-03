@@ -12,6 +12,14 @@
 #endif
 #endif // _MSC_VER > 1000
 
+#if defined _MSC_VER && _MSC_VER >= 1400
+	#ifndef _CRT_SECURE_NO_DEPRECATE
+		#define _CRT_SECURE_NO_DEPRECATE
+	#endif
+
+	#pragma warning(disable: 4996) // deprecated functions
+#endif
+
 #ifndef __AFXWIN_H__
 	#error include 'stdafx.h' before including this file for PCH
 #endif

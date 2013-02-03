@@ -27,6 +27,7 @@ typedef struct entity_s
 extern	lightentity_t	lightentities[MAX_MAP_ENTITIES];
 extern	int		numlightentities;
 
+#undef ON_EPSILON
 #define	ON_EPSILON	0.1
 
 #define	MAXLIGHTS			1024

@@ -126,7 +126,7 @@ void Sys_Sleep_Timer( int msec )
 	struct itimerval tm;
 
 	tm.it_value.tv_sec=msec/1000; // convert msec to seconds
-	tm.it_value.tv_usec=(msec%1000)*1E3; // get the number of msecs and change to micros
+	tm.it_value.tv_usec=static_cast<__suseconds_t>((msec%1000)*1E3); // get the number of msecs and change to micros
 	tm.it_interval.tv_sec  = 0;
         tm.it_interval.tv_usec = 0;
 
@@ -1001,7 +1001,6 @@ int main(int argc, char **argv)
 
    while ( 1 )
    {
-		char *p;
 		static double oldtime = 0.0;
 
 		double newtime;

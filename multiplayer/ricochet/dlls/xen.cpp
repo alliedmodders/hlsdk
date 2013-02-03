@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -103,7 +103,7 @@ void CXenPLight :: Spawn( void )
 	pev->frame = RANDOM_FLOAT(0,255);
 
 	m_pGlow = CSprite::SpriteCreate( XEN_PLANT_GLOW_SPRITE, pev->origin + Vector(0,0,(pev->mins.z+pev->maxs.z)*0.5), FALSE );
-	m_pGlow->SetTransparency( kRenderGlow, pev->rendercolor.x, pev->rendercolor.y, pev->rendercolor.z, pev->renderamt, pev->renderfx );
+	m_pGlow->SetTransparency( kRenderGlow, static_cast<int>(pev->rendercolor.x), static_cast<int>(pev->rendercolor.y), static_cast<int>(pev->rendercolor.z), static_cast<int>(pev->renderamt), static_cast<int>(pev->renderfx) );
 	m_pGlow->SetAttachment( edict(), 1 );
 }
 
@@ -469,7 +469,7 @@ void CXenSporeLarge::Spawn( void )
 	UTIL_MakeVectorsPrivate( pev->angles, forward, right, NULL );
 
 	// Rotate the leg hulls into position
-	for ( int i = 0; i < ARRAYSIZE(m_hullSizes); i++ )
+	for ( int i = 0; i < static_cast<int>(ARRAYSIZE(m_hullSizes)); i++ )
 		CXenHull :: CreateHull( this, Vector(-12, -12, 0 ), Vector( 12, 12, 120 ), (m_hullSizes[i].x * forward) + (m_hullSizes[i].y * right) );
 }
 
@@ -511,7 +511,7 @@ void CXenSpore :: Touch( CBaseEntity *pOther )
 
 void CXenSpore :: Think( void )
 {
-	float flInterval = StudioFrameAdvance();
+	StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1;
 
 #if 0
@@ -526,5 +526,3 @@ void CXenSpore :: Think( void )
 	}
 #endif
 }
-
-

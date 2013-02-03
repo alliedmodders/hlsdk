@@ -250,7 +250,8 @@ void Host_Say( edict_t *pEntity, int teamonly )
 	}
 
 // make sure the text has content
-	for ( char *pc = p; pc != NULL && *pc != 0; pc++ )
+	char *pc = NULL;
+	for ( pc = p; pc != NULL && *pc != 0; pc++ )
 	{
 		if ( isprint( *pc ) && !isspace( *pc ) )
 		{
@@ -532,7 +533,6 @@ Called every frame before physics are run
 */
 void PlayerPreThink( edict_t *pEntity )
 {
-	entvars_t *pev = &pEntity->v;
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
 
 	if (pPlayer)
@@ -548,7 +548,6 @@ Called every frame after physics are run
 */
 void PlayerPostThink( edict_t *pEntity )
 {
-	entvars_t *pev = &pEntity->v;
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
 
 	if (pPlayer)
@@ -584,7 +583,7 @@ void StartFrame( void )
 		return;
 
 	gpGlobals->teamplay = CVAR_GET_FLOAT("teamplay");
-	g_iSkillLevel = CVAR_GET_FLOAT("skill");
+	g_iSkillLevel = static_cast<int>(CVAR_GET_FLOAT("skill"));
 	g_ulFrameCount++;
 }
 
@@ -797,7 +796,6 @@ animation right now.
 */
 void PlayerCustomization( edict_t *pEntity, customization_t *pCust )
 {
-	entvars_t *pev = &pEntity->v;
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
 
 	if (!pPlayer)
@@ -837,7 +835,6 @@ A spectator has joined the game
 */
 void SpectatorConnect( edict_t *pEntity )
 {
-	entvars_t *pev = &pEntity->v;
 	CBaseSpectator *pPlayer = (CBaseSpectator *)GET_PRIVATE(pEntity);
 
 	if (pPlayer)
@@ -853,7 +850,6 @@ A spectator has left the game
 */
 void SpectatorDisconnect( edict_t *pEntity )
 {
-	entvars_t *pev = &pEntity->v;
 	CBaseSpectator *pPlayer = (CBaseSpectator *)GET_PRIVATE(pEntity);
 
 	if (pPlayer)
@@ -869,7 +865,6 @@ A spectator has sent a usercmd
 */
 void SpectatorThink( edict_t *pEntity )
 {
-	entvars_t *pev = &pEntity->v;
 	CBaseSpectator *pPlayer = (CBaseSpectator *)GET_PRIVATE(pEntity);
 
 	if (pPlayer)
@@ -1065,11 +1060,11 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 	}
 
 	state->rendermode    = ent->v.rendermode;
-	state->renderamt     = ent->v.renderamt; 
+	state->renderamt     = static_cast<int>(ent->v.renderamt); 
 	state->renderfx      = ent->v.renderfx;
-	state->rendercolor.r = ent->v.rendercolor[0];
-	state->rendercolor.g = ent->v.rendercolor[1];
-	state->rendercolor.b = ent->v.rendercolor[2];
+	state->rendercolor.r = static_cast<byte>(ent->v.rendercolor[0]);
+	state->rendercolor.g = static_cast<byte>(ent->v.rendercolor[1]);
+	state->rendercolor.b = static_cast<byte>(ent->v.rendercolor[2]);
 
 	state->aiment = 0;
 	if ( ent->v.aiment )
@@ -1102,7 +1097,7 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 //		state->team			= ent->v.team;
 //		state->playerclass  = ent->v.playerclass;
 		state->usehull      = ( ent->v.flags & FL_DUCKING ) ? 1 : 0;
-		state->health		= ent->v.health;
+		state->health		= static_cast<int>(ent->v.health);
 	}
 
 	return 1;
@@ -1500,7 +1495,7 @@ void UpdateClientData ( const struct edict_s *ent, int sendweapons, struct clien
 	cd->flTimeStepSound = ent->v.flTimeStepSound;
 	cd->flDuckTime		= ent->v.flDuckTime;
 	cd->flSwimTime		= ent->v.flSwimTime;
-	cd->waterjumptime	= ent->v.teleport_time;
+	cd->waterjumptime	= static_cast<const int>(ent->v.teleport_time);
 
 	strcpy( cd->physinfo, ENGINE_GETPHYSINFO( ent ) );
 
@@ -1540,7 +1535,7 @@ void UpdateClientData ( const struct edict_s *ent, int sendweapons, struct clien
 			}
 
 			cd->fuser1 = (float)pl->m_iQuakeWeapon;
-			cd->iuser4 = gpGlobals->deathmatch;
+			cd->iuser4 = static_cast<int>(gpGlobals->deathmatch);
 			cd->fuser2 = pl->m_iNailOffset > 0 ? 1.0 : 0.0;
 
 			cd->iuser3 = pl->m_iQuakeItems;
@@ -1614,9 +1609,6 @@ ConnectionlessPacket
 */
 int	ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
 {
-	// Parse stuff from args
-	int max_buffer_size = *response_buffer_size;
-
 	// Zero it out since we aren't going to respond.
 	// If we wanted to response, we'd write data into response_buffer
 	*response_buffer_size = 0;
@@ -1669,7 +1661,6 @@ to be created during play ( e.g., grenades, ammo packs, projectiles, corpses, et
 */
 void CreateInstancedBaselines ( void )
 {
-	int iret = 0;
 	entity_state_t state;
 
 	memset( &state, 0, sizeof( state ) );

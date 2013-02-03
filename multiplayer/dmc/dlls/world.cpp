@@ -123,15 +123,15 @@ void CDecal :: Spawn( void )
 
 	if ( FStringNull ( pev->targetname ) )
 	{
-		SetThink( StaticDecal );
+		SetThink( &CDecal::StaticDecal );
 		// if there's no targetname, the decal will spray itself on as soon as the world is done spawning.
 		pev->nextthink = gpGlobals->time;
 	}
 	else
 	{
 		// if there IS a targetname, the decal sprays itself on when it is triggered.
-		SetThink ( SUB_DoNothing );
-		SetUse(TriggerDecal);
+		SetThink ( &CBaseEntity::SUB_DoNothing );
+		SetUse(&CDecal::TriggerDecal);
 	}
 }
 
@@ -156,7 +156,7 @@ void CDecal :: TriggerDecal ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 			WRITE_SHORT( (int)VARS(trace.pHit)->modelindex );
 	MESSAGE_END();
 
-	SetThink( SUB_Remove );
+	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
@@ -601,7 +601,7 @@ void CWorld :: Precache( void )
 	// 63 testing
 	LIGHT_STYLE(63, "a");
 
-	for ( int i = 0; i < ARRAYSIZE(gDecals); i++ )
+	for ( int i = 0; i < static_cast<int>(ARRAYSIZE(gDecals)); i++ )
 		gDecals[i].index = DECAL_INDEX( gDecals[i].name );
 
 // init the WorldGraph.

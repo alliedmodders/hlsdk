@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -22,15 +22,25 @@
 
 // Allow "DEBUG" in addition to default "_DEBUG"
 #ifdef _DEBUG
-#define DEBUG 1
+	#define DEBUG 1
 #endif
 
 // Silence certain warnings
-#pragma warning(disable : 4244)		// int or float down-conversion
-#pragma warning(disable : 4305)		// int or float data truncation
-#pragma warning(disable : 4201)		// nameless struct/union
-#pragma warning(disable : 4514)		// unreferenced inline function removed
-#pragma warning(disable : 4100)		// unreferenced formal parameter
+#ifdef _MSC_VER
+	#pragma warning(disable : 4244)		// int or float down-conversion
+	#pragma warning(disable : 4305)		// int or float data truncation
+	#pragma warning(disable : 4201)		// nameless struct/union
+	#pragma warning(disable : 4514)		// unreferenced inline function removed
+	#pragma warning(disable : 4100)		// unreferenced formal parameter
+
+	#if _MSC_VER >= 1400
+		#ifndef _CRT_SECURE_NO_DEPRECATE
+			#define _CRT_SECURE_NO_DEPRECATE
+		#endif
+
+		#pragma warning(disable: 4996) // deprecated functions
+	#endif
+#endif
 
 #ifdef _WIN32
 // Prevent tons of unused windows definitions
@@ -53,7 +63,7 @@ typedef int BOOL;
 
 #include <limits.h>
 #include <stdarg.h>
-
+#include <ctype.h>
 #ifndef min
 #define min(a,b)  (((a) < (b)) ? (a) : (b))
 #endif

@@ -5,16 +5,16 @@
 #
 
 #make sure this is the correct compiler for your system
-CC=gcc
+CC=g++
 
 SRCDIR=.
 OBJDIR=$(SRCDIR)/obj
 
 #safe optimization
-CFLAGS=-w -m486 -O1
+CFLAGS=-Wall -Werror -m486 -O1
 
 #full optimization
-#CFLAGS=-w -m486 -O2 \
+#CFLAGS=-Wall -Werror -m486 -O2 \
 	-ffast-math -funroll-loops \
 	-fexpensive-optimizations -malign-loops=2 \
 	-malign-jumps=2 -malign-functions=2
@@ -45,10 +45,9 @@ OBJ = \
 hlds : neat $(OBJ)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ)
 neat:
-	-mkdir $(OBJDIR)
+	-mkdir -p $(OBJDIR)
 clean:
 	-rm -f $(OBJ)
 	-rm -f hlds
 spotless: clean
 	-rm -r $(OBJDIR)
-

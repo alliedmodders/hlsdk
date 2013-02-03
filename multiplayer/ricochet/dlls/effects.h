@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -79,7 +79,7 @@ public:
 
 	inline void AnimateAndDie( float framerate ) 
 	{ 
-		SetThink(AnimateUntilDead); 
+		SetThink(&CSprite::AnimateUntilDead); 
 		pev->framerate = framerate;
 		pev->dmgtime = gpGlobals->time + (m_maxFrame / framerate); 
 		pev->nextthink = gpGlobals->time; 
@@ -145,12 +145,12 @@ public:
 	Vector Center( void ) { return (GetStartPos() + GetEndPos()) * 0.5; }; // center point of beam
 
 	inline int  GetTexture( void ) { return pev->modelindex; }
-	inline int  GetWidth( void ) { return pev->scale; }
+	inline int  GetWidth( void ) { return static_cast<int>(pev->scale); }
 	inline int  GetNoise( void ) { return pev->body; }
 	// inline void GetColor( int r, int g, int b ) { pev->rendercolor.x = r; pev->rendercolor.y = g; pev->rendercolor.z = b; }
-	inline int  GetBrightness( void ) { return pev->renderamt; }
-	inline int  GetFrame( void ) { return pev->frame; }
-	inline int  GetScrollRate( void ) { return pev->animtime; }
+	inline int  GetBrightness( void ) { return static_cast<int>(pev->renderamt); }
+	inline int  GetFrame( void ) { return static_cast<int>(pev->frame); }
+	inline int  GetScrollRate( void ) { return static_cast<int>(pev->animtime); }
 
 	// Call after you change start/end positions
 	void		RelinkBeam( void );
@@ -168,7 +168,7 @@ public:
 
 	static CBeam *BeamCreate( const char *pSpriteName, int width );
 
-	inline void LiveForTime( float time ) { SetThink(SUB_Remove); pev->nextthink = gpGlobals->time + time; }
+	inline void LiveForTime( float time ) { SetThink(&CBaseEntity::SUB_Remove); pev->nextthink = gpGlobals->time + time; }
 	inline void	BeamDamageInstant( TraceResult *ptr, float damage ) 
 	{ 
 		pev->dmg = damage; 

@@ -33,7 +33,6 @@ public:
 
 	inline Vector2D Normalize ( void ) const
 	{
-		// Vector2D vec2;
 
 		float flLen = Length();
 		if ( flLen == 0 )

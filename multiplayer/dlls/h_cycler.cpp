@@ -334,7 +334,7 @@ void CWeaponCycler::Spawn( )
 
 	UTIL_SetOrigin( pev, pev->origin );
 	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
-	SetTouch( DefaultTouch );
+	SetTouch( &CBasePlayerItem::DefaultTouch );
 }
 
 
@@ -426,7 +426,7 @@ void CWreckage::Spawn( void )
 	}
 	// pev->scale = 5.0;
 
-	m_flStartTime		= gpGlobals->time;
+	m_flStartTime		= static_cast<int>(gpGlobals->time);
 }
 
 void CWreckage::Precache( )

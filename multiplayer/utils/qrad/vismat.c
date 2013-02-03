@@ -290,7 +290,7 @@ getfiledata(char *filename, char *buffer, int buffersize)
 {
 	long			size = 0;
 	int				handle;
-	long			start,end;
+	time_t			start,end;
 	time(&start);
 
 	if ( (handle = _open( filename, _O_RDONLY | _O_BINARY )) != -1 )

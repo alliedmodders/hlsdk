@@ -174,7 +174,8 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	}
 
 	// find an empty string slot
-	for ( int i = 0; i < MAX_LINES; i++ )
+	int i;
+	for ( i = 0; i < MAX_LINES; i++ )
 	{
 		if ( ! *g_szLineBuffer[i] )
 			break;

@@ -79,7 +79,7 @@ void CBaseMonster :: MonsterInitDead( void )
 
 	// Setup health counters, etc.
 	BecomeDead();
-	SetThink( CorpseFallThink );
+	SetThink( &CBaseMonster::CorpseFallThink );
 	pev->nextthink = gpGlobals->time + 0.5;
 }
 
@@ -238,7 +238,7 @@ CBaseEntity *CBaseMonster :: BestVisibleEnemy ( void )
 				// currently think is the best visible enemy. No need to do 
 				// a distance check, just get mad at this one for now.
 				iBestRelationship = IRelationship ( pNextEnt );
-				iNearest = ( pNextEnt->pev->origin - pev->origin ).Length();
+				iNearest = static_cast<int>(( pNextEnt->pev->origin - pev->origin ).Length());
 				pReturn = pNextEnt;
 			}
 			else if ( IRelationship( pNextEnt) == iBestRelationship )
@@ -246,7 +246,7 @@ CBaseEntity *CBaseMonster :: BestVisibleEnemy ( void )
 				// this entity is disliked just as much as the entity that
 				// we currently think is the best visible enemy, so we only
 				// get mad at it if it is closer.
-				iDist = ( pNextEnt->pev->origin - pev->origin ).Length();
+				iDist = static_cast<int>(( pNextEnt->pev->origin - pev->origin ).Length());
 				
 				if ( iDist <= iNearest )
 				{

@@ -391,7 +391,7 @@ int CHudHealth::DrawDamage(float flTime)
 
 
 	// check for bits that should be expired
-	for ( i = 0; i < NUM_DMG_TYPES; i++ )
+	for ( int i = 0; i < NUM_DMG_TYPES; i++ )
 	{
 		DAMAGE_IMAGE *pdmg = &m_dmg[i];
 

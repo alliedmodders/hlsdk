@@ -42,7 +42,7 @@ cvar_t sv_alltalk = {"sv_alltalk", "0"};
 // ------------------------------------------------------------------------ //
 
 // Find a player with a case-insensitive name search.
-static CBasePlayer* FindPlayerByName(const char *pTestName)
+/*static CBasePlayer* FindPlayerByName(const char *pTestName)
 {
 	for(int i=1; i <= gpGlobals->maxClients; i++)
 	{
@@ -62,7 +62,7 @@ static CBasePlayer* FindPlayerByName(const char *pTestName)
 	}
 
 	return NULL;
-}
+}*/
 
 static void VoiceServerDebug( char const *pFmt, ... )
 {
@@ -179,7 +179,7 @@ bool CVoiceGameMgr::ClientCommand(CBasePlayer *pPlayer, const char *cmd)
 		for(int i=1; i < CMD_ARGC(); i++)
 		{
 			unsigned long mask = 0;
-			sscanf(CMD_ARGV(i), "%x", &mask);
+			sscanf(CMD_ARGV(i), "%lx", &mask);
 
 			if(i <= VOICE_MAX_PLAYERS_DW)
 			{

@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -58,8 +58,8 @@ void CAirtank :: Spawn( void )
 	UTIL_SetSize(pev, Vector( -16, -16, 0), Vector(16, 16, 36));
 	UTIL_SetOrigin( pev, pev->origin );
 
-	SetTouch( TankTouch );
-	SetThink( TankThink );
+	SetTouch( &CAirtank::TankTouch );
+	SetThink( &CAirtank::TankThink );
 
 	pev->flags |= FL_MONSTER;
 	pev->takedamage		= DAMAGE_YES;

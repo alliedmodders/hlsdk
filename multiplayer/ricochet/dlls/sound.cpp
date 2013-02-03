@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -193,7 +193,7 @@ void CAmbientGeneric :: Spawn( void )
 	{
 		ALERT( at_error, "EMPTY AMBIENT AT: %f, %f, %f\n", pev->origin.x, pev->origin.y, pev->origin.z );
 		pev->nextthink = gpGlobals->time + 0.1;
-		SetThink( SUB_Remove );
+		SetThink( &CBaseEntity::SUB_Remove );
 		return;
 	}
     pev->solid		= SOLID_NOT;
@@ -203,12 +203,12 @@ void CAmbientGeneric :: Spawn( void )
 	// of ambient sound's pitch or volume. Don't
 	// start thinking yet.
 
-	SetThink(RampThink);
+	SetThink(&CAmbientGeneric::RampThink);
 	pev->nextthink = 0;
 
 	// allow on/off switching via 'use' function.
 
-	SetUse ( ToggleUse );
+	SetUse ( &CAmbientGeneric::ToggleUse );
 	
 	m_fActive = FALSE;
 
@@ -449,7 +449,7 @@ void CAmbientGeneric :: InitModulationParms(void)
 {
 	int pitchinc;
 
-	m_dpv.volrun = pev->health * 10;	// 0 - 100
+	m_dpv.volrun = static_cast<int>(pev->health * 10);	// 0 - 100
 	if (m_dpv.volrun > 100) m_dpv.volrun = 100;
 	if (m_dpv.volrun < 0) m_dpv.volrun = 0;
 
@@ -551,7 +551,7 @@ void CAmbientGeneric :: ToggleUse ( CBaseEntity *pActivator, CBaseEntity *pCalle
 		if (fraction < 0.0)
 			fraction = 0.01;
 
-		m_dpv.pitch = fraction * 255;
+		m_dpv.pitch = static_cast<int>(fraction * 255);
 
 		UTIL_EmitAmbientSound(ENT(pev), pev->origin, szSoundFile, 
 					0, 0, SND_CHANGE_PITCH, m_dpv.pitch);
@@ -1828,19 +1828,19 @@ void CSpeaker :: Spawn( void )
 	{
 		ALERT( at_error, "SPEAKER with no Level/Sentence! at: %f, %f, %f\n", pev->origin.x, pev->origin.y, pev->origin.z );
 		pev->nextthink = gpGlobals->time + 0.1;
-		SetThink( SUB_Remove );
+		SetThink( &CBaseEntity::SUB_Remove );
 		return;
 	}
     pev->solid		= SOLID_NOT;
     pev->movetype	= MOVETYPE_NONE;
 
 	
-	SetThink(SpeakerThink);
+	SetThink(&CSpeaker::SpeakerThink);
 	pev->nextthink = 0.0;
 
 	// allow on/off switching via 'use' function.
 
-	SetUse ( ToggleUse );
+	SetUse ( &CSpeaker::ToggleUse );
 
 	Precache( );
 }
@@ -1856,7 +1856,7 @@ void CSpeaker :: Precache( void )
 }
 void CSpeaker :: SpeakerThink( void )
 {
-	char* szSoundFile;
+	char *szSoundFile = NULL;
 	float flvolume = pev->health * 0.1;
 	float flattenuation = 0.3;
 	int flags = 0;

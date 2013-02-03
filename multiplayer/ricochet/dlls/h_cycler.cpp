@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -334,7 +334,7 @@ void CWeaponCycler::Spawn( )
 
 	UTIL_SetOrigin( pev, pev->origin );
 	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
-	SetTouch( DefaultTouch );
+	SetTouch( &CBasePlayerItem::DefaultTouch );
 }
 
 
@@ -426,7 +426,7 @@ void CWreckage::Spawn( void )
 	}
 	// pev->scale = 5.0;
 
-	m_flStartTime		= gpGlobals->time;
+	m_flStartTime		= static_cast<int>(gpGlobals->time);
 }
 
 void CWreckage::Precache( )

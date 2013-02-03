@@ -38,36 +38,13 @@
 
 static int pm_shared_initialized = 0;
 
+#ifdef _MSC_VER
 #pragma warning( disable : 4305 )
+#endif
 
 typedef enum {mod_brush, mod_sprite, mod_alias, mod_studio} modtype_t;
 
 playermove_t *pmove = NULL;
-
-typedef struct
-{
-	int			planenum;
-	short		children[2];	// negative numbers are contents
-} dclipnode_t;
-
-typedef struct mplane_s
-{
-	vec3_t	normal;			// surface normal
-	float	dist;			// closest appoach to origin
-	byte	type;			// for texture axis selection and fast side tests
-	byte	signbits;		// signx + signy<<1 + signz<<1
-	byte	pad[2];
-} mplane_t;
-
-typedef struct hull_s
-{
-	dclipnode_t	*clipnodes;
-	mplane_t	*planes;
-	int			firstclipnode;
-	int			lastclipnode;
-	vec3_t		clip_mins;
-	vec3_t		clip_maxs;
-} hull_t;
 
 // Ducking time
 #define TIME_TO_DUCK	0.4
@@ -117,7 +94,9 @@ typedef struct hull_s
 #define PLAYER_LONGJUMP_SPEED 350 // how fast we longjump
 
 // double to float warning
+#ifdef _MSC_VER
 #pragma warning(disable : 4244)
+#endif
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
 // up / down
@@ -1981,9 +1960,6 @@ void PM_Duck( void )
 
 	int buttonsChanged	= ( pmove->oldbuttons ^ pmove->cmd.buttons );	// These buttons have changed this frame
 	int nButtonPressed	=  buttonsChanged & pmove->cmd.buttons;		// The changed ones still down are "pressed"
-
-	int duckchange		= buttonsChanged & IN_DUCK ? 1 : 0;
-	int duckpressed		= nButtonPressed & IN_DUCK ? 1 : 0;
 
 	if ( pmove->cmd.buttons & IN_DUCK )
 	{

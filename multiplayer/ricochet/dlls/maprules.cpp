@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -138,7 +138,7 @@ public:
 	void	Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void	KeyValue( KeyValueData *pkvd );
 
-	inline	int		Points( void ) { return pev->frags; }
+	inline	int		Points( void ) { return static_cast<int>(pev->frags); }
 	inline	BOOL	AllowNegativeScore( void ) { return pev->spawnflags & SF_SCORE_NEGATIVE; }
 	inline	BOOL	AwardToTeam( void ) { return pev->spawnflags & SF_SCORE_TEAM; }
 
@@ -669,8 +669,8 @@ public:
 	inline void CountUp( void ) { pev->frags++; }
 	inline void CountDown( void ) { pev->frags--; }
 	inline void ResetCount( void ) { pev->frags = pev->dmg; }
-	inline int  CountValue( void ) { return pev->frags; }
-	inline int	LimitValue( void ) { return pev->health; }
+	inline int  CountValue( void ) { return static_cast<int>(pev->frags); }
+	inline int	LimitValue( void ) { return static_cast<int>(pev->health); }
 	
 	inline BOOL HitLimit( void ) { return CountValue() == LimitValue(); }
 

@@ -80,7 +80,11 @@ int CServerCtrlDlg::RunModalLoop(DWORD dwFlags)
 	BOOL bShowIdle = (dwFlags & MLF_SHOWONIDLE) && !(GetStyle() & WS_VISIBLE);
 	HWND hWndParent = ::GetParent(m_hWnd);
 	m_nFlags |= (WF_MODALLOOP|WF_CONTINUEMODAL);
+#if _MSC_VER < 1300
 	MSG* pMsg = &AfxGetThread()->m_msgCur;
+#else
+	MSG* pMsg = &AfxGetThreadState()->m_msgCur;
+#endif
 
 	// acquire and dispatch messages until the modal state is done
 	for (;;)

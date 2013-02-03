@@ -9,6 +9,14 @@
 #include <stdio.h>
 #include "voice_banmgr.h"
 
+#if defined _MSC_VER && _MSC_VER >= 1400
+	#ifndef _CRT_SECURE_NO_DEPRECATE
+		#define _CRT_SECURE_NO_DEPRECATE
+	#endif
+
+	#pragma warning(disable: 4996) // deprecated functions
+#endif
+
 
 #define BANMGR_FILEVERSION	1
 char const *g_pBanMgrFilename = "voice_ban.dt";

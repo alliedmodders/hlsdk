@@ -116,7 +116,7 @@ void CDiscwarPowerup::PowerupTouch( CBaseEntity *pOther )
 	pev->effects |= EF_NODRAW;
 
 	// Choose another powerup soon 
-	SetThink( ChoosePowerupThink );
+	SetThink( &CDiscwarPowerup::ChoosePowerupThink );
 	pev->nextthink = gpGlobals->time + DISC_POWERUP_RESPAWN_TIME;
 
 	// Play the powerup sound
@@ -136,7 +136,7 @@ void CDiscwarPowerup::Disable()
 void CDiscwarPowerup::Enable()
 {
 	// Pick a powerup 
-	SetThink( ChoosePowerupThink );
+	SetThink( &CDiscwarPowerup::ChoosePowerupThink );
 	pev->nextthink = gpGlobals->time + (DISC_POWERUP_RESPAWN_TIME / 2);
 }
 
@@ -150,14 +150,14 @@ void CDiscwarPowerup::ChoosePowerupThink( void )
 	SET_MODEL( ENT(pev), szPowerupModels[iPowerup] );
 	pev->effects &= ~EF_NODRAW;
 
-	SetTouch(PowerupTouch);
+	SetTouch(&CDiscwarPowerup::PowerupTouch);
 	
 	// Start Animating
 	pev->sequence = 0;
 	pev->frame = 0;
 	ResetSequenceInfo();
 
-	SetThink(AnimateThink);
+	SetThink(&CDiscwarPowerup::AnimateThink);
 	pev->nextthink = gpGlobals->time + 0.1;
 
 	pev->rendermode = kRenderTransAdd;
@@ -176,13 +176,13 @@ void CDiscwarPowerup::AnimateThink( void )
 // Remove the powerup from the person we gave it to
 void CDiscwarPowerup::RemovePowerupThink( void )
 {
-	if (m_hPlayerIGaveTo == NULL)
+	if (m_hPlayerIGaveTo == 0)
 		return;
 
 	((CBasePlayer*)(CBaseEntity*)m_hPlayerIGaveTo)->RemovePowerup( m_iPowerupType );
 
 	// Pick a powerup later
-	SetThink( ChoosePowerupThink );
+	SetThink( &CDiscwarPowerup::ChoosePowerupThink );
 	pev->nextthink = gpGlobals->time + DISC_POWERUP_RESPAWN_TIME;
 }
 
@@ -231,4 +231,3 @@ bool CBasePlayer::HasPowerup( int iPowerupType )
 {
 	return (m_iPowerups & iPowerupType) != 0;
 }
-

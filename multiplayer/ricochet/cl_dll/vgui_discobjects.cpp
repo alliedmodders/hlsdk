@@ -281,7 +281,8 @@ void CDiscArena_RoundStart::RecalculateText( void )
 
 	// Team 1
 	strcpy( sz, "" );
-	for (int i = 0; i < (m_iNumPlayers / 2); i++ )
+	int i;
+	for ( i = 0; i < (m_iNumPlayers / 2); i++ )
 	{
 		if ( g_PlayerInfoList[ m_iClients[i] ].name && g_PlayerInfoList[ m_iClients[i] ].name[0] )
 			strcat( sz, g_PlayerInfoList[ m_iClients[i] ].name );

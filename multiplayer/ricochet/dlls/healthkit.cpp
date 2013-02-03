@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -161,7 +161,7 @@ void CWallHealth::Spawn()
 	UTIL_SetOrigin(pev, pev->origin);		// set size and link into world
 	UTIL_SetSize(pev, pev->mins, pev->maxs);
 	SET_MODEL(ENT(pev), STRING(pev->model) );
-	m_iJuice = gSkillData.healthchargerCapacity;
+	m_iJuice = static_cast<int>(gSkillData.healthchargerCapacity);
 	pev->frame = 0;			
 
 }
@@ -202,7 +202,7 @@ void CWallHealth::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 	}
 
 	pev->nextthink = pev->ltime + 0.25;
-	SetThink(Off);
+	SetThink(&CWallHealth::Off);
 
 	// Time to recharge yet?
 
@@ -235,10 +235,10 @@ void CWallHealth::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 
 void CWallHealth::Recharge(void)
 {
-		EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/medshot4.wav", 1.0, ATTN_NORM );
-	m_iJuice = gSkillData.healthchargerCapacity;
+	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/medshot4.wav", 1.0, ATTN_NORM );
+	m_iJuice = static_cast<int>(gSkillData.healthchargerCapacity);
 	pev->frame = 0;			
-	SetThink( SUB_DoNothing );
+	SetThink( &CBaseEntity::SUB_DoNothing );
 }
 
 void CWallHealth::Off(void)
@@ -249,11 +249,11 @@ void CWallHealth::Off(void)
 
 	m_iOn = 0;
 
-	if ((!m_iJuice) &&  ( ( m_iReactivate = g_pGameRules->FlHealthChargerRechargeTime() ) > 0) )
+	if ((!m_iJuice) &&  ( ( m_iReactivate = static_cast<int>(g_pGameRules->FlHealthChargerRechargeTime()) ) > 0) )
 	{
 		pev->nextthink = pev->ltime + m_iReactivate;
-		SetThink(Recharge);
+		SetThink(&CWallHealth::Recharge);
 	}
 	else
-		SetThink( SUB_DoNothing );
+		SetThink( &CBaseEntity::SUB_DoNothing );
 }

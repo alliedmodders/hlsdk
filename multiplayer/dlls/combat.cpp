@@ -115,7 +115,7 @@ void CGib :: SpawnStickyGibs( entvars_t *pevVictim, Vector vecOrigin, int cGibs 
 			pGib->pev->movetype = MOVETYPE_TOSS;
 			pGib->pev->solid = SOLID_BBOX;
 			UTIL_SetSize ( pGib->pev, Vector ( 0, 0 ,0 ), Vector ( 0, 0, 0 ) );
-			pGib->SetTouch ( StickyGibTouch );
+			pGib->SetTouch ( &CGib::StickyGibTouch );
 			pGib->SetThink (NULL);
 		}
 		pGib->LimitVelocity();
@@ -331,7 +331,7 @@ void CBaseMonster :: GibMonster( void )
 		if ( gibbed )
 		{
 			// don't remove players!
-			SetThink ( SUB_Remove );
+			SetThink ( &CBaseEntity::SUB_Remove );
 			pev->nextthink = gpGlobals->time;
 		}
 		else
@@ -590,9 +590,6 @@ Killed
 */
 void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 {
-	unsigned int	cCount = 0;
-	BOOL			fDone = FALSE;
-
 	if ( HasMemory( bits_MEMORY_KILLED ) )
 	{
 		if ( ShouldGibMonster( iGib ) )
@@ -654,7 +651,7 @@ void CBaseEntity :: SUB_StartFadeOut ( void )
 	pev->avelocity = g_vecZero;
 
 	pev->nextthink = gpGlobals->time + 0.1;
-	SetThink ( SUB_FadeOut );
+	SetThink ( &CBaseEntity::SUB_FadeOut );
 }
 
 void CBaseEntity :: SUB_FadeOut ( void  )
@@ -668,7 +665,7 @@ void CBaseEntity :: SUB_FadeOut ( void  )
 	{
 		pev->renderamt = 0;
 		pev->nextthink = gpGlobals->time + 0.2;
-		SetThink ( SUB_Remove );
+		SetThink ( &CBaseEntity::SUB_Remove );
 	}
 }
 
@@ -688,7 +685,7 @@ void CGib :: WaitTillLand ( void )
 
 	if ( pev->velocity == g_vecZero )
 	{
-		SetThink (SUB_StartFadeOut);
+		SetThink (&CBaseEntity::SUB_StartFadeOut);
 		pev->nextthink = gpGlobals->time + m_lifeTime;
 
 		// If you bleed, you stink!
@@ -756,7 +753,7 @@ void CGib :: StickyGibTouch ( CBaseEntity *pOther )
 	Vector	vecSpot;
 	TraceResult	tr;
 	
-	SetThink ( SUB_Remove );
+	SetThink ( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 10;
 
 	if ( !FClassnameIs( pOther->pev, "worldspawn" ) )
@@ -797,8 +794,8 @@ void CGib :: Spawn( const char *szGibModel )
 
 	pev->nextthink = gpGlobals->time + 4;
 	m_lifeTime = 25;
-	SetThink ( WaitTillLand );
-	SetTouch ( BounceGibTouch );
+	SetThink ( &CGib::WaitTillLand );
+	SetTouch ( &CGib::BounceGibTouch );
 
 	m_material = matNone;
 	m_cBloodDecals = 5;// how many blood decals this gib can place (1 per bounce until none remain). 
@@ -937,7 +934,7 @@ int CBaseMonster :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker,
 			// enemy's last known position is somewhere down the vector that the attack came from.
 			if (pevInflictor)
 			{
-				if (m_hEnemy == NULL || pevInflictor == m_hEnemy->pev || !HasConditions(bits_COND_SEE_ENEMY))
+				if (m_hEnemy == 0 || pevInflictor == m_hEnemy->pev || !HasConditions(bits_COND_SEE_ENEMY))
 				{
 					m_vecEnemyLKP = pevInflictor->origin;
 				}
@@ -1488,7 +1485,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 			}
 		}
 		// make bullet trails
-		UTIL_BubbleTrail( vecSrc, tr.vecEndPos, (flDistance * tr.flFraction) / 64.0 );
+		UTIL_BubbleTrail( vecSrc, tr.vecEndPos, static_cast<int>((flDistance * tr.flFraction) / 64.0) );
 	}
 	ApplyMultiDamage(pev, pevAttacker);
 }
@@ -1505,11 +1502,10 @@ This version is used by Players, uses the random seed generator to sync client a
 */
 Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker, int shared_rand )
 {
-	static int tracerCount;
 	TraceResult tr;
 	Vector vecRight = gpGlobals->v_right;
 	Vector vecUp = gpGlobals->v_up;
-	float x, y, z;
+	float x = 0.0f, y = 0.0f, z = 0.0f;
 
 	if ( pevAttacker == NULL )
 		pevAttacker = pev;  // the default attacker is ourselves
@@ -1578,7 +1574,7 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 			}
 		}
 		// make bullet trails
-		UTIL_BubbleTrail( vecSrc, tr.vecEndPos, (flDistance * tr.flFraction) / 64.0 );
+		UTIL_BubbleTrail( vecSrc, tr.vecEndPos, static_cast<int>((flDistance * tr.flFraction) / 64.0) );
 	}
 	ApplyMultiDamage(pev, pevAttacker);
 

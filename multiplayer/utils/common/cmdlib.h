@@ -13,6 +13,14 @@
 #ifndef __CMDLIB__
 #define __CMDLIB__
 
+#if defined _MSC_VER && _MSC_VER >= 1400
+	#ifndef _CRT_SECURE_NO_DEPRECATE
+		#define _CRT_SECURE_NO_DEPRECATE
+	#endif
+
+	#pragma warning(disable: 4996) // deprecated functions
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

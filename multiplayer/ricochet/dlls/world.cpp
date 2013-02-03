@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -127,15 +127,15 @@ void CDecal :: Spawn( void )
 
 	if ( FStringNull ( pev->targetname ) )
 	{
-		SetThink( StaticDecal );
+		SetThink( &CDecal::StaticDecal );
 		// if there's no targetname, the decal will spray itself on as soon as the world is done spawning.
 		pev->nextthink = gpGlobals->time;
 	}
 	else
 	{
 		// if there IS a targetname, the decal sprays itself on when it is triggered.
-		SetThink ( SUB_DoNothing );
-		SetUse(TriggerDecal);
+		SetThink ( &CBaseEntity::SUB_DoNothing );
+		SetUse(&CDecal::TriggerDecal);
 	}
 }
 
@@ -160,7 +160,7 @@ void CDecal :: TriggerDecal ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 			WRITE_SHORT( (int)VARS(trace.pHit)->modelindex );
 	MESSAGE_END();
 
-	SetThink( SUB_Remove );
+	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
@@ -625,7 +625,7 @@ void CWorld :: Precache( void )
 	// 63 testing
 	LIGHT_STYLE(63, "a");
 
-	for ( i = 0; i < ARRAYSIZE(gDecals); i++ )
+	for ( int i = 0; i < static_cast<int>(ARRAYSIZE(gDecals)); i++ )
 		gDecals[i].index = DECAL_INDEX( gDecals[i].name );
 
 // init the WorldGraph.
@@ -660,7 +660,7 @@ void CWorld :: Precache( void )
 		CBaseEntity *pEntity = CBaseEntity::Create( "env_message", g_vecZero, g_vecZero, NULL );
 		if ( pEntity )
 		{
-			pEntity->SetThink( SUB_CallUseToggle );
+			pEntity->SetThink( &CBaseEntity::SUB_CallUseToggle );
 			pEntity->pev->message = pev->netname;
 			pev->netname = 0;
 			pEntity->pev->nextthink = gpGlobals->time + 0.3;
@@ -689,7 +689,7 @@ void CWorld :: Precache( void )
 
 	// Discwar
 	if ( g_iPlayersPerTeam < 1 )
-		g_iPlayersPerTeam = CVAR_GET_FLOAT("rc_playersperteam");
+		g_iPlayersPerTeam = static_cast<int>(CVAR_GET_FLOAT("rc_playersperteam"));
 }
 
 

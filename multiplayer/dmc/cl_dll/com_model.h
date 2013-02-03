@@ -78,6 +78,9 @@ typedef struct
 } dmodel_t;
 
 // plane_t structure
+// plane_t structure
+#ifndef _MPLANE_DEFINED_
+#define _MPLANE_DEFINED_
 typedef struct mplane_s
 {
 	vec3_t	normal;			// surface normal
@@ -86,6 +89,7 @@ typedef struct mplane_s
 	byte	signbits;		// signx + signy<<1 + signz<<1
 	byte	pad[2];
 } mplane_t;
+#endif
 
 typedef struct
 {
@@ -206,12 +210,17 @@ struct msurface_s
 	decal_t		*pdecals;
 };
 
+#ifndef _DCLIPNODE_DEFINED_
+#define _DCLIPNODE_DEFINED_
 typedef struct
 {
 	int			planenum;
 	short		children[2];	// negative numbers are contents
 } dclipnode_t;
+#endif
 
+#ifndef _HULL_DEFINED_
+#define _HULL_DEFINED_
 typedef struct hull_s
 {
 	dclipnode_t	*clipnodes;
@@ -221,6 +230,7 @@ typedef struct hull_s
 	vec3_t		clip_mins;
 	vec3_t		clip_maxs;
 } hull_t;
+#endif
 
 #if !defined( CACHE_USER ) && !defined( QUAKEDEF_H )
 #define CACHE_USER

@@ -103,8 +103,8 @@ void CDisc::Spawn( void )
 	UTIL_SetSize(pev, Vector( -4,-4,-4 ), Vector(4, 4, 4));
 
 	UTIL_SetOrigin( pev, pev->origin );
-	SetTouch( DiscTouch );
-	SetThink( DiscThink );
+	SetTouch( &CDisc::DiscTouch );
+	SetThink( &CDisc::DiscThink );
 
 	m_iBounces = 0;
 	m_fDontTouchOwner = gpGlobals->time + 0.2;
@@ -139,9 +139,9 @@ void CDisc::Spawn( void )
 
 		WRITE_BYTE( 5 );  // width
 
-		WRITE_BYTE( g_iaDiscColors[pev->team][0] ); // r, g, b
-		WRITE_BYTE( g_iaDiscColors[pev->team][1] ); // r, g, b
-		WRITE_BYTE( g_iaDiscColors[pev->team][2] ); // r, g, b
+		WRITE_BYTE( static_cast<int>(g_iaDiscColors[pev->team][0]) ); // r, g, b
+		WRITE_BYTE( static_cast<int>(g_iaDiscColors[pev->team][1]) ); // r, g, b
+		WRITE_BYTE( static_cast<int>(g_iaDiscColors[pev->team][2]) ); // r, g, b
 
 		WRITE_BYTE( 250 );	// brightness
 	MESSAGE_END();
@@ -333,7 +333,7 @@ void CDisc::DiscThink()
 	if ( (m_iPowerupFlags & POW_FREEZE) && (m_iBounces == 0) )
 	{
 		// Use an existing target if he's still in the view cone
-		if ( m_pLockTarget != NULL )
+		if ( m_pLockTarget != 0 )
 		{
 			Vector vecDir = (m_pLockTarget->pev->origin - pev->origin).Normalize();
 			UTIL_MakeVectors( pev->angles );
@@ -343,7 +343,7 @@ void CDisc::DiscThink()
 		}
 
 		// Get a new target if we don't have one
-		if ( m_pLockTarget == NULL )
+		if ( m_pLockTarget == 0 )
 		{
 			CBaseEntity *pOther = NULL;
 
@@ -370,7 +370,7 @@ void CDisc::DiscThink()
 		}
 
 		// Track towards our target
-		if ( m_pLockTarget != NULL )
+		if ( m_pLockTarget != 0 )
 		{
 			// Calculate new velocity
 			Vector vecDir = (m_pLockTarget->pev->origin - pev->origin).Normalize();
@@ -518,7 +518,7 @@ void CDiscWeapon::Holster( int skiplocal /* = 0 */ )
 	{
 		// no more grenades!
 		m_pPlayer->pev->weapons &= ~(1<<WEAPON_DISC);
-		SetThink( DestroyItem );
+		SetThink( &CBasePlayerItem::DestroyItem );
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
 
@@ -748,6 +748,3 @@ int CDiscWeapon::AddDuplicate( CBasePlayerItem *pOriginal )
 	pev->flags |= FL_KILLME;
 	return FALSE;
 }
-
-
-

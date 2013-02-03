@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -93,7 +93,7 @@ void CItem::Spawn( void )
 	pev->solid = SOLID_TRIGGER;
 	UTIL_SetOrigin( pev, pev->origin );
 	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
-	SetTouch(ItemTouch);
+	SetTouch(&CItem::ItemTouch);
 
 	if (DROP_TO_FLOOR(ENT(pev)) == 0)
 	{
@@ -151,7 +151,7 @@ CBaseEntity* CItem::Respawn( void )
 
 	UTIL_SetOrigin( pev, g_pGameRules->VecItemRespawnSpot( this ) );// blip to whereever you should respawn.
 
-	SetThink ( Materialize );
+	SetThink ( &CItem::Materialize );
 	pev->nextthink = g_pGameRules->FlItemRespawnTime( this ); 
 	return this;
 }
@@ -166,7 +166,7 @@ void CItem::Materialize( void )
 		pev->effects |= EF_MUZZLEFLASH;
 	}
 
-	SetTouch( ItemTouch );
+	SetTouch( &CItem::ItemTouch );
 }
 
 #define SF_SUIT_SHORTLOGON		0x0001

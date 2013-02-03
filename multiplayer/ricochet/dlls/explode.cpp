@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -217,7 +217,7 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		RadiusDamage ( pev, pev, m_iMagnitude, CLASS_NONE, DMG_BLAST );
 	}
 
-	SetThink( Smoke );
+	SetThink( &CEnvExplosion::Smoke );
 	pev->nextthink = gpGlobals->time + 0.3;
 
 	// draw sparks

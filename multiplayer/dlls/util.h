@@ -28,8 +28,8 @@ inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, ent
 extern globalvars_t				*gpGlobals;
 
 // Use this instead of ALLOC_STRING on constant strings
-#define STRING(offset)		(const char *)(gpGlobals->pStringBase + (int)offset)
-#define MAKE_STRING(str)	((int)str - (int)STRING(0))
+#define STRING(offset)		reinterpret_cast<const char *>(gpGlobals->pStringBase + (uintp)offset)
+#define MAKE_STRING(str)	(reinterpret_cast<uintp>(str) - reinterpret_cast<uintp>(STRING(0)))
 
 inline edict_t *FIND_ENTITY_BY_CLASSNAME(edict_t *entStart, const char *pszName) 
 {
@@ -246,7 +246,7 @@ typedef enum { ignore_monsters=1, dont_ignore_monsters=0, missile=2 } IGNORE_MON
 typedef enum { ignore_glass=1, dont_ignore_glass=0 } IGNORE_GLASS;
 extern void			UTIL_TraceLine			(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult *ptr);
 extern void			UTIL_TraceLine			(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, edict_t *pentIgnore, TraceResult *ptr);
-enum { point_hull=0, human_hull=1, large_hull=2, head_hull=3 };
+typedef enum { point_hull=0, human_hull=1, large_hull=2, head_hull=3 };
 extern void			UTIL_TraceHull			(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t *pentIgnore, TraceResult *ptr);
 extern TraceResult	UTIL_GetGlobalTrace		(void);
 extern void			UTIL_TraceModel			(const Vector &vecStart, const Vector &vecEnd, int hullNumber, edict_t *pentModel, TraceResult *ptr);
@@ -506,7 +506,7 @@ void EMIT_GROUPID_SUIT(edict_t *entity, int isentenceg);
 void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname);
 
 #define PRECACHE_SOUND_ARRAY( a ) \
-	{ for (int i = 0; i < ARRAYSIZE( a ); i++ ) PRECACHE_SOUND((char *) a [i]); }
+	{ for (int i = 0; i < static_cast<int>(ARRAYSIZE( a )); i++ ) PRECACHE_SOUND((char *) a [i]); }
 
 #define EMIT_SOUND_ARRAY_DYN( chan, array ) \
 	EMIT_SOUND_DYN ( ENT(pev), chan , array [ RANDOM_LONG(0,ARRAYSIZE( array )-1) ], 1.0, ATTN_NORM, 0, RANDOM_LONG(95,105) ); 

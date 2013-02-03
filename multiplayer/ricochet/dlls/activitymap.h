@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -33,5 +33,5 @@ _A(	ACT_FLINCH_FORWARD ),
 _A(	ACT_DIE_HEADSHOT ),
 _A(	ACT_DIEFORWARD ),
 _A(	ACT_DIEBACKWARD ),
-0, NULL
+{ 0, NULL }
 };

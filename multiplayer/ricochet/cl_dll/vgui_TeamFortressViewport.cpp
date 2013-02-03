@@ -585,7 +585,7 @@ void TeamFortressViewport::Initialize( void )
 		strcpy(m_sTeamNames[i], "");
 	}
 
-	App::getInstance()->setCursorOveride( App::getInstance()->getScheme()->getCursor(Scheme::SchemeCursor::scu_none) );
+	App::getInstance()->setCursorOveride( App::getInstance()->getScheme()->getCursor(Scheme::scu_none) );
 }
 
 class CException;
@@ -1664,7 +1664,7 @@ void TeamFortressViewport::UpdateCursorState()
 	if ( m_pCurrentMenu || m_pServerBrowser->isVisible() || GetClientVoiceMgr()->IsInSquelchMode() )
 	{
 		g_iVisibleMouse = true;
-		App::getInstance()->setCursorOveride( App::getInstance()->getScheme()->getCursor(Scheme::SchemeCursor::scu_arrow) );
+		App::getInstance()->setCursorOveride( App::getInstance()->getScheme()->getCursor(Scheme::scu_arrow) );
 		return;
 	}
 	else if ( m_pCurrentCommandMenu )
@@ -1673,14 +1673,14 @@ void TeamFortressViewport::UpdateCursorState()
 		if ( gHUD.m_pCvarStealMouse->value != 0.0f )
 		{
 			g_iVisibleMouse = true;
-			App::getInstance()->setCursorOveride( App::getInstance()->getScheme()->getCursor(Scheme::SchemeCursor::scu_arrow) );
+			App::getInstance()->setCursorOveride( App::getInstance()->getScheme()->getCursor(Scheme::scu_arrow) );
 			return;
 		}
 	}
 
 	IN_ResetMouse();
 	g_iVisibleMouse = false;
-	App::getInstance()->setCursorOveride( App::getInstance()->getScheme()->getCursor(Scheme::SchemeCursor::scu_none) );
+	App::getInstance()->setCursorOveride( App::getInstance()->getScheme()->getCursor(Scheme::scu_none) );
 }
 
 void TeamFortressViewport::UpdateHighlights()
@@ -2070,7 +2070,8 @@ int TeamFortressViewport::MsgFunc_TeamScore( const char *pszName, int iSize, voi
 	char *TeamName = READ_STRING();
 
 	// find the team matching the name
-	for ( int i = 1; i <= m_pScoreBoard->m_iNumTeams; i++ )
+	int i;
+	for ( i = 1; i <= m_pScoreBoard->m_iNumTeams; i++ )
 	{
 		if ( !stricmp( TeamName, g_TeamInfo[i].name ) )
 			break;

@@ -261,7 +261,7 @@ void CGauss::SecondaryAttack()
 			m_pPlayer->m_flNextAmmoBurn = 1000;
 		}
 
-		int pitch = ( gpGlobals->time - m_pPlayer->m_flStartCharge ) * ( 150 / GetFullChargeTime() ) + 100;
+		int pitch = static_cast<int>(( gpGlobals->time - m_pPlayer->m_flStartCharge ) * ( 150 / GetFullChargeTime() ) + 100);
 		if ( pitch > 250 ) 
 			 pitch = 250;
 		

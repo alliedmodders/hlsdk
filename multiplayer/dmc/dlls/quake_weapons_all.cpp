@@ -134,7 +134,7 @@ void CBasePlayer::W_SetCurrentAmmo( int sendanim /* = 1 */ )
 	int	iszViewModel = 0;
 	char *viewmodel = "";
 	int iszWeaponModel = 0;
-	char *szAnimExt;
+	char *szAnimExt = NULL;
 	
 	// Find out what weapon the player's using
 	if (m_iQuakeWeapon == IT_AXE)
@@ -773,7 +773,7 @@ void CBasePlayer::W_FireRocket( int iQuadSound )
 	UTIL_MakeVectors( pev->v_angle );
 	Vector vecOrg = pev->origin + (gpGlobals->v_forward * 8) + Vector(0,0,16);
 	Vector vecDir = GetAutoaimVector( AUTOAIM_5DEGREES );
-	CQuakeRocket *pRocket = CQuakeRocket::CreateRocket( vecOrg, vecDir, this );
+	CQuakeRocket::CreateRocket( vecOrg, vecDir, this );
 }
 
 // Grenade launcher
@@ -799,7 +799,7 @@ void CBasePlayer::W_FireGrenade( int iQuadSound )
 	}
 
 	// Create the grenade
-	CQuakeRocket *pRocket = CQuakeRocket::CreateGrenade( pev->origin, vecVelocity, this );
+	CQuakeRocket::CreateGrenade( pev->origin, vecVelocity, this );
 }
 
 // Lightning Gun
@@ -881,7 +881,7 @@ void CBasePlayer::W_FireSuperSpikes( int iQuadSound )
 
 	// Fire the Nail
 	Vector vecDir = GetAutoaimVector( AUTOAIM_5DEGREES );
-	CQuakeNail *pNail = CQuakeNail::CreateSuperNail( pev->origin + Vector(0,0,16), vecDir, this );
+	CQuakeNail::CreateSuperNail( pev->origin + Vector(0,0,16), vecDir, this );
 }
 
 // Nailgun
@@ -917,7 +917,7 @@ void CBasePlayer::W_FireSpikes( int iQuadSound )
 	// Fire the nail
 	UTIL_MakeVectors( pev->v_angle );
 	Vector vecDir = GetAutoaimVector( AUTOAIM_5DEGREES );
-	CQuakeNail *pNail = CQuakeNail::CreateNail( pev->origin + Vector(0,0,10) + (gpGlobals->v_right * m_iNailOffset), vecDir, this );
+	CQuakeNail::CreateNail( pev->origin + Vector(0,0,10) + (gpGlobals->v_right * m_iNailOffset), vecDir, this );
 }
 
 //===============================================================================
