@@ -166,13 +166,8 @@ typedef struct enginefuncs_s
 	void		(*pfnCVarSetFloat)			(const char *szVarName, float flValue);
 	void		(*pfnCVarSetString)			(const char *szVarName, const char *szValue);
 	void		(*pfnAlertMessage)			(ALERT_TYPE atype, char *szFmt, ...);
-#ifdef HLSDK_3_2_OLD_EIFACE
-	void		(*pfnEngineFprintf)			(FILE *pfile, char *szFmt, ...);
-	void*		(*pfnPvAllocEntPrivateData)	(edict_t *pEdict, long cb);
-#else
 	void		(*pfnEngineFprintf)			(void *pfile, char *szFmt, ...);
 	void*		(*pfnPvAllocEntPrivateData)	(edict_t *pEdict, int32 cb);
-#endif
 	void*		(*pfnPvEntPrivateData)		(edict_t *pEdict);
 	void		(*pfnFreeEntPrivateData)	(edict_t *pEdict);
 	const char*	(*pfnSzFromIndex)			(int iString);
@@ -187,13 +182,8 @@ typedef struct enginefuncs_s
 	int			(*pfnRegUserMsg)			(const char *pszName, int iSize);
 	void		(*pfnAnimationAutomove)		(const edict_t* pEdict, float flTime);
 	void		(*pfnGetBonePosition)		(const edict_t* pEdict, int iBone, float *rgflOrigin, float *rgflAngles );
-#ifdef HLSDK_3_2_OLD_EIFACE
-	unsigned long (*pfnFunctionFromName)	( const char *pName );
-	const char *(*pfnNameForFunction)		( unsigned long function );
-#else
 	uint32 (*pfnFunctionFromName)	( const char *pName );
 	const char *(*pfnNameForFunction)		( uint32 function );
-#endif
 	void		(*pfnClientPrintf)			( edict_t* pEdict, PRINT_TYPE ptype, const char *szMsg ); // JOHN: engine callbacks so game DLL can print messages to individual clients
 	void		(*pfnServerPrint)			( const char *szMsg );
 	const char *(*pfnCmd_Args)				( void );		// these 3 added 
@@ -204,11 +194,7 @@ typedef struct enginefuncs_s
 	void        (*pfnCRC32_ProcessBuffer)   (CRC32_t *pulCRC, void *p, int len);
 	void		(*pfnCRC32_ProcessByte)     (CRC32_t *pulCRC, unsigned char ch);
 	CRC32_t		(*pfnCRC32_Final)			(CRC32_t pulCRC);
-#ifdef HLSDK_3_2_OLD_EIFACE
-	long		(*pfnRandomLong)			(long  lLow,  long  lHigh);
-#else
 	int32		(*pfnRandomLong)			(int32  lLow,  int32  lHigh);
-#endif
 	float		(*pfnRandomFloat)			(float flLow, float flHigh);
 	void		(*pfnSetView)				(const edict_t *pClient, const edict_t *pViewent );
 	float		(*pfnTime)					( void );
@@ -304,6 +290,7 @@ typedef struct enginefuncs_s
 	void		(*pfnProcessTutorMessageDecayBuffer)	(int *buffer, int bufferLength);
 	void		(*pfnConstructTutorMessageDecayBuffer)	(int *buffer, int bufferLength);
 	void		(*pfnResetTutorMessageDecayData)		( void );
+	void		(*pfnQueryClientCvarValue)				( const edict_t *player, const char *cvarName );
 } enginefuncs_t;
 
 
@@ -315,11 +302,7 @@ typedef struct KeyValueData_s
 	char	*szClassName;	// in: entity classname
 	char	*szKeyName;		// in: name of key
 	char	*szValue;		// in: value of key
-#ifdef HLSDK_3_2_OLD_EIFACE
-	long	fHandled;		// out: DLL sets to true if key-value pair was understood
-#else
 	int32	fHandled;		// out: DLL sets to true if key-value pair was understood
-#endif
 } KeyValueData;
 
 
@@ -530,6 +513,7 @@ typedef struct
 	void			(*pfnOnFreeEntPrivateData)(edict_t *pEnt);
 	void			(*pfnGameShutdown)(void);
 	int				(*pfnShouldCollide)( edict_t *pentTouched, edict_t *pentOther );
+	void			(*pfnCvarValue)( const edict_t *pEnt, const char *value );
 } NEW_DLL_FUNCTIONS;
 typedef int	(*NEW_DLL_FUNCTIONS_FN)( NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 
