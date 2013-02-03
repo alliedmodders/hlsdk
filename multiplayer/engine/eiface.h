@@ -291,6 +291,7 @@ typedef struct enginefuncs_s
 	void		(*pfnConstructTutorMessageDecayBuffer)	(int *buffer, int bufferLength);
 	void		(*pfnResetTutorMessageDecayData)		( void );
 	void		(*pfnQueryClientCvarValue)				( const edict_t *player, const char *cvarName );
+    void        (*pfnQueryClientCvarValue2)             ( const edict_t *player, const char *cvarName, int requestID );
 } enginefuncs_t;
 
 
@@ -514,6 +515,7 @@ typedef struct
 	void			(*pfnGameShutdown)(void);
 	int				(*pfnShouldCollide)( edict_t *pentTouched, edict_t *pentOther );
 	void			(*pfnCvarValue)( const edict_t *pEnt, const char *value );
+    void            (*pfnCvarValue2)( const edict_t *pEnt, int requestID, const char *cvarName, const char *value );
 } NEW_DLL_FUNCTIONS;
 typedef int	(*NEW_DLL_FUNCTIONS_FN)( NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 
