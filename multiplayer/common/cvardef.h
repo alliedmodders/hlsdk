@@ -27,10 +27,10 @@
 
 typedef struct cvar_s
 {
-	char	*name;
-	char	*string;
-	int		flags;
-	float	value;
+	const char *name;
+	const char *string;
+	int flags;
+	float value;
 	struct cvar_s *next;
 } cvar_t;
 #endif

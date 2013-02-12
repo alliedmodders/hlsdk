@@ -51,8 +51,12 @@
 #define NOIME
 #include "windows.h"
 #else // _WIN32
+#ifndef FALSE
 #define FALSE 0
+#endif
+#ifndef TRUE
 #define TRUE (!FALSE)
+#endif
 typedef unsigned long ULONG;
 typedef unsigned char BYTE;
 typedef int BOOL;

@@ -76,7 +76,9 @@ typedef int EOFFSET;
 typedef int BOOL;
 
 // In case this ever changes
+#ifndef M_PI
 #define M_PI			3.14159265358979323846
+#endif
 
 // Keeps clutter down a bit, when declaring external entity/global method prototypes
 #define DECLARE_GLOBAL_METHOD(MethodName)  extern void DLLEXPORT MethodName( void )
@@ -246,7 +248,7 @@ typedef enum { ignore_monsters=1, dont_ignore_monsters=0, missile=2 } IGNORE_MON
 typedef enum { ignore_glass=1, dont_ignore_glass=0 } IGNORE_GLASS;
 extern void			UTIL_TraceLine			(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult *ptr);
 extern void			UTIL_TraceLine			(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, edict_t *pentIgnore, TraceResult *ptr);
-enum { point_hull=0, human_hull=1, large_hull=2, head_hull=3 };
+typedef enum { point_hull=0, human_hull=1, large_hull=2, head_hull=3 } HULL_TYPE;
 extern void			UTIL_TraceHull			(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t *pentIgnore, TraceResult *ptr);
 extern TraceResult	UTIL_GetGlobalTrace		(void);
 extern void			UTIL_TraceModel			(const Vector &vecStart, const Vector &vecEnd, int hullNumber, edict_t *pentModel, TraceResult *ptr);
@@ -331,7 +333,7 @@ extern char *UTIL_dtos3( int d );
 extern char *UTIL_dtos4( int d );
 
 // Writes message to console with timestamp and FragLog header.
-extern void			UTIL_LogPrintf( char *fmt, ... );
+extern void			UTIL_LogPrintf( const char *fmt, ... );
 
 // Sorta like FInViewCone, but for nonmonsters. 
 extern float UTIL_DotPoints ( const Vector &vecSrc, const Vector &vecCheck, const Vector &vecDir );
