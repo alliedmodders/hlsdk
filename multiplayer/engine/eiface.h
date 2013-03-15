@@ -291,7 +291,8 @@ typedef struct enginefuncs_s
 	void		(*pfnConstructTutorMessageDecayBuffer)	(int *buffer, int bufferLength);
 	void		(*pfnResetTutorMessageDecayData)		( void );
 	void		(*pfnQueryClientCvarValue)				( const edict_t *player, const char *cvarName );
-    void        (*pfnQueryClientCvarValue2)             ( const edict_t *player, const char *cvarName, int requestID );
+	void		(*pfnQueryClientCvarValue2)		( const edict_t *player, const char *cvarName, int requestID );
+	int		(*pfnEngCheckParm)			( const char *pchCmdLineToken, char **pchNextVal );
 } enginefuncs_t;
 
 
