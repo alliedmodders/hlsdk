@@ -82,7 +82,7 @@ typedef	uint8 Salt_t[ k_cubSaltSize ];
 typedef uint64 GID_t;
 
 #ifdef __cplusplus
-const GID_t k_GIDNil = 0xfffffffffffffffful;
+const GID_t k_GIDNil = 0xffffffffffffffffull;
 #else
 #define k_GIDNil 0xffffffffffffffffull;
 #endif
