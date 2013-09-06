@@ -24,6 +24,9 @@
 #include "talkmonster.h"
 #include "gamerules.h"
 
+#if !defined ( _WIN32 )
+#include <ctype.h>
+#endif
 
 static char *memfgets( byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int bufferSize );
 
@@ -193,7 +196,7 @@ void CAmbientGeneric :: Spawn( void )
 	{
 		ALERT( at_error, "EMPTY AMBIENT AT: %f, %f, %f\n", pev->origin.x, pev->origin.y, pev->origin.z );
 		pev->nextthink = gpGlobals->time + 0.1;
-		SetThink( &CBaseEntity::SUB_Remove );
+		SetThink( &CAmbientGeneric::SUB_Remove );
 		return;
 	}
     pev->solid		= SOLID_NOT;
@@ -1176,7 +1179,7 @@ int SENTENCEG_PlayRndI(edict_t *entity, int isentenceg,
 	name[0] = 0;
 
 	ipick = USENTENCEG_Pick(isentenceg, name);
-	if (ipick > 0 && name)
+	if (ipick > 0 && name[0])
 		EMIT_SOUND_DYN(entity, CHAN_VOICE, name, volume, attenuation, flags, pitch);
 	return ipick;
 }
@@ -1634,7 +1637,7 @@ float TEXTURETYPE_PlaySound(TraceResult *ptr,  Vector vecSrc, Vector vecEnd, int
 	const char *pTextureName;
 	float rgfl1[3];
 	float rgfl2[3];
-	char *rgsz[4];
+	const char *rgsz[4];
 	int cnt;
 	float fattn = ATTN_NORM;
 
@@ -1822,13 +1825,13 @@ IMPLEMENT_SAVERESTORE( CSpeaker, CBaseEntity );
 //
 void CSpeaker :: Spawn( void )
 {
-	char* szSoundFile = (char*) STRING(pev->message);
+	const char *szSoundFile = STRING(pev->message);
 
 	if ( !m_preset && (FStringNull( pev->message ) || strlen( szSoundFile ) < 1 ))
 	{
 		ALERT( at_error, "SPEAKER with no Level/Sentence! at: %f, %f, %f\n", pev->origin.x, pev->origin.y, pev->origin.z );
 		pev->nextthink = gpGlobals->time + 0.1;
-		SetThink( &CBaseEntity::SUB_Remove );
+		SetThink( &CSpeaker::SUB_Remove );
 		return;
 	}
     pev->solid		= SOLID_NOT;
@@ -1856,7 +1859,7 @@ void CSpeaker :: Precache( void )
 }
 void CSpeaker :: SpeakerThink( void )
 {
-	char *szSoundFile = NULL;
+	const char *szSoundFile = NULL;
 	float flvolume = pev->health * 0.1;
 	float flattenuation = 0.3;
 	int flags = 0;

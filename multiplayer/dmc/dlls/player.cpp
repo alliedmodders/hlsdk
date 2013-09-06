@@ -1546,7 +1546,7 @@ void CBasePlayer :: UpdateStepSound( void )
 	float velwalk;
 	float flduck;
 	int	fLadder;
-	int step;
+//	int step;
 
 	if (gpGlobals->time <= m_flTimeStepSound)
 		return;
@@ -1595,19 +1595,19 @@ void CBasePlayer :: UpdateStepSound( void )
 		// find out what we're stepping in or on...
 		if (fLadder)
 		{
-			step = STEP_LADDER;
+			//step = STEP_LADDER;
 			fvol = 0.35;
 			m_flTimeStepSound = gpGlobals->time + 0.35;
 		}
 		else if ( UTIL_PointContents ( knee ) == CONTENTS_WATER )
 		{
-			step = STEP_WADE;
+			//step = STEP_WADE;
 			fvol = 0.65;
 			m_flTimeStepSound = gpGlobals->time + 0.6;
 		}
 		else if (UTIL_PointContents ( feet ) == CONTENTS_WATER )
 		{
-			step = STEP_SLOSH;
+			//step = STEP_SLOSH;
 			fvol = fWalking ? 0.2 : 0.5;
 			m_flTimeStepSound = fWalking ? gpGlobals->time + 0.4 : gpGlobals->time + 0.3;		
 		}
@@ -1648,7 +1648,8 @@ void CBasePlayer :: UpdateStepSound( void )
 				}
 			}
 			
-			step = MapTextureTypeStepType(m_chTextureType);
+			/*step = */
+			MapTextureTypeStepType(m_chTextureType);
 
 			switch (m_chTextureType)
 			{
@@ -2410,7 +2411,7 @@ void CBasePlayer::CheckSuitUpdate()
 // seconds, then we won't repeat playback of this word or sentence
 // for at least that number of seconds.
 
-void CBasePlayer::SetSuitUpdate(char *name, int fgroup, int iNoRepeatTime)
+void CBasePlayer::SetSuitUpdate(const char *name, int fgroup, int iNoRepeatTime)
 {
 	int i;
 	int isentence;
@@ -2628,9 +2629,6 @@ void CBasePlayer::PostThink()
 	StudioFrameAdvance( );
 	CheckPowerups(pev);
 
-	// Track button info so we can detect 'pressed' and 'released' buttons next frame
-	m_afButtonLast = pev->button;
-
 pt_end:
 		// Decay timers on weapons
 	// go through all of the weapons and make a list of the ones to pack
@@ -2665,6 +2663,9 @@ pt_end:
 	m_flNextAttack -= gpGlobals->frametime;
 	if ( m_flNextAttack < -0.001 )
 		m_flNextAttack = -0.001;
+
+	// Track button info so we can detect 'pressed' and 'released' buttons next frame
+	m_afButtonLast = pev->button;
 }
 
 BOOL IsSpawnPointValid( CBaseEntity *pPlayer, CBaseEntity *pSpot )
@@ -3258,7 +3259,7 @@ void CBloodSplat::Spray ( void )
 
 		UTIL_BloodDecalTrace( &tr, BLOOD_COLOR_RED );
 	}
-	SetThink ( &CBaseEntity::SUB_Remove );
+	SetThink ( &CBloodSplat::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
@@ -3733,7 +3734,7 @@ int CBasePlayer::RemovePlayerItem( CBasePlayerItem *pItem )
 //
 // Returns the unique ID for the ammo, or -1 if error
 //
-int CBasePlayer :: GiveAmmo( int iCount, char *szName, int iMax )
+int CBasePlayer :: GiveAmmo( int iCount, const char *szName, int iMax )
 {
 	if ( !szName )
 	{
@@ -3977,14 +3978,17 @@ void CBasePlayer :: UpdateClientData( void )
 
 	if (pev->health != m_iClientHealth)
 	{
-		int iHealth = max( static_cast<int>(pev->health), 0 );  // make sure that no negative health values are sent
+#define clamp( val, min, max ) ( ((val) > (max)) ? (max) : ( ((val) < (min)) ? (min) : (val) ) )
+		int iHealth = clamp( pev->health, 0, 255 );  // make sure that no negative health values are sent
+		if ( pev->health > 0.0f && pev->health <= 1.0f )
+			iHealth = 1;
 
 		// send "health" update message
 		MESSAGE_BEGIN( MSG_ONE, gmsgHealth, NULL, pev );
 			WRITE_BYTE( iHealth );
 		MESSAGE_END();
 
-		m_iClientHealth = static_cast<int>(pev->health);
+		m_iClientHealth = pev->health;
 	}
 
 	// QUAKECLASSIC
@@ -4672,10 +4676,10 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 
 	int	m_iPose;// which sequence to display	-- temporary, don't need to save
-	static char *m_szPoses[4];
+	static const char *m_szPoses[4];
 };
 
-char *CDeadHEV::m_szPoses[] = { "deadback", "deadsitting", "deadstomach", "deadtable" };
+const char *CDeadHEV::m_szPoses[] = { "deadback", "deadsitting", "deadstomach", "deadtable" };
 
 void CDeadHEV::KeyValue( KeyValueData *pkvd )
 {

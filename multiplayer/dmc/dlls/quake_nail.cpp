@@ -65,7 +65,7 @@ void CQuakeNail::Spawn( void )
 	
 	// Safety removal
 	pev->nextthink = gpGlobals->time + 6;
-	SetThink( &CBaseEntity::SUB_Remove );
+	SetThink( &CQuakeNail::SUB_Remove );
 	
 	// Touch
 	SetTouch( &CQuakeNail::NailTouch );

@@ -10,6 +10,7 @@
 
 #include<VGUI_Panel.h>
 #include<VGUI_Dar.h>
+#include<VGUI_Button.h>
 
 namespace vgui
 {

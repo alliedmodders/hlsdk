@@ -93,6 +93,8 @@ playermove_t *pmove = NULL;
 
 #define PLAYER_LONGJUMP_SPEED 350 // how fast we longjump
 
+#define PLAYER_DUCKING_MULTIPLIER 0.333
+
 // double to float warning
 #ifdef _MSC_VER
 #pragma warning(disable : 4244)
@@ -481,7 +483,7 @@ void PM_UpdateStepSound( void )
 	float fvol;
 	vec3_t knee;
 	vec3_t feet;
-	vec3_t center;
+	//vec3_t center;
 	float height;
 	float speed;
 	float velrun;
@@ -526,7 +528,7 @@ void PM_UpdateStepSound( void )
 	{
 		fWalking = speed < velrun;		
 
-		VectorCopy( pmove->origin, center );
+		//VectorCopy( pmove->origin, center );
 		VectorCopy( pmove->origin, knee );
 		VectorCopy( pmove->origin, feet );
 
@@ -1010,7 +1012,6 @@ Only used by players.  Moves along the ground when player is a MOVETYPE_WALK.
 */
 void PM_WalkMove ()
 {
-	int			clip;
 	int			oldonground;
 	int i;
 
@@ -1020,7 +1021,7 @@ void PM_WalkMove ()
 	vec3_t		wishdir;
 	float		wishspeed;
 
-	vec3_t dest, start;
+	vec3_t dest; //, start;
 	vec3_t original, originalvel;
 	vec3_t down, downvel;
 	float downdist, updist;
@@ -1083,7 +1084,7 @@ void PM_WalkMove ()
 	dest[2] = pmove->origin[2];
 
 	// first try moving directly to the next spot
-	VectorCopy (dest, start);
+	//VectorCopy (dest, start);
 	trace = pmove->PM_PlayerTraceEx (pmove->origin, dest, PM_NORMAL, PM_Ignore );
 	// If we made it all the way, then copy trace end
 	//  as new player position.
@@ -1106,7 +1107,7 @@ void PM_WalkMove ()
 	VectorCopy (pmove->velocity, originalvel);  //  velocity.
 
 	// Slide move
-	clip = PM_FlyMove ();
+	PM_FlyMove ();
 
 	// Copy the results out
 	VectorCopy (pmove->origin  , down);
@@ -1131,7 +1132,7 @@ void PM_WalkMove ()
 	}
 
 // slide move the rest of the way.
-	clip = PM_FlyMove ();
+	PM_FlyMove ();
 
 // Now try going back down from the end point
 //  press down the stepheight
@@ -1978,9 +1979,9 @@ void PM_Duck( void )
 
 	if ( ( pmove->cmd.buttons & IN_DUCK ) || ( pmove->bInDuck ) || ( pmove->flags & FL_DUCKING ) )
 	{
-		pmove->cmd.forwardmove *= 0.333;
-		pmove->cmd.sidemove    *= 0.333;
-		pmove->cmd.upmove      *= 0.333;
+		pmove->cmd.forwardmove *= PLAYER_DUCKING_MULTIPLIER;
+		pmove->cmd.sidemove    *= PLAYER_DUCKING_MULTIPLIER;
+		pmove->cmd.upmove      *= PLAYER_DUCKING_MULTIPLIER;
 
 		if ( pmove->cmd.buttons & IN_DUCK )
 		{
@@ -2107,16 +2108,37 @@ void PM_LadderMove( physent_t *pLadder )
 	{
 		float forward = 0, right = 0;
 		vec3_t vpn, v_right;
+		float flSpeed = MAX_CLIMB_SPEED;
+
+		// they shouldn't be able to move faster than their maxspeed
+		if ( flSpeed > pmove->maxspeed )
+		{
+			flSpeed = pmove->maxspeed;
+		}
 
 		AngleVectors( pmove->angles, vpn, v_right, NULL );
+
+		if ( pmove->flags & FL_DUCKING )
+		{
+			flSpeed *= PLAYER_DUCKING_MULTIPLIER;
+		}
+
 		if ( pmove->cmd.buttons & IN_BACK )
-			forward -= MAX_CLIMB_SPEED;
+		{
+			forward -= flSpeed;
+		}
 		if ( pmove->cmd.buttons & IN_FORWARD )
-			forward += MAX_CLIMB_SPEED;
+		{
+			forward += flSpeed;
+		}
 		if ( pmove->cmd.buttons & IN_MOVELEFT )
-			right -= MAX_CLIMB_SPEED;
+		{
+			right -= flSpeed;
+		}
 		if ( pmove->cmd.buttons & IN_MOVERIGHT )
-			right += MAX_CLIMB_SPEED;
+		{
+			right += flSpeed;
+		}
 
 		if ( pmove->cmd.buttons & IN_JUMP )
 		{

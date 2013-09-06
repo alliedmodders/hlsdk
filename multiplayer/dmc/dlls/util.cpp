@@ -1247,7 +1247,7 @@ float UTIL_SplineFraction( float value, float scale )
 }
 
 
-char* UTIL_VarArgs( char *format, ... )
+char* UTIL_VarArgs( const char *format, ... )
 {
 	va_list		argptr;
 	static char		string[1024];
@@ -1764,7 +1764,7 @@ void UTIL_PrecacheOther( const char *szClassname )
 // UTIL_LogPrintf - Prints a logged message to console.
 // Preceded by LOG: ( timestamp ) < message >
 //=========================================================
-void UTIL_LogPrintf( char *fmt, ... )
+void UTIL_LogPrintf( const char *fmt, ... )
 {
 	va_list			argptr;
 	static char		string[1024];
@@ -2136,11 +2136,11 @@ void CSave :: WritePositionVector( const char *pname, const float *value, int co
 }
 
 
-void CSave :: WriteFunction( const char *pname, const int *data, int count )
+void CSave :: WriteFunction( const char *pname, void **data, int count )
 {
 	const char *functionName;
 
-	functionName = NAME_FOR_FUNCTION( *data );
+	functionName = NAME_FOR_FUNCTION( (uint32)*data );
 	if ( functionName )
 		BufferField( pname, strlen(functionName) + 1, functionName );
 	else
@@ -2306,7 +2306,7 @@ int CSave :: WriteFields( const char *pname, void *pBaseData, TYPEDESCRIPTION *p
 		break;
 
 		case FIELD_FUNCTION:
-			WriteFunction( pTest->fieldName, (int *)(char *)pOutputData, pTest->fieldSize );
+			WriteFunction( pTest->fieldName, (void **)pOutputData, pTest->fieldSize );
 		break;
 		default:
 			ALERT( at_error, "Bad field type\n" );

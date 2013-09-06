@@ -328,14 +328,13 @@ int GetAnimationEvent( void *pmodel, entvars_t *pev, MonsterEvent_t *pMonsterEve
 float SetController( void *pmodel, entvars_t *pev, int iController, float flValue )
 {
 	studiohdr_t *pstudiohdr;
+	int i;
 	
 	pstudiohdr = (studiohdr_t *)pmodel;
 	if (! pstudiohdr)
 		return flValue;
 
 	mstudiobonecontroller_t	*pbonecontroller = (mstudiobonecontroller_t *)((byte *)pstudiohdr + pstudiohdr->bonecontrollerindex);
-
-	int i = 0;
 
 	// find first controller that matches the index
 	for (i = 0; i < pstudiohdr->numbonecontrollers; i++, pbonecontroller++)

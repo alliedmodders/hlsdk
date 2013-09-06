@@ -30,8 +30,13 @@
 #ifdef CLIENT_DLL
 	// Spectator Mode
 	int		iJumpSpectator;
+#ifndef DISABLE_JUMP_ORIGIN
 	float	vJumpOrigin[3];
 	float	vJumpAngles[3];
+#else
+	extern float	vJumpOrigin[3];
+	extern float	vJumpAngles[3];
+#endif
 #endif
 
 static int pm_shared_initialized = 0;
@@ -320,17 +325,17 @@ void PM_CatagorizeTextureType( void )
 void PM_UpdateStepSound( void )
 {
 	int	fWalking;
-	float fvol;
+	//float fvol;
 	vec3_t knee;
 	vec3_t feet;
-	vec3_t center;
+	//vec3_t center;
 	float height;
 	float speed;
 	float velrun;
 	float velwalk;
 	float flduck;
 	int	fLadder;
-	int step;
+	//int step;
 
 	if ( pmove->flTimeStepSound > 0 )
 		return;
@@ -368,7 +373,7 @@ void PM_UpdateStepSound( void )
 	{
 		fWalking = speed < velrun;		
 
-		VectorCopy( pmove->origin, center );
+		//VectorCopy( pmove->origin, center );
 		VectorCopy( pmove->origin, knee );
 		VectorCopy( pmove->origin, feet );
 
@@ -379,57 +384,57 @@ void PM_UpdateStepSound( void )
 
 		if ( pmove->PM_PointContents ( knee, NULL ) == CONTENTS_WATER )
 		{
-			step = STEP_WADE;
-			fvol = 0.65;
+			//step = STEP_WADE;
+			//fvol = 0.65;
 			pmove->flTimeStepSound = 600;
 		}
 		else if ( pmove->PM_PointContents ( feet, NULL ) == CONTENTS_WATER )
 		{
-			step = STEP_SLOSH;
-			fvol = fWalking ? 0.2 : 0.5;
+			//step = STEP_SLOSH;
+			//fvol = fWalking ? 0.2 : 0.5;
 			pmove->flTimeStepSound = fWalking ? 400 : 300;		
 		}
 		else
 		{
 			// find texture under player, if different from current texture, 
 			// get material type
-			step = PM_MapTextureTypeStepType( pmove->chtexturetype );
+			PM_MapTextureTypeStepType( pmove->chtexturetype );
 
 			switch ( pmove->chtexturetype )
 			{
 			default:
 			case CHAR_TEX_CONCRETE:						
-				fvol = fWalking ? 0.2 : 0.5;
+				//fvol = fWalking ? 0.2 : 0.5;
 				pmove->flTimeStepSound = fWalking ? 400 : 300;
 				break;
 
 			case CHAR_TEX_METAL:	
-				fvol = fWalking ? 0.2 : 0.5;
+				//fvol = fWalking ? 0.2 : 0.5;
 				pmove->flTimeStepSound = fWalking ? 400 : 300;
 				break;
 
 			case CHAR_TEX_DIRT:	
-				fvol = fWalking ? 0.25 : 0.55;
+				//fvol = fWalking ? 0.25 : 0.55;
 				pmove->flTimeStepSound = fWalking ? 400 : 300;
 				break;
 
 			case CHAR_TEX_VENT:	
-				fvol = fWalking ? 0.4 : 0.7;
+				//fvol = fWalking ? 0.4 : 0.7;
 				pmove->flTimeStepSound = fWalking ? 400 : 300;
 				break;
 
 			case CHAR_TEX_GRATE:
-				fvol = fWalking ? 0.2 : 0.5;
+				//fvol = fWalking ? 0.2 : 0.5;
 				pmove->flTimeStepSound = fWalking ? 400 : 300;
 				break;
 
 			case CHAR_TEX_TILE:	
-				fvol = fWalking ? 0.2 : 0.5;
+				//fvol = fWalking ? 0.2 : 0.5;
 				pmove->flTimeStepSound = fWalking ? 400 : 300;
 				break;
 
 			case CHAR_TEX_SLOSH:
-				fvol = fWalking ? 0.2 : 0.5;
+				//fvol = fWalking ? 0.2 : 0.5;
 				pmove->flTimeStepSound = fWalking ? 400 : 300;
 				break;
 			}
@@ -836,7 +841,6 @@ Only used by players.  Moves along the ground when player is a MOVETYPE_WALK.
 */
 void PM_WalkMove ()
 {
-	int			clip;
 	int			oldonground;
 	int i;
 
@@ -846,7 +850,7 @@ void PM_WalkMove ()
 	vec3_t		wishdir;
 	float		wishspeed;
 
-	vec3_t dest, start;
+	vec3_t dest; //, start;
 	vec3_t original, originalvel;
 	vec3_t down, downvel;
 	float downdist, updist;
@@ -909,7 +913,7 @@ void PM_WalkMove ()
 	dest[2] = pmove->origin[2];
 
 	// first try moving directly to the next spot
-	VectorCopy (dest, start);
+	//VectorCopy (dest, start);
 	trace = pmove->PM_PlayerTrace (pmove->origin, dest, PM_NORMAL, -1 );
 	// If we made it all the way, then copy trace end
 	//  as new player position.
@@ -932,7 +936,7 @@ void PM_WalkMove ()
 	VectorCopy (pmove->velocity, originalvel);  //  velocity.
 
 	// Slide move
-	clip = PM_FlyMove ();
+	PM_FlyMove ();
 
 	// Copy the results out
 	VectorCopy (pmove->origin  , down);
@@ -957,7 +961,7 @@ void PM_WalkMove ()
 	}
 
 // slide move the rest of the way.
-	clip = PM_FlyMove ();
+	PM_FlyMove ();
 
 // Now try going back down from the end point
 //  press down the stepheight
@@ -1864,9 +1868,9 @@ void PM_Physics_Toss()
 	if (trace.plane.normal[2] > 0.7)
 	{		
 		float vel;
-		vec3_t base;
+		//vec3_t base;
 
-		VectorClear( base );
+		//VectorClear( base );
 
 		// QUAKECLASSIC: No Static friction
 		/*

@@ -15,7 +15,10 @@
 // mathlib.h
 
 typedef float vec_t;
+#ifndef DID_VEC3_T_DEFINE
+#define DID_VEC3_T_DEFINE
 typedef vec_t vec3_t[3];
+#endif
 typedef vec_t vec4_t[4];	// x,y,z,w
 typedef vec_t vec5_t[5];
 
@@ -27,7 +30,6 @@ typedef vec_s_t vec5s_t[5];
 typedef	int	fixed4_t;
 typedef	int	fixed8_t;
 typedef	int	fixed16_t;
-
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif

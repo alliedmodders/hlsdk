@@ -104,10 +104,10 @@ int CHudStatusIcons::MsgFunc_StatusIcon( const char *pszName, int iSize, void *p
 }
 
 // add the icon to the icon list, and set it's drawing color
-void CHudStatusIcons::EnableIcon( char *pszIconName, unsigned char red, unsigned char green, unsigned char blue )
+void CHudStatusIcons::EnableIcon( const char *pszIconName, unsigned char red, unsigned char green, unsigned char blue )
 {
-	// check to see if the sprite is in the current list
 	int i;
+	// check to see if the sprite is in the current list
 	for ( i = 0; i < MAX_ICONSPRITES; i++ )
 	{
 		if ( !stricmp( m_IconList[i].szSpriteName, pszIconName ) )
@@ -148,7 +148,7 @@ void CHudStatusIcons::EnableIcon( char *pszIconName, unsigned char red, unsigned
 	}
 }
 
-void CHudStatusIcons::DisableIcon( char *pszIconName )
+void CHudStatusIcons::DisableIcon( const char *pszIconName )
 {
 	// find the sprite is in the current list
 	for ( int i = 0; i < MAX_ICONSPRITES; i++ )
@@ -156,7 +156,7 @@ void CHudStatusIcons::DisableIcon( char *pszIconName )
 		if ( !stricmp( m_IconList[i].szSpriteName, pszIconName ) )
 		{
 			// clear the item from the list
-			memset( &m_IconList[i], 0, sizeof icon_sprite_t );
+			memset( &m_IconList[i], 0, sizeof(icon_sprite_t) );
 			return;
 		}
 	}

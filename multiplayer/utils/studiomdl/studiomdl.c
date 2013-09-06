@@ -24,15 +24,16 @@
 #include <sys/stat.h>
 #include <math.h>
 
+#include "archtypes.h"
 #include "cmdlib.h"
 #include "lbmlib.h"
 #include "scriplib.h"
 #include "mathlib.h"
 #define EXTERN
-#include "..\..\engine\studio.h"
+#include "../../engine/studio.h"
 #include "studiomdl.h"
-#include "..\..\dlls\activity.h"
-#include "..\..\dlls\activitymap.h"
+#include "../../dlls/activity.h"
+#include "../../dlls/activitymap.h"
 
 
 static int force_powerof2_textures = 0;
@@ -3121,6 +3122,61 @@ void Cmd_Renamebone( )
 	numrenamedbones++;
 }
 
+/*add transparent texture support to models
+===================
+Cmd_SetTextureRendermode
+
+//paramaters:
+  	 // "texturename" "rendermode" renderamt
+  	// acceptable strings for rendermode are:
+  	// "alpha"
+  	// "additive"
+  	// "masked"
+
+===================
+*/
+void Cmd_SetTextureRendermode( void )
+{
+	int iTextureIndex;
+
+	if(!TokenAvailable())
+	{
+  		printf("*********ERROR!!!*************");
+  		printf("\nmissing texturename after $texrendermode\n");
+  		exit(1);
+	}
+
+	GetToken(false);
+
+	iTextureIndex = lookup_texture(token);
+
+	if(!TokenAvailable())
+	{
+  		printf("\n*********ERROR!!!*************\n");
+  		printf("\nmissing rendermode at $texrendermode\n");
+  		exit(1);
+	}
+
+	GetToken(false);
+
+	if(!strcmp(token, "additive"))
+	{
+		texture[iTextureIndex].flags |= STUDIO_NF_ADDITIVE;
+		return;
+	}
+	else if(!strcmp(token, "masked"))
+	{
+  		texture[iTextureIndex].flags |= STUDIO_NF_MASKED;
+  		return;
+	}
+	else
+	{
+  		printf("\n*********ERROR!!!*************\n");
+  		printf("\ninvalid rendermode at $texrendermode, choices are :\nadditive\nmasked\n");
+  		exit(1);
+	}
+}
+
 
 /*
 ===============
@@ -3262,14 +3318,17 @@ void ParseScript (void)
 		}
 		else if (!strcmp (token, "$cliptotextures"))
 		{
-			clip_texcoords = 1;
+			clip_texcoords = 0;
 		}
 		else if (!strcmp (token, "$renamebone"))
 		{
 			Cmd_Renamebone ();
 		}
-	
-		else
+  		else if (!strcmp (token, "$texrendermode"))
+  		{
+			Cmd_SetTextureRendermode();
+  		}
+  		else
 		{
 			Error ("bad command %s\n", token);
 		}

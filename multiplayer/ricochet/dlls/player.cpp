@@ -728,7 +728,7 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 	}
 
 	Vector vecNormVel;
-	float  flDot, flSideDot, flVelDot;
+	float  flDot, /*flSideDot,*/ flVelDot;
 	bool   bInReverse;
 	int	   iFrame;
 
@@ -834,9 +834,9 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 		bInReverse = ( pev->sequence == LookupSequence("base_reverse") );
 		vecNormVel = pev->velocity.Normalize();
 		flDot = DotProduct( vecNormVel, gpGlobals->v_forward );
-		flSideDot = DotProduct( vecNormVel, gpGlobals->v_right );
+		//flSideDot = DotProduct( vecNormVel, gpGlobals->v_right );
 		flVelDot = DotProduct( m_vecOldVelocity, vecNormVel );
-		if ( ( m_flBackupTime < gpGlobals->time ) && (m_Activity != ACT_BASE_THROW) || m_fSequenceFinished )
+		if ( (( m_flBackupTime < gpGlobals->time ) && (m_Activity != ACT_BASE_THROW)) || m_fSequenceFinished )
 		{
 			//UTIL_MakeVectors( pev->angles );
 			//ALERT(at_console, "%f\n", flDot );
@@ -1692,7 +1692,7 @@ void CBasePlayer :: UpdateStepSound( void )
 	float velwalk;
 	float flduck;
 	int	fLadder;
-	int step;
+	//int step;
 
 	if (gpGlobals->time <= m_flTimeStepSound)
 		return;
@@ -1744,19 +1744,19 @@ void CBasePlayer :: UpdateStepSound( void )
 		// find out what we're stepping in or on...
 		if (fLadder)
 		{
-			step = STEP_LADDER;
+			//step = STEP_LADDER;
 			fvol = 0.35;
 			m_flTimeStepSound = gpGlobals->time + 0.35;
 		}
 		else if ( UTIL_PointContents ( knee ) == CONTENTS_WATER )
 		{
-			step = STEP_WADE;
+			//step = STEP_WADE;
 			fvol = 0.65;
 			m_flTimeStepSound = gpGlobals->time + 0.6;
 		}
 		else if (UTIL_PointContents ( feet ) == CONTENTS_WATER )
 		{
-			step = STEP_SLOSH;
+			//step = STEP_SLOSH;
 			fvol = fWalking ? 0.2 : 0.5;
 			m_flTimeStepSound = fWalking ? gpGlobals->time + 0.4 : gpGlobals->time + 0.3;		
 		}
@@ -1797,7 +1797,7 @@ void CBasePlayer :: UpdateStepSound( void )
 				}
 			}
 			
-			step = MapTextureTypeStepType(m_chTextureType);
+			MapTextureTypeStepType(m_chTextureType);
 
 			switch (m_chTextureType)
 			{
@@ -2373,7 +2373,7 @@ void CBasePlayer::CheckSuitUpdate()
 // seconds, then we won't repeat playback of this word or sentence
 // for at least that number of seconds.
 
-void CBasePlayer::SetSuitUpdate(char *name, int fgroup, int iNoRepeatTime)
+void CBasePlayer::SetSuitUpdate(const char *name, int fgroup, int iNoRepeatTime)
 {
 	int i;
 	int isentence;
@@ -2735,9 +2735,6 @@ void CBasePlayer::PostThink()
 
 	UpdatePlayerSound();
 
-	// Track button info so we can detect 'pressed' and 'released' buttons next frame
-	m_afButtonLast = pev->button;
-
 pt_end:
 
 	// Store old velocity for use in backpedalling animations
@@ -2776,6 +2773,9 @@ pt_end:
 	m_flNextAttack -= gpGlobals->frametime;
 	if ( m_flNextAttack < -0.001 )
 		m_flNextAttack = -0.001;
+
+	// Track button info so we can detect 'pressed' and 'released' buttons next frame
+	m_afButtonLast = pev->button;
 }
 
 
@@ -3356,7 +3356,7 @@ void CBloodSplat::Spray ( void )
 
 		UTIL_BloodDecalTrace( &tr, BLOOD_COLOR_RED );
 	}
-	SetThink ( &CBaseEntity::SUB_Remove );
+	SetThink ( &CBloodSplat::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
@@ -3830,7 +3830,7 @@ int CBasePlayer::RemovePlayerItem( CBasePlayerItem *pItem )
 //
 // Returns the unique ID for the ammo, or -1 if error
 //
-int CBasePlayer :: GiveAmmo( int iCount, char *szName, int iMax )
+int CBasePlayer :: GiveAmmo( int iCount, const char *szName, int iMax )
 {
 	if ( !szName )
 	{
@@ -4037,7 +4037,10 @@ void CBasePlayer :: UpdateClientData( void )
 
 	if (pev->health != m_iClientHealth)
 	{
-		int iHealth = max( static_cast<int>(pev->health), 0 );  // make sure that no negative health values are sent
+#define clamp( val, min, max ) ( ((val) > (max)) ? (max) : ( ((val) < (min)) ? (min) : (val) ) )
+		int iHealth = clamp( pev->health, 0, 255 );  // make sure that no negative health values are sent
+		if ( pev->health > 0.0f && pev->health <= 1.0f )
+			iHealth = 1;
 
 		// send "health" update message
 		MESSAGE_BEGIN( MSG_ONE, gmsgHealth, NULL, pev );
@@ -4636,10 +4639,10 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 
 	int	m_iPose;// which sequence to display	-- temporary, don't need to save
-	static char *m_szPoses[4];
+	static const char *m_szPoses[4];
 };
 
-char *CDeadHEV::m_szPoses[] = { "deadback", "deadsitting", "deadstomach", "deadtable" };
+const char *CDeadHEV::m_szPoses[] = { "deadback", "deadsitting", "deadstomach", "deadtable" };
 
 void CDeadHEV::KeyValue( KeyValueData *pkvd )
 {

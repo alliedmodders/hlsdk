@@ -18,9 +18,9 @@
 // implementation of CHudHealth class
 //
 
-#include "STDIO.H"
-#include "STDLIB.H"
-#include "MATH.H"
+#include "stdio.h"
+#include "stdlib.h"
+#include "math.h"
 
 #include "hud.h"
 #include "cl_util.h"
@@ -316,7 +316,7 @@ int CHudHealth::DrawPain(float flTime)
 int CHudHealth::DrawDamage(float flTime)
 {
 	int r, g, b, a;
-	DAMAGE_IMAGE *pdmg;
+	//DAMAGE_IMAGE *pdmg;
 
 	if (!m_bitsDamage)
 		return 1;
@@ -332,7 +332,7 @@ int CHudHealth::DrawDamage(float flTime)
 	{
 		if (m_bitsDamage & giDmgFlags[i])
 		{
-			pdmg = &m_dmg[i];
+			//pdmg = &m_dmg[i];
 			SPR_Set(gHUD.GetSprite(m_HUD_dmg_bio + i), r, g, b );
 
 			// Discwar: Hack. Freeze is the only icon we use. Just place it directly above the disc ammo

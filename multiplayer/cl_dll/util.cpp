@@ -18,9 +18,9 @@
 // implementation of class-less helper functions
 //
 
-#include "STDIO.H"
-#include "STDLIB.H"
-#include "MATH.H"
+#include "stdio.h"
+#include "stdlib.h"
+#include "math.h"
 
 #include "hud.h"
 #include "cl_util.h"
@@ -116,7 +116,7 @@ void VectorMA (const float *veca, float scale, const float *vecb, float *vecc)
 	vecc[2] = veca[2] + scale*vecb[2];
 }
 
-HSPRITE LoadSprite(const char *pszName)
+HLSPRITE LoadSprite(const char *pszName)
 {
 	int i;
 	char sz[256]; 

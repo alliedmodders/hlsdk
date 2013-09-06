@@ -17,15 +17,13 @@
 #include "cl_entity.h"
 #include "triangleapi.h"
 
-#define DLLEXPORT __declspec( dllexport )
-
 extern "C"
 {
-	void DLLEXPORT HUD_DrawNormalTriangles( void );
-	void DLLEXPORT HUD_DrawTransparentTriangles( void );
+	void EXPORT HUD_DrawNormalTriangles( void );
+	void EXPORT HUD_DrawTransparentTriangles( void );
 };
 
-extern float g_iFogColor[4];
+extern float g_iFogColor[3];
 extern float g_iStartDist;
 extern float g_iEndDist;
 extern int g_iWaterLevel;
@@ -112,7 +110,7 @@ HUD_DrawNormalTriangles
 Non-transparent triangles-- add them here
 =================
 */
-void DLLEXPORT HUD_DrawNormalTriangles( void )
+void EXPORT HUD_DrawNormalTriangles( void )
 {
 	gHUD.m_Spectator.DrawOverview();
 }
@@ -124,7 +122,7 @@ HUD_DrawTransparentTriangles
 Render any triangles with transparent rendermode needs here
 =================
 */
-void DLLEXPORT HUD_DrawTransparentTriangles( void )
+void EXPORT HUD_DrawTransparentTriangles( void )
 {
 
 	RenderFog();

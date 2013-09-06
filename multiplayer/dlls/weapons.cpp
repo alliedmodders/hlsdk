@@ -656,6 +656,11 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		m_fInReload = FALSE;
 	}
 
+	if ( !(m_pPlayer->pev->button & IN_ATTACK ) )
+	{
+		m_flLastFireTime = 0.0f;
+	}
+
 	if ((m_pPlayer->pev->button & IN_ATTACK2) && CanAttack( m_flNextSecondaryAttack, gpGlobals->time, UseDecrement() ) )
 	{
 		if ( pszAmmo2() && !m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()] )
@@ -739,14 +744,14 @@ int CBasePlayerItem::AddToPlayer( CBasePlayer *pPlayer )
 void CBasePlayerItem::Drop( void )
 {
 	SetTouch( NULL );
-	SetThink(&CBaseEntity::SUB_Remove);
+	SetThink(&CBasePlayerItem::SUB_Remove);
 	pev->nextthink = gpGlobals->time + .1;
 }
 
 void CBasePlayerItem::Kill( void )
 {
 	SetTouch( NULL );
-	SetThink(&CBaseEntity::SUB_Remove);
+	SetThink(&CBasePlayerItem::SUB_Remove);
 	pev->nextthink = gpGlobals->time + .1;
 }
 
@@ -982,7 +987,7 @@ BOOL CBasePlayerWeapon :: CanDeploy( void )
 	return TRUE;
 }
 
-BOOL CBasePlayerWeapon :: DefaultDeploy( char *szViewModel, char *szWeaponModel, int iAnim, char *szAnimExt, int skiplocal /* = 0 */, int body )
+BOOL CBasePlayerWeapon :: DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int skiplocal /* = 0 */, int body )
 {
 	if (!CanDeploy( ))
 		return FALSE;
@@ -995,6 +1000,7 @@ BOOL CBasePlayerWeapon :: DefaultDeploy( char *szViewModel, char *szWeaponModel,
 
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
+	m_flLastFireTime = 0.0;
 
 	return TRUE;
 }
@@ -1110,7 +1116,7 @@ void CBasePlayerAmmo :: DefaultTouch( CBaseEntity *pOther )
 		else
 		{
 			SetTouch( NULL );
-			SetThink(&CBaseEntity::SUB_Remove);
+			SetThink(&CBasePlayerAmmo::SUB_Remove);
 			pev->nextthink = gpGlobals->time + .1;
 		}
 	}
@@ -1118,7 +1124,7 @@ void CBasePlayerAmmo :: DefaultTouch( CBaseEntity *pOther )
 	{
 		// evil impulse 101 hack, kill always
 		SetTouch( NULL );
-		SetThink(&CBaseEntity::SUB_Remove);
+		SetThink(&CBasePlayerAmmo::SUB_Remove);
 		pev->nextthink = gpGlobals->time + .1;
 	}
 }
@@ -1182,6 +1188,38 @@ void CBasePlayerWeapon::RetireWeapon( void )
 
 	g_pGameRules->GetNextBestWeapon( m_pPlayer, this );
 }
+
+//=========================================================================
+// GetNextAttackDelay - An accurate way of calcualting the next attack time.
+//=========================================================================
+float CBasePlayerWeapon::GetNextAttackDelay( float delay ) 
+{		
+	if(m_flLastFireTime == 0 || m_flNextPrimaryAttack == -1) 
+	{
+		// At this point, we are assuming that the client has stopped firing
+		// and we are going to reset our book keeping variables.
+		m_flLastFireTime = gpGlobals->time;
+		m_flPrevPrimaryAttack = delay;
+	}
+	// calculate the time between this shot and the previous
+	float flTimeBetweenFires = gpGlobals->time - m_flLastFireTime;
+	float flCreep = 0.0f;
+	if(flTimeBetweenFires > 0)
+			flCreep = flTimeBetweenFires - m_flPrevPrimaryAttack; // postive or negative
+	
+	// save the last fire time
+	m_flLastFireTime = gpGlobals->time;		
+	
+	float flNextAttack = UTIL_WeaponTimeBase() + delay - flCreep;
+	// we need to remember what the m_flNextPrimaryAttack time is set to for each shot, 
+	// store it as m_flPrevPrimaryAttack.
+	m_flPrevPrimaryAttack = flNextAttack - UTIL_WeaponTimeBase();
+// 	char szMsg[256];
+// 	_snprintf( szMsg, sizeof(szMsg), "next attack time: %0.4f\n", gpGlobals->time + flNextAttack );
+// 	OutputDebugString( szMsg );
+	return flNextAttack;
+}
+
 
 //*********************************************************
 // weaponbox code:
@@ -1255,7 +1293,7 @@ void CWeaponBox::Kill( void )
 
 		while ( pWeapon )
 		{
-			pWeapon->SetThink(&CBaseEntity::SUB_Remove);
+			pWeapon->SetThink(&CBasePlayerItem::SUB_Remove);
 			pWeapon->pev->nextthink = gpGlobals->time + 0.1;
 			pWeapon = pWeapon->m_pNext;
 		}
@@ -1417,7 +1455,7 @@ BOOL CWeaponBox::PackAmmo( int iszName, int iCount )
 //=========================================================
 // CWeaponBox - GiveAmmo
 //=========================================================
-int CWeaponBox::GiveAmmo( int iCount, char *szName, int iMax, int *pIndex/* = NULL*/ )
+int CWeaponBox::GiveAmmo( int iCount, const char *szName, int iMax, int *pIndex/* = NULL*/ )
 {
 	int i;
 

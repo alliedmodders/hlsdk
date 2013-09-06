@@ -348,7 +348,7 @@ void CBaseDoor :: SetToggleState( int state )
 
 void CBaseDoor::Precache( void )
 {
-	char *pszSound;
+	const char *pszSound;
 
 // set the door's "in-motion" sound
 	switch (m_bMoveSnd)
@@ -537,7 +537,7 @@ void CBaseDoor::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 {
 	m_hActivator = pActivator;
 	// if not ready to be used, ignore "use" command.
-	if (m_toggle_state == TS_AT_BOTTOM || FBitSet(pev->spawnflags, SF_DOOR_NO_AUTO_RETURN) && m_toggle_state == TS_AT_TOP)
+	if (m_toggle_state == TS_AT_BOTTOM || (FBitSet(pev->spawnflags, SF_DOOR_NO_AUTO_RETURN) && m_toggle_state == TS_AT_TOP))
 		DoorActivate();
 }
 
@@ -594,8 +594,9 @@ void CBaseDoor::DoorGoUp( void )
 		// don't play sounds too often
 		if ( m_fNextSoundPlay < gpGlobals->time )
 		{
-			Vector v = Center();
-			PLAYBACK_EVENT_FULL( FEV_RELIABLE, NULL, m_usDoorGoUp, 0.0, (float *)&v, (float *)&g_vecZero, 0.0, 0.0, ( m_bMoveSnd << 8 ) | ( m_bStopSnd & 0xff ), 0, 0, 0 );
+			Vector vecCenter( Center() );
+			float *pCenter = (float *)&vecCenter;
+			PLAYBACK_EVENT_FULL( FEV_RELIABLE, NULL, m_usDoorGoUp, 0.0, pCenter, (float *)&g_vecZero, 0.0, 0.0, ( m_bMoveSnd << 8 ) | ( m_bStopSnd & 0xff ), 0, 0, 0 );
 #if defined ( OLD_SOUNDS )
 			STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving) );
 			EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
@@ -647,8 +648,10 @@ void CBaseDoor::DoorHitTop( void )
 		{
 			m_bStoppedOpenSound = true;
 
-			Vector v = Center();
-			PLAYBACK_EVENT_FULL( FEV_RELIABLE, NULL, m_usDoorHitTop, 0.0, (float *)&v, (float *)&g_vecZero, 0.0, 0.0, ( m_bMoveSnd << 8 ) | ( m_bStopSnd & 0xff ), 0, 0, 0 );
+			Vector vecCenter( Center() );
+			float *pCenter = (float *)&vecCenter;
+
+			PLAYBACK_EVENT_FULL( FEV_RELIABLE, NULL, m_usDoorHitTop, 0.0, pCenter, (float *)&g_vecZero, 0.0, 0.0, ( m_bMoveSnd << 8 ) | ( m_bStopSnd & 0xff ), 0, 0, 0 );
 #if defined ( OLD_SOUNDS )
 			STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving) );
 			EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseArrived), 1, ATTN_NORM);
@@ -697,8 +700,10 @@ void CBaseDoor::DoorGoDown( void )
 		// don't play sounds too often
 		if ( m_fNextSoundPlay < gpGlobals->time )
 		{
-			Vector v = Center();
-			PLAYBACK_EVENT_FULL( FEV_RELIABLE, NULL, m_usDoorGoDown, 0.0, (float *)&v, (float *)&g_vecZero, 0.0, 0.0, ( m_bMoveSnd << 8 ) | ( m_bStopSnd & 0xff ), 0, 0, 0 );
+			Vector vecCenter( Center() );
+			float *pCenter = (float *)&vecCenter;
+
+			PLAYBACK_EVENT_FULL( FEV_RELIABLE, NULL, m_usDoorGoDown, 0.0, pCenter, (float *)&g_vecZero, 0.0, 0.0, ( m_bMoveSnd << 8 ) | ( m_bStopSnd & 0xff ), 0, 0, 0 );
 #if defined ( OLD_SOUNDS )
 			STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving) );
 			EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
@@ -728,8 +733,9 @@ void CBaseDoor::DoorHitBottom( void )
 		// don't play sounds too often
 		if ( m_fNextSoundPlay < gpGlobals->time )
 		{
-			Vector v = Center();
-			PLAYBACK_EVENT_FULL( FEV_RELIABLE, NULL, m_usDoorHitBottom, 0.0, (float *)&v, (float *)&g_vecZero, 0.0, 0.0, ( m_bMoveSnd << 8 ) | ( m_bStopSnd & 0xff ), 0, 0, 0 );
+			Vector vecCenter( Center() );
+			float *pCenter = (float *)&vecCenter;
+			PLAYBACK_EVENT_FULL( FEV_RELIABLE, NULL, m_usDoorHitBottom, 0.0, pCenter, (float *)&g_vecZero, 0.0, 0.0, ( m_bMoveSnd << 8 ) | ( m_bStopSnd & 0xff ), 0, 0, 0 );
 #if defined ( OLD_SOUNDS )
 			STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving) );
 			EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseArrived), 1, ATTN_NORM);
@@ -927,7 +933,7 @@ void CRotDoor::Spawn( void )
 		SetTouch ( NULL );
 	}
 	else // touchable button
-		SetTouch( &CBaseDoor::DoorTouch );
+		SetTouch( &CRotDoor::DoorTouch );
 }
 
 

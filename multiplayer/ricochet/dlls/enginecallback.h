@@ -93,7 +93,6 @@ inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin = NU
 #define CVAR_GET_STRING	(*g_engfuncs.pfnCVarGetString)
 #define CVAR_SET_FLOAT	(*g_engfuncs.pfnCVarSetFloat)
 #define CVAR_SET_STRING	(*g_engfuncs.pfnCVarSetString)
-#define CVAR_GET_POINTER (*g_engfuncs.pfnCVarGetPointer)
 #define ALERT			(*g_engfuncs.pfnAlertMessage)
 #define ENGINE_FPRINTF	(*g_engfuncs.pfnEngineFprintf)
 #define ALLOC_PRIVATE	(*g_engfuncs.pfnPvAllocEntPrivateData)
@@ -132,6 +131,8 @@ inline void *GET_PRIVATE( edict_t *pent )
 #define IS_MAP_VALID			(*g_engfuncs.pfnIsMapValid)
 #define NUMBER_OF_ENTITIES		(*g_engfuncs.pfnNumberOfEntities)
 #define IS_DEDICATED_SERVER		(*g_engfuncs.pfnIsDedicatedServer)
+
+#define CVAR_GET_POINTER (*g_engfuncs.pfnCVarGetPointer)
 
 #define PRECACHE_EVENT			(*g_engfuncs.pfnPrecacheEvent)
 #define PLAYBACK_EVENT_FULL		(*g_engfuncs.pfnPlaybackEvent)

@@ -36,7 +36,7 @@
 
 
 // Arrow filenames
-char *sArrowFilenames[] =
+const char *sArrowFilenames[] =
 {
 	"arrowup",
 	"arrowdn", 
@@ -421,8 +421,5 @@ void CHandler_MenuButtonOver::cursorEntered(Panel *panel)
 void CMenuHandler_StringCommandClassSelect::actionPerformed(Panel* panel)
 {
 	CMenuHandler_StringCommand::actionPerformed( panel );
-
-	bool bAutoKill = CVAR_GET_FLOAT( "hud_classautokill" ) != 0;
-	
 }
 

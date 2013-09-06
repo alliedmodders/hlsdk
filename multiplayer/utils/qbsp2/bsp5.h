@@ -10,6 +10,8 @@
 
 // bsp5.h
 
+#include "mathlib.h"
+#include "const.h"
 #include "cmdlib.h"
 #include "mathlib.h"
 #include "bspfile.h"

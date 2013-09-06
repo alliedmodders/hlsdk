@@ -12,10 +12,11 @@
 *   without written permission from Valve LLC.
 *
 ****/
+#include "archtypes.h"     // DAL
+
 //
 // Misc utility code
 //
-#include <string.h>
 #ifndef ACTIVITY_H
 #include "activity.h"
 #endif
@@ -28,8 +29,8 @@ inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, ent
 extern globalvars_t				*gpGlobals;
 
 // Use this instead of ALLOC_STRING on constant strings
-#define STRING(offset)		reinterpret_cast<const char *>(gpGlobals->pStringBase + (uintp)offset)
-#define MAKE_STRING(str)	(reinterpret_cast<uintp>(str) - reinterpret_cast<uintp>(STRING(0)))
+#define STRING(offset)		((const char *)(gpGlobals->pStringBase + (unsigned int)(offset)))
+#define MAKE_STRING(str)	((uint64)(str) - (uint64)(STRING(0)))
 
 inline edict_t *FIND_ENTITY_BY_CLASSNAME(edict_t *entStart, const char *pszName) 
 {
@@ -81,19 +82,23 @@ typedef int BOOL;
 #endif
 
 // Keeps clutter down a bit, when declaring external entity/global method prototypes
-#define DECLARE_GLOBAL_METHOD(MethodName)  extern void DLLEXPORT MethodName( void )
-#define GLOBAL_METHOD(funcname)					void DLLEXPORT funcname(void)
+#define DECLARE_GLOBAL_METHOD(MethodName)  extern void UTIL_DLLEXPORT MethodName( void )
+#define GLOBAL_METHOD(funcname)					void UTIL_DLLEXPORT funcname(void)
+
+#ifndef UTIL_DLLEXPORT
+#ifdef _WIN32
+#define UTIL_DLLEXPORT _declspec( dllexport )
+#else
+#define UTIL_DLLEXPORT __attribute__ ((visibility("default")))
+#endif
+#endif
 
 // This is the glue that hooks .MAP entity class names to our CPP classes
 // The _declspec forces them to be exported by name so we can do a lookup with GetProcAddress()
 // The function is used to intialize / allocate the object for the entity
-#ifdef _WIN32
 #define LINK_ENTITY_TO_CLASS(mapClassName,DLLClassName) \
-	extern "C" _declspec( dllexport ) void mapClassName( entvars_t *pev ); \
+	extern "C" UTIL_DLLEXPORT void mapClassName( entvars_t *pev ); \
 	void mapClassName( entvars_t *pev ) { GetClassPtr( (DLLClassName *)pev ); }
-#else
-#define LINK_ENTITY_TO_CLASS(mapClassName,DLLClassName) extern "C" void mapClassName( entvars_t *pev ); void mapClassName( entvars_t *pev ) { GetClassPtr( (DLLClassName *)pev ); }
-#endif
 
 
 //
@@ -273,7 +278,7 @@ extern float		UTIL_Approach( float target, float value, float speed );
 extern float		UTIL_ApproachAngle( float target, float value, float speed );
 extern float		UTIL_AngleDistance( float next, float cur );
 
-extern char			*UTIL_VarArgs( char *format, ... );
+extern char			*UTIL_VarArgs( const char *format, ... );
 extern void			UTIL_Remove( CBaseEntity *pEntity );
 extern BOOL			UTIL_IsValidEntity( edict_t *pent );
 extern BOOL			UTIL_TeamsMatch( const char *pTeamName1, const char *pTeamName2 );

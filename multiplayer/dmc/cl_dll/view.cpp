@@ -41,7 +41,7 @@ extern "C"
 	int CL_IsThirdPerson( void );
 	void CL_CameraOffset( float *ofs );
 
-	void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
+	void EXPORT V_CalcRefdef( struct ref_params_s *pparams );
 
 	void PM_ParticleLine( float *start, float *end, int pcolor, float life, float vert);
 	int PM_GetInfo( int ent );
@@ -120,6 +120,7 @@ void V_NormalizeAngles( float *angles )
 		}
 	}
 }
+*/
 
 /*
 ===================
@@ -426,7 +427,7 @@ V_CalcIntermissionRefdef
 */
 void V_CalcIntermissionRefdef ( struct ref_params_s *pparams )
 {
-	cl_entity_t	*ent, *view;
+	cl_entity_t	/**ent,*/ *view;
 	float		old;
 
 // don't allow cheats in multiplayer
@@ -438,7 +439,7 @@ void V_CalcIntermissionRefdef ( struct ref_params_s *pparams )
 	}
 
 	// ent is the player model ( visible when out of body )
-	ent = gEngfuncs.GetLocalPlayer();
+	//ent = gEngfuncs.GetLocalPlayer();
 	
 	// view is the weapon model (only visible from inside body )
 	view = gEngfuncs.GetViewModel();
@@ -490,7 +491,7 @@ V_CalcRefdef
 */
 void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 {
-	cl_entity_t		*ent, *view;
+	cl_entity_t		/**ent,*/ *view;
 	int				i;
 	vec3_t			angles;
 	float			bob, waterOffset;
@@ -499,7 +500,6 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	static float oldz = 0;
 	static float lasttime;
 
-	static float lastang[3];
 	vec3_t angdelta;
 
 	vec3_t camAngles, camForward, camRight, camUp;
@@ -527,7 +527,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	V_DriftPitch ( pparams );
 
 	// ent is the player model ( visible when out of body )
-	ent = gEngfuncs.GetLocalPlayer();
+	//ent = gEngfuncs.GetLocalPlayer();
 	
 	// view is the weapon model (only visible from inside body )
 	view = gEngfuncs.GetViewModel();
@@ -1172,7 +1172,7 @@ void V_GetMapChasePosition(int target, float * cl_angles, float * origin, float 
 int V_FindViewModelByWeaponModel(int weaponindex)
 {
 
-	static char * modelmap[][2] =	{
+	static const char *modelmap[][2] =	{
 
 #ifdef THREEWAVE
 	//	{ "models/p_grapple.mdl",			"models/v_grapple.mdl"	},
@@ -1231,7 +1231,7 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 		
 	cl_entity_t	 * ent = gEngfuncs.GetEntityByIndex( g_iUser2 );
 	cl_entity_t	 * gunModel = gEngfuncs.GetViewModel();
-	static float lasttime;
+	//static float lasttime;
 
 	static float lastang[3];
 	static float lastorg[3];
@@ -1516,7 +1516,7 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 		lastWeaponModelIndex = lastViewModelIndex = 0;
 	}
 
-	lasttime = pparams->time; 
+	//lasttime = pparams->time; 
 
 	// write back new values into pparams
 
@@ -1525,7 +1525,7 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 
 }
 
-void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
+void EXPORT V_CalcRefdef( struct ref_params_s *pparams )
 {
 	// intermission / finale rendering
 	if ( pparams->intermission )

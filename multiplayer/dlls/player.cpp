@@ -34,6 +34,7 @@
 #include "decals.h"
 #include "gamerules.h"
 #include "game.h"
+#include "pm_shared.h"
 #include "hltv.h"
 
 // #define DUCKFIX
@@ -206,7 +207,8 @@ void LinkUserMessages( void )
 	gmsgDamage = REG_USER_MSG( "Damage", 12 );
 	gmsgBattery = REG_USER_MSG( "Battery", 2);
 	gmsgTrain = REG_USER_MSG( "Train", 1);
-	gmsgHudText = REG_USER_MSG( "HudText", -1 );
+	//gmsgHudText = REG_USER_MSG( "HudTextPro", -1 );
+	gmsgHudText = REG_USER_MSG( "HudText", -1 ); // we don't use the message but 3rd party addons may!
 	gmsgSayText = REG_USER_MSG( "SayText", -1 );
 	gmsgTextMsg = REG_USER_MSG( "TextMsg", -1 );
 	gmsgWeaponList = REG_USER_MSG("WeaponList", -1);
@@ -813,6 +815,12 @@ void CBasePlayer::RemoveAllItems( BOOL removeSuit )
 
 	m_pLastItem = NULL;
 
+	if ( m_pTank != 0 )
+	{
+		m_pTank->Use( this, this, USE_OFF, 0 );
+		m_pTank = NULL;
+	}
+
 	int i;
 	CBasePlayerItem *pPendingItem;
 	for (i = 0; i < MAX_ITEM_TYPES; i++)
@@ -1327,6 +1335,9 @@ void CBasePlayer::PlayerDeathThink(void)
 		// go to dead camera. 
 		StartDeathCam();
 	}
+
+	if ( pev->iuser1 )	// player is in spectator mode
+		return;	
 	
 // wait for any button down,  or mp_forcerespawn is set and the respawn time is up
 	if (!fAnyButtonDown 
@@ -1377,7 +1388,9 @@ void CBasePlayer::StartDeathCam( void )
 		}
 
 		CopyToBodyQue( pev );
-		StartObserver( pSpot->v.origin, pSpot->v.v_angle );
+
+		UTIL_SetOrigin( pev, pSpot->v.origin );
+		pev->angles = pev->v_angle = pSpot->v.v_angle;
 	}
 	else
 	{
@@ -1385,23 +1398,90 @@ void CBasePlayer::StartDeathCam( void )
 		TraceResult tr;
 		CopyToBodyQue( pev );
 		UTIL_TraceLine( pev->origin, pev->origin + Vector( 0, 0, 128 ), ignore_monsters, edict(), &tr );
-		StartObserver( tr.vecEndPos, UTIL_VecToAngles( tr.vecEndPos - pev->origin  ) );
-		return;
+
+		UTIL_SetOrigin( pev, tr.vecEndPos );
+		pev->angles = pev->v_angle = UTIL_VecToAngles( tr.vecEndPos - pev->origin  );
 	}
+
+	// start death cam
+
+	m_afPhysicsFlags |= PFLAG_OBSERVER;
+	pev->view_ofs = g_vecZero;
+	pev->fixangle = TRUE;
+	pev->solid = SOLID_NOT;
+	pev->takedamage = DAMAGE_NO;
+	pev->movetype = MOVETYPE_NONE;
+	pev->modelindex = 0;
 }
 
 void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 {
-	m_afPhysicsFlags |= PFLAG_OBSERVER;
+	// clear any clientside entities attached to this player
+	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
+		WRITE_BYTE( TE_KILLPLAYERATTACHMENTS );
+		WRITE_BYTE( (BYTE)entindex() );
+	MESSAGE_END();
 
+	// Holster weapon immediately, to allow it to cleanup
+	if (m_pActiveItem)
+		m_pActiveItem->Holster( );
+
+	if ( m_pTank != 0 )
+	{
+		m_pTank->Use( this, this, USE_OFF, 0 );
+		m_pTank = NULL;
+	}
+
+	// clear out the suit message cache so we don't keep chattering
+	SetSuitUpdate(NULL, FALSE, 0);
+
+	// Tell Ammo Hud that the player is dead
+	MESSAGE_BEGIN( MSG_ONE, gmsgCurWeapon, NULL, pev );
+		WRITE_BYTE(0);
+		WRITE_BYTE(0XFF);
+		WRITE_BYTE(0xFF);
+	MESSAGE_END();
+
+	// reset FOV
+	m_iFOV = m_iClientFOV = 0;
+	pev->fov = m_iFOV;
+	MESSAGE_BEGIN( MSG_ONE, gmsgSetFOV, NULL, pev );
+		WRITE_BYTE(0);
+	MESSAGE_END();
+
+	// Setup flags
+	m_iHideHUD = (HIDEHUD_HEALTH | HIDEHUD_WEAPONS);
+	m_afPhysicsFlags |= PFLAG_OBSERVER;
+	pev->effects = EF_NODRAW;
 	pev->view_ofs = g_vecZero;
 	pev->angles = pev->v_angle = vecViewAngle;
 	pev->fixangle = TRUE;
 	pev->solid = SOLID_NOT;
 	pev->takedamage = DAMAGE_NO;
 	pev->movetype = MOVETYPE_NONE;
-	pev->modelindex = 0;
+	ClearBits( m_afPhysicsFlags, PFLAG_DUCKING );
+	ClearBits( pev->flags, FL_DUCKING );
+	pev->deadflag = DEAD_RESPAWNABLE;
+	pev->health = 1;
+
+	// Clear out the status bar
+	m_fInitHUD = TRUE;
+
+	pev->team =  0;
+	MESSAGE_BEGIN( MSG_ALL, gmsgTeamInfo );
+		WRITE_BYTE( ENTINDEX(edict()) );
+		WRITE_STRING( "" );
+	MESSAGE_END();
+
+	// Remove all the player's stuff
+	RemoveAllItems( FALSE );
+
+	// Move them to the new position
 	UTIL_SetOrigin( pev, vecPosition );
+
+	// Find a player to watch
+	m_flNextObserverInput = 0;
+	Observer_SetMode( m_iObserverLastMode );
 }
 
 // 
@@ -1411,6 +1491,9 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 
 void CBasePlayer::PlayerUse ( void )
 {
+	if ( IsObserver() )
+		return;
+
 	// Was use pressed or released?
 	if ( ! ((pev->button | m_afButtonPressed | m_afButtonReleased) & IN_USE) )
 		return;
@@ -1794,6 +1877,16 @@ void CBasePlayer::PreThink(void)
 	CheckTimeBasedDamage();
 
 	CheckSuitUpdate();
+
+	// Observer Button Handling
+	if ( IsObserver() )
+	{
+		Observer_HandleButtons();
+		Observer_CheckTarget();
+		Observer_CheckProperties();
+		pev->impulse = 0;
+		return;
+	}
 
 	if (pev->deadflag >= DEAD_DYING)
 	{
@@ -2236,7 +2329,7 @@ void CBasePlayer::CheckSuitUpdate()
 // seconds, then we won't repeat playback of this word or sentence
 // for at least that number of seconds.
 
-void CBasePlayer::SetSuitUpdate(char *name, int fgroup, int iNoRepeatTime)
+void CBasePlayer::SetSuitUpdate(const char *name, int fgroup, int iNoRepeatTime)
 {
 	int i;
 	int isentence;
@@ -2561,9 +2654,6 @@ void CBasePlayer::PostThink()
 
 	UpdatePlayerSound();
 
-	// Track button info so we can detect 'pressed' and 'released' buttons next frame
-	m_afButtonLast = pev->button;
-
 pt_end:
 #if defined( CLIENT_WEAPONS )
 		// Decay timers on weapons
@@ -2627,11 +2717,10 @@ pt_end:
 		if ( m_flAmmoStartCharge < -0.001 )
 			m_flAmmoStartCharge = -0.001;
 	}
-	
-
-#else
-	return;
 #endif
+
+	// Track button info so we can detect 'pressed' and 'released' buttons next frame
+	m_afButtonLast = pev->button;
 }
 
 
@@ -3220,7 +3309,7 @@ void CBloodSplat::Spray ( void )
 
 		UTIL_BloodDecalTrace( &tr, BLOOD_COLOR_RED );
 	}
-	SetThink ( &CBaseEntity::SUB_Remove );
+	SetThink ( &CBloodSplat::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
@@ -3693,7 +3782,7 @@ int CBasePlayer::RemovePlayerItem( CBasePlayerItem *pItem )
 //
 // Returns the unique ID for the ammo, or -1 if error
 //
-int CBasePlayer :: GiveAmmo( int iCount, char *szName, int iMax )
+int CBasePlayer :: GiveAmmo( int iCount, const char *szName, int iMax )
 {
 	if ( !szName )
 	{
@@ -3859,7 +3948,7 @@ void CBasePlayer :: UpdateClientData( void )
 	{
 		m_fInitHUD = FALSE;
 		gInitHUD = FALSE;
-
+		
 		MESSAGE_BEGIN( MSG_ONE, gmsgResetHUD, NULL, pev );
 			WRITE_BYTE( 0 );
 		MESSAGE_END();
@@ -3871,6 +3960,9 @@ void CBasePlayer :: UpdateClientData( void )
 
 			g_pGameRules->InitHUD( this );
 			m_fGameHUDInitialized = TRUE;
+			
+			m_iObserverLastMode = OBS_ROAMING;
+			
 			if ( g_pGameRules->IsMultiplayer() )
 			{
 				FireTargets( "game_playerjoin", this, this, USE_TOGGLE, 0 );
@@ -3911,7 +4003,10 @@ void CBasePlayer :: UpdateClientData( void )
 
 	if (pev->health != m_iClientHealth)
 	{
-		int iHealth = max( static_cast<int>(pev->health), 0 );  // make sure that no negative health values are sent
+#define clamp( val, min, max ) ( ((val) > (max)) ? (max) : ( ((val) < (min)) ? (min) : (val) ) )
+		int iHealth = clamp( pev->health, 0, 255 );  // make sure that no negative health values are sent
+		if ( pev->health > 0.0f && pev->health <= 1.0f )
+			iHealth = 1;
 
 		// send "health" update message
 		MESSAGE_BEGIN( MSG_ONE, gmsgHealth, NULL, pev );
@@ -4457,7 +4552,8 @@ void CBasePlayer::DropPlayerItem ( char *pszItemName )
 		// item we want to drop and hit a BREAK;  pWeapon is the item.
 		if ( pWeapon )
 		{
-			g_pGameRules->GetNextBestWeapon( this, pWeapon );
+			if ( !g_pGameRules->GetNextBestWeapon( this, pWeapon ) )
+				return; // can't drop the item they asked for, may be our last item or something we can't holster
 
 			UTIL_MakeVectors ( pev->angles ); 
 
@@ -4577,10 +4673,10 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 
 	int	m_iPose;// which sequence to display	-- temporary, don't need to save
-	static char *m_szPoses[4];
+	static const char *m_szPoses[4];
 };
 
-char *CDeadHEV::m_szPoses[] = { "deadback", "deadsitting", "deadstomach", "deadtable" };
+const char *CDeadHEV::m_szPoses[] = { "deadback", "deadsitting", "deadstomach", "deadtable" };
 
 void CDeadHEV::KeyValue( KeyValueData *pkvd )
 {

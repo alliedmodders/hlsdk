@@ -19,8 +19,11 @@
 #include "pm_defs.h"
 #include "pmtrace.h"	
 #include "pm_shared.h"
+#include "bench.h"
+#include "Exports.h"
 
-#define DLLEXPORT __declspec( dllexport )
+#include "particleman.h"
+extern IParticleMan *g_pParticleMan;
 
 void Game_AddObjects( void );
 
@@ -28,29 +31,21 @@ extern vec3_t v_origin;
 
 int g_iAlive = 1;
 
-extern "C" 
-{
-	int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname );
-	void DLLEXPORT HUD_CreateEntities( void );
-	void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
-	void DLLEXPORT HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client );
-	void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src );
-	void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd );
-	void DLLEXPORT HUD_TempEntUpdate( double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree, struct tempent_s **ppTempEntActive, int ( *Callback_AddVisibleEntity )( struct cl_entity_s *pEntity ), void ( *Callback_TempEntPlaySound )( struct tempent_s *pTemp, float damp ) );
-	struct cl_entity_s DLLEXPORT *HUD_GetUserEntity( int index );
-}
-
 /*
 ========================
 HUD_AddEntity
 	Return 0 to filter entity from visible list for rendering
 ========================
 */
-int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname )
+int CL_DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname )
 {
+//	RecClAddEntity(type, ent, modelname);
+
 	switch ( type )
 	{
 	case ET_NORMAL:
+		Bench_CheckEntity( type, ent, modelname );
+		break;
 	case ET_PLAYER:
 	case ET_BEAM:
 	case ET_TEMPENTITY:
@@ -85,8 +80,10 @@ playerstate update in entity_state_t.  In order for these overrides to eventuall
 structure, we need to copy them into the state structure at this point.
 =========================
 */
-void DLLEXPORT HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client )
+void CL_DLLEXPORT HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client )
 {
+//	RecClTxferLocalOverrides(state, client);
+
 	VectorCopy( client->origin, state->origin );
 
 	// Spectator
@@ -108,8 +105,10 @@ We have received entity_state_t for this player over the network.  We need to co
 playerstate structure
 =========================
 */
-void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src )
+void CL_DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src )
 {
+//	RecClProcessPlayerState(dst, src);
+
 	// Copy in network data
 	VectorCopy( src->origin, dst->origin );
 	VectorCopy( src->angles, dst->angles );
@@ -151,6 +150,10 @@ void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct 
 	dst->team					= src->team;
 	dst->colormap				= src->colormap;
 
+#if defined( _TFC )
+	dst->fuser1					= src->fuser1;
+#endif
+
 	// Save off some data so other areas of the Client DLL can get to it
 	cl_entity_t *player = gEngfuncs.GetLocalPlayer();	// Get the local player's index
 	if ( dst->number == player->index )
@@ -174,8 +177,10 @@ Because we can predict an arbitrary number of frames before the server responds 
  update is occupying.
 =========================
 */
-void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd )
+void CL_DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd )
 {
+//	RecClTxferPredictionData(ps, pps, pcd, ppcd, wd, pwd);
+
 	ps->oldbuttons				= pps->oldbuttons;
 	ps->flFallVelocity			= pps->flFallVelocity;
 	ps->iStepLeft				= pps->iStepLeft;
@@ -212,7 +217,6 @@ void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct
 		pcd->iuser1 = g_iUser1;	// observer mode
 		pcd->iuser2 = g_iUser2; // first target
 		pcd->iuser3 = g_iUser3; // second target
-
 	}
 
 	// Fire prevention
@@ -228,210 +232,6 @@ void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct
 
 	memcpy( wd, pwd, 32 * sizeof( weapon_data_t ) );
 }
-
-/*
-//#define TEST_IT
-#if defined( TEST_IT )
-
-cl_entity_t mymodel[9];
-
-void MoveModel( void )
-{
-	cl_entity_t *player;
-	int i, j;
-	int modelindex;
-	struct model_s *mod;
-
-	// Load it up with some bogus data
-	player = gEngfuncs.GetLocalPlayer();
-	if ( !player )
-		return;
-
-	mod = gEngfuncs.CL_LoadModel( "models/sentry3.mdl", &modelindex );
-	for ( i = 0; i < 3; i++ )
-	{
-		for ( j = 0; j < 3; j++ )
-		{
-			// Don't draw over ourself...
-			if ( ( i == 1 ) && ( j == 1 ) )
-				continue;
-
-			mymodel[ i * 3 + j ] = *player;
-
-			mymodel[ i * 3 + j ].player = 0;
-
-			mymodel[ i * 3 + j ].model = mod;
-			mymodel[ i * 3 + j ].curstate.modelindex = modelindex;
-		
-				// Move it out a bit
-			mymodel[ i * 3 + j ].origin[0] = player->origin[0] + 50 * ( 1 - i );
-			mymodel[ i * 3 + j ].origin[1] = player->origin[1] + 50 * ( 1 - j );
-
-			gEngfuncs.CL_CreateVisibleEntity( ET_NORMAL, &mymodel[i*3+j] );
-		}
-	}
-
-}
-
-#endif
-
-//#define TRACE_TEST
-#if defined( TRACE_TEST )
-
-extern int hitent;
-
-cl_entity_t hit;
-
-void TraceModel( void )
-{
-	cl_entity_t *ent;
-
-	if ( hitent <= 0 )
-		return;
-
-	// Load it up with some bogus data
-	ent = gEngfuncs.GetEntityByIndex( hitent );
-	if ( !ent )
-		return;
-
-	hit = *ent;
-	//hit.curstate.rendermode = kRenderTransTexture;
-	//hit.curstate.renderfx = kRenderFxGlowShell;
-	//hit.curstate.renderamt = 100;
-
-	hit.origin[2] += 40;
-
-	gEngfuncs.CL_CreateVisibleEntity( ET_NORMAL, &hit );
-}
-
-#endif
-*/
-
-/*
-void ParticleCallback( struct particle_s *particle, float frametime )
-{
-	int i;
-
-	for ( i = 0; i < 3; i++ )
-	{
-		particle->org[ i ] += particle->vel[ i ] * frametime;
-	}
-}
-
-cvar_t *color = NULL;
-void Particles( void )
-{
-	static float lasttime;
-	float curtime;
-	
-	curtime = gEngfuncs.GetClientTime();
-
-	if ( ( curtime - lasttime ) < 2.0 )
-		return;
-
-	if ( !color )
-	{
-		color = gEngfuncs.pfnRegisterVariable ( "color","255 0 0", 0 );
-	}
-
-	lasttime = curtime;
-
-	// Create a few particles
-	particle_t *p;
-	int i, j;
-
-	for ( i = 0; i < 1000; i++ )
-	{
-		int r, g, b;
-		p = gEngfuncs.pEfxAPI->R_AllocParticle( ParticleCallback );
-		if ( !p )
-			break;
-
-		for ( j = 0; j < 3; j++ )
-		{
-			p->org[ j ] = v_origin[ j ] + gEngfuncs.pfnRandomFloat( -32.0, 32.0 );;
-			p->vel[ j ] = gEngfuncs.pfnRandomFloat( -100.0, 100.0 );
-		}
-
-		if ( color )
-		{
-			sscanf( color->string, "%i %i %i", &r, &g, &b );
-		}
-		else
-		{
-			r = 192;
-			g = 0;
-			b = 0;
-		}
-
-		p->color = 	gEngfuncs.pEfxAPI->R_LookupColor( r, g, b );
-		gEngfuncs.pEfxAPI->R_GetPackedColor( &p->packedColor, p->color );
-
-		// p->die is set to current time so all you have to do is add an additional time to it
-		p->die += 3.0;
-	}
-}
-*/
-
-/*
-void TempEntCallback ( struct tempent_s *ent, float frametime, float currenttime )
-{
-	int i;
-
-	for ( i = 0; i < 3; i++ )
-	{
-		ent->entity.curstate.origin[ i ] += ent->entity.baseline.origin[ i ] * frametime;
-	}
-}
-
-void TempEnts( void )
-{
-	static float lasttime;
-	float curtime;
-	
-	curtime = gEngfuncs.GetClientTime();
-
-	if ( ( curtime - lasttime ) < 10.0 )
-		return;
-
-	lasttime = curtime;
-
-	TEMPENTITY *p;
-	int i, j;
-	struct model_s *mod;
-	vec3_t origin;
-	int index;
-
-	mod = gEngfuncs.CL_LoadModel( "sprites/laserdot.spr", &index );
-
-	for ( i = 0; i < 100; i++ )
-	{
-		for ( j = 0; j < 3; j++ )
-		{
-			origin[ j ] = v_origin[ j ];
-			if ( j != 2 )
-			{
-				origin[ j ] += 75;
-			}
-		}
-
-		p = gEngfuncs.pEfxAPI->CL_TentEntAllocCustom( (float *)&origin, mod, 0, TempEntCallback );
-		if ( !p )
-			break;
-
-		for ( j = 0; j < 3; j++ )
-		{
-			p->entity.curstate.origin[ j ] = origin[ j ];
-
-			// Store velocity in baseline origin
-			p->entity.baseline.origin[ j ] = gEngfuncs.pfnRandomFloat( -100, 100 );
-		}
-
-		// p->die is set to current time so all you have to do is add an additional time to it
-		p->die += 10.0;
-	}
-}
-*/
 
 #if defined( BEAM_TEST )
 // Note can't index beam[ 0 ] in Beam callback, so don't use that index
@@ -511,36 +311,25 @@ HUD_CreateEntities
 Gives us a chance to add additional entities to the render this frame
 =========================
 */
-void DLLEXPORT HUD_CreateEntities( void )
+void CL_DLLEXPORT HUD_CreateEntities( void )
 {
-	// e.g., create a persistent cl_entity_t somewhere.
-	// Load an appropriate model into it ( gEngfuncs.CL_LoadModel )
-	// Call gEngfuncs.CL_CreateVisibleEntity to add it to the visedicts list
-/*
-#if defined( TEST_IT )
-	MoveModel();
-#endif
-
-#if defined( TRACE_TEST )
-	TraceModel();
-#endif
-*/
-/*
-	Particles();
-*/
-/*
-	TempEnts();
-*/
+//	RecClCreateEntities();
 
 #if defined( BEAM_TEST )
 	Beams();
 #endif
+
+	Bench_AddObjects();
 
 	// Add in any game specific objects
 	Game_AddObjects();
 
 	GetClientVoiceMgr()->CreateEntities();
 }
+
+#if defined( _TFC )
+extern int g_bACSpinning[33];
+#endif 
 
 /*
 =========================
@@ -550,21 +339,36 @@ The entity's studio model description indicated an event was
 fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound )
 =========================
 */
-void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity )
+void CL_DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity )
 {
+//	RecClStudioEvent(event, entity);
+
+	int iMuzzleFlash = 1;
+
+#if defined( _TFC )
+
+	if ( g_bACSpinning[ entity->index - 1 ] )
+		iMuzzleFlash = 0;
+
+#endif 
+
 	switch( event->event )
 	{
 	case 5001:
-		gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[0], atoi( event->options) );
+		if ( iMuzzleFlash )
+			gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[0], atoi( event->options) );
 		break;
 	case 5011:
-		gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[1], atoi( event->options) );
+		if ( iMuzzleFlash )
+			gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[1], atoi( event->options) );
 		break;
 	case 5021:
-		gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[2], atoi( event->options) );
+		if ( iMuzzleFlash )
+			gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[2], atoi( event->options) );
 		break;
 	case 5031:
-		gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[3], atoi( event->options) );
+		if ( iMuzzleFlash )
+			gEngfuncs.pEfxAPI->R_MuzzleFlash( (float *)&entity->attachment[3], atoi( event->options) );
 		break;
 	case 5002:
 		gEngfuncs.pEfxAPI->R_SparkEffect( (float *)&entity->attachment[0], atoi( event->options), -100, 100 );
@@ -585,7 +389,7 @@ CL_UpdateTEnts
 Simulation and cleanup of temporary entities
 =================
 */
-void DLLEXPORT HUD_TempEntUpdate (
+void CL_DLLEXPORT HUD_TempEntUpdate (
 	double frametime,   // Simulation time
 	double client_time, // Absolute time on client
 	double cl_gravity,  // True gravity on client
@@ -594,10 +398,19 @@ void DLLEXPORT HUD_TempEntUpdate (
 	int		( *Callback_AddVisibleEntity )( cl_entity_t *pEntity ),
 	void	( *Callback_TempEntPlaySound )( TEMPENTITY *pTemp, float damp ) )
 {
+//	RecClTempEntUpdate(frametime, client_time, cl_gravity, ppTempEntFree, ppTempEntActive, Callback_AddVisibleEntity, Callback_TempEntPlaySound);
+
 	static int gTempEntFrame = 0;
 	int			i;
 	TEMPENTITY	*pTemp, *pnext, *pprev;
-	float		freq, gravity, gravitySlow, life, fastFreq;
+	float		/*freq,*/ gravity, gravitySlow, life, fastFreq;
+
+	Vector		vAngles;
+
+	gEngfuncs.GetViewAngles( (float*)vAngles );
+
+	if ( g_pParticleMan )
+		 g_pParticleMan->SetVariables( cl_gravity, vAngles );
 
 	// Nothing to simulate
 	if ( !*ppTempEntActive )		
@@ -635,7 +448,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 	}
 
 	pprev = NULL;
-	freq = client_time * 0.01;
+	//freq = client_time * 0.01;
 	fastFreq = client_time * 5.5;
 	gravity = -frametime * cl_gravity;
 	gravitySlow = gravity * 0.5;
@@ -722,9 +535,9 @@ void DLLEXPORT HUD_TempEntUpdate (
 			}
 			else if ( pTemp->flags & FTENT_SPIRAL )
 			{
-				float s, c;
-				s = sin( pTemp->entity.baseline.origin[2] + fastFreq );
-				c = cos( pTemp->entity.baseline.origin[2] + fastFreq );
+				//float s, c;
+				//s = sin( pTemp->entity.baseline.origin[2] + fastFreq );
+				//c = cos( pTemp->entity.baseline.origin[2] + fastFreq );
 
 				pTemp->entity.origin[0] += pTemp->entity.baseline.origin[0] * frametime + 8 * sin( client_time * 20 + (int)pTemp );
 				pTemp->entity.origin[1] += pTemp->entity.baseline.origin[1] * frametime + 4 * sin( client_time * 30 + (int)pTemp );
@@ -957,8 +770,10 @@ If you specify negative numbers for beam start and end point entities, then
 Indices must start at 1, not zero.
 =================
 */
-cl_entity_t DLLEXPORT *HUD_GetUserEntity( int index )
+cl_entity_t CL_DLLEXPORT *HUD_GetUserEntity( int index )
 {
+//	RecClGetUserEntity(index);
+
 #if defined( BEAM_TEST )
 	// None by default, you would return a valic pointer if you create a client side
 	//  beam and attach it to a client side entity.

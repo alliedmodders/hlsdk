@@ -71,7 +71,7 @@ AlertMessage
 Print debug messages to console
 ======================
 */
-void AlertMessage( ALERT_TYPE atype, char *szFmt, ... )
+void AlertMessage( ALERT_TYPE atype, const char *szFmt, ... )
 {
 	va_list		argptr;
 	static char	string[1024];
@@ -193,7 +193,7 @@ CBasePlayerWeapon :: DefaultDeploy
 
 =====================
 */
-BOOL CBasePlayerWeapon :: DefaultDeploy( char *szViewModel, char *szWeaponModel, int iAnim, char *szAnimExt, int skiplocal )
+BOOL CBasePlayerWeapon :: DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int skiplocal )
 {
 	if ( !CanDeploy() )
 		return FALSE;
@@ -780,10 +780,12 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 			m_IdealActivity = ACT_BASE_WALK;
 		}
 		break;
+	default:
+		break;
 	}
 
 	Vector vecNormVel;
-	float  flDot, flSideDot, flVelDot;
+	float  flDot, /*flSideDot,*/ flVelDot;
 	bool   bInReverse;
 	int	   iFrame;
 
@@ -891,10 +893,10 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 		vecNormVel = pev->velocity;
 		vecNormVel.Normalize();
 		flDot = DotProduct( vecNormVel, gpGlobals->v_forward );
-		flSideDot = DotProduct( vecNormVel, gpGlobals->v_right );
+		//flSideDot = DotProduct( vecNormVel, gpGlobals->v_right );
 		flVelDot = DotProduct( m_vecOldVelocity, vecNormVel );
 
-		if ( ( m_flBackupTime <= 0 ) && (m_Activity != ACT_BASE_THROW) || m_fSequenceFinished )
+		if ( (( m_flBackupTime <= 0 ) && (m_Activity != ACT_BASE_THROW)) || m_fSequenceFinished )
 		{
 			if ( speed == 0 )
 			{
@@ -1392,7 +1394,7 @@ runfuncs is 1 if this is the first time we've predicted this command.  If so, so
 be ignored
 =====================
 */
-void _DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed )
+void EXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed )
 {
 	g_runfuncs = runfuncs;
 

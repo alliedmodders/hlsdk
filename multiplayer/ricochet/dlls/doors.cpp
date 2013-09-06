@@ -335,7 +335,7 @@ void CBaseDoor :: SetToggleState( int state )
 
 void CBaseDoor::Precache( void )
 {
-	char *pszSound;
+	const char *pszSound;
 
 // set the door's "in-motion" sound
 	switch (m_bMoveSnd)
@@ -520,7 +520,7 @@ void CBaseDoor::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 {
 	m_hActivator = pActivator;
 	// if not ready to be used, ignore "use" command.
-	if (m_toggle_state == TS_AT_BOTTOM || FBitSet(pev->spawnflags, SF_DOOR_NO_AUTO_RETURN) && m_toggle_state == TS_AT_TOP)
+	if (m_toggle_state == TS_AT_BOTTOM || (FBitSet(pev->spawnflags, SF_DOOR_NO_AUTO_RETURN) && m_toggle_state == TS_AT_TOP))
 		DoorActivate();
 }
 
@@ -860,7 +860,7 @@ void CRotDoor::Spawn( void )
 		SetTouch ( NULL );
 	}
 	else // touchable button
-		SetTouch( &CBaseDoor::DoorTouch );
+		SetTouch( &CRotDoor::DoorTouch );
 }
 
 

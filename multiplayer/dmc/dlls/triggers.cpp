@@ -634,7 +634,7 @@ void CTriggerMonsterJump :: Spawn ( void )
 	{// if targetted, spawn turned off
 		pev->solid = SOLID_NOT;
 		UTIL_SetOrigin( pev, pev->origin ); // Unlink from trigger list
-		SetUse( &CBaseTrigger::ToggleUse );
+		SetUse( &CTriggerMonsterJump::ToggleUse );
 	}
 }
 
@@ -728,7 +728,7 @@ void PlayCDTrack( int iTrack )
 
 	if ( iTrack == -1 )
 	{
-		CLIENT_COMMAND ( pClient, "cd pause\n");
+		CLIENT_COMMAND ( pClient, "cd stop\n");
 	}
 	else
 	{
@@ -959,11 +959,11 @@ void CBaseTrigger :: EnvTouch ( CBaseEntity *pOther )
 void CTriggerHurt :: Spawn( void )
 {
 	InitTrigger();
-	SetTouch ( &CBaseTrigger::HurtTouch );
+	SetTouch ( &CTriggerHurt::HurtTouch );
 
 	if ( !FStringNull ( pev->targetname ) )
 	{
-		SetUse ( &CBaseTrigger::ToggleUse );
+		SetUse ( &CTriggerHurt::ToggleUse );
 	}
 	else
 	{
@@ -1231,7 +1231,7 @@ void CTriggerMultiple :: Spawn( void )
 //		}
 //	else
 		{
-			SetTouch( &CBaseTrigger::MultiTouch );
+			SetTouch( &CTriggerMultiple::MultiTouch );
 		}
 	}
 
@@ -1273,7 +1273,7 @@ void CBaseTrigger :: MultiTouch( CBaseEntity *pOther )
 	// Only touch clients, monsters, or pushables (depending on flags)
 	if ( ((pevToucher->flags & FL_CLIENT) && !(pev->spawnflags & SF_TRIGGER_NOCLIENTS)) ||
 		 ((pevToucher->flags & FL_MONSTER) && (pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS)) ||
-		 (pev->spawnflags & SF_TRIGGER_PUSHABLES) && FClassnameIs(pevToucher,"func_pushable") )
+		 ((pev->spawnflags & SF_TRIGGER_PUSHABLES) && FClassnameIs(pevToucher,"func_pushable")) )
 	{
 
 #if 0
@@ -1337,7 +1337,7 @@ void CBaseTrigger :: ActivateMultiTrigger( CBaseEntity *pActivator )
 		// called while C code is looping through area links...
 		SetTouch( NULL );
 		pev->nextthink = gpGlobals->time + 0.1;
-		SetThink(  &CBaseEntity::SUB_Remove );
+		SetThink(  &CBaseTrigger::SUB_Remove );
 	}
 }
 
@@ -1417,7 +1417,7 @@ void CTriggerCounter :: Spawn( void )
 
 	if (m_cTriggersLeft == 0)
 		m_cTriggersLeft = 2;
-	SetUse( &CBaseTrigger::CounterUse );
+	SetUse( &CTriggerCounter::CounterUse );
 }
 
 // ====================== TRIGGER_CHANGELEVEL ================================
@@ -1966,7 +1966,7 @@ void CTriggerPush :: Spawn( )
 	if ( FBitSet (pev->spawnflags, SF_TRIGGER_PUSH_START_OFF) )// if flagged to Start Turned Off, make trigger nonsolid.
 		pev->solid = SOLID_NOT;
 
-	SetUse( &CBaseTrigger::ToggleUse );
+	SetUse( &CTriggerPush::ToggleUse );
 
 	UTIL_SetOrigin( pev, pev->origin );		// Link into the list
 }
@@ -2045,7 +2045,7 @@ void CTeleDeath::Spawn( void )
 
 	SetTouch( &CTeleDeath::DeathTouch );
 	pev->nextthink = gpGlobals->time + 0.2;
-	SetThink( &CBaseEntity::SUB_Remove );
+	SetThink( &CTeleDeath::SUB_Remove );
 	
 	// Touch still players
 	gpGlobals->force_retouch = 2;
@@ -2169,7 +2169,7 @@ void CTriggerTeleport :: Spawn( void )
 {
 	InitTrigger();
 
-	SetTouch( &CBaseTrigger::TeleportTouch );
+	SetTouch( &CTriggerTeleport::TeleportTouch );
 
 	g_vecTeleMins[ g_iTeleNum ] = pev->absmin; 
 	g_vecTeleMaxs[ g_iTeleNum ] = pev->absmax;

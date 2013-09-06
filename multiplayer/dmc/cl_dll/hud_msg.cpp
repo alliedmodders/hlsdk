@@ -78,7 +78,7 @@ void CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 	}
 
 	/***** FOG CLEARING JIBBA JABBA *****/
-	for ( i = 0; i < 4; i++ )
+	for ( i = 0; i < 3; i++ )
 		 g_iFogColor[ i ] = 0.0;
 
 	g_iStartDist = 0.0;

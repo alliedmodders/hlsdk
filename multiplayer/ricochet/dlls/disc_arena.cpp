@@ -39,7 +39,7 @@ extern int g_iMapTurnedOffArena;
 
 CDiscArena *g_pArenaList[ MAX_ARENAS ];
 
-char *g_szCountDownVox[6] =
+const char *g_szCountDownVox[6] =
 {
 	"die",
 	"one",
@@ -48,7 +48,7 @@ char *g_szCountDownVox[6] =
 	"four",
 };
 
-char *g_szTeamNames[3] =
+const char *g_szTeamNames[3] =
 {
 	"",
 	"red",

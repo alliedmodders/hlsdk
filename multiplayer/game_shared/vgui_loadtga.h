@@ -14,7 +14,7 @@
 #endif
 
 
-#include "vgui_bitmaptga.h"
+#include "VGUI_BitmapTGA.h"
 
 
 vgui::BitmapTGA* vgui_LoadTGA(char const *pFilename);

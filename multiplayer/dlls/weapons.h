@@ -317,7 +317,7 @@ public:
 
 	virtual BOOL CanDeploy( void );
 	virtual BOOL IsUseable( void );
-	BOOL DefaultDeploy( char *szViewModel, char *szWeaponModel, int iAnim, char *szAnimExt, int skiplocal = 0, int body = 0 );
+	BOOL DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int skiplocal = 0, int body = 0 );
 	int DefaultReload( int iClipSize, int iAnim, float fDelay, int body = 0 );
 
 	virtual void ItemPostFrame( void );	// called each frame by the player PostThink
@@ -338,6 +338,7 @@ public:
 	void PrintState( void );
 
 	virtual CBasePlayerItem *GetWeaponPtr( void ) { return (CBasePlayerItem *)this; };
+	float GetNextAttackDelay( float delay );
 
 	float m_flPumpTime;
 	int		m_fInSpecialReload;									// Are we in the middle of a reload for the shotguns
@@ -352,6 +353,10 @@ public:
 	int		m_fInReload;										// Are we in the middle of a reload;
 
 	int		m_iDefaultAmmo;// how much ammo you get when you pick up this weapon as placed by a level designer.
+	
+	// hle time creep vars
+	float	m_flPrevPrimaryAttack;
+	float	m_flLastFireTime;			
 
 };
 
@@ -436,7 +441,7 @@ class CWeaponBox : public CBaseEntity
 	void Touch( CBaseEntity *pOther );
 	void KeyValue( KeyValueData *pkvd );
 	BOOL IsEmpty( void );
-	int  GiveAmmo( int iCount, char *szName, int iMax, int *pIndex = NULL );
+	int  GiveAmmo( int iCount, const char *szName, int iMax, int *pIndex = NULL );
 	void SetObjectCollisionBox( void );
 
 public:
@@ -459,7 +464,7 @@ public:
 
 #ifdef CLIENT_DLL
 bool bIsMultiplayer ( void );
-void LoadVModel ( char *szViewModel, CBasePlayer *m_pPlayer );
+void LoadVModel ( const char *szViewModel, CBasePlayer *m_pPlayer );
 #endif
 
 class CGlock : public CBasePlayerWeapon
@@ -538,7 +543,6 @@ public:
 	void Holster( int skiplocal = 0 );
 	void Reload( void );
 	void WeaponIdle( void );
-	float m_flSoundDelay;
 
 	BOOL m_fInZoom;// don't save this. 
 
@@ -845,7 +849,9 @@ public:
 	unsigned short m_usEgonStop;
 
 private:
+#ifndef CLIENT_DLL
 	float				m_shootTime;
+#endif
 	EGON_FIREMODE		m_fireMode;
 	float				m_shakeTime;
 	BOOL				m_deployed;

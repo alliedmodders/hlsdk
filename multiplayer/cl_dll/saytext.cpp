@@ -24,6 +24,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <malloc.h> // _alloca
 
 #include "vgui_TeamFortressViewport.h"
 
@@ -35,7 +36,6 @@ extern float *GetClientColor( int clientIndex );
 // allow 20 pixels on either side of the text
 #define MAX_LINE_WIDTH  ( ScreenWidth - 40 )
 #define LINE_START  10
-static float SCROLL_SPEED = 5;
 
 static char g_szLineBuffer[ MAX_LINES + 1 ][ MAX_CHARS_PER_LINE ];
 static float *g_pflNameColors[ MAX_LINES + 1 ];
@@ -129,16 +129,25 @@ int CHudSayText :: Draw( float flTime )
 			if ( *g_szLineBuffer[i] == 2 && g_pflNameColors[i] )
 			{
 				// it's a saytext string
-				static char buf[MAX_PLAYER_NAME_LENGTH+32];
+				char *buf = static_cast<char *>( _alloca( strlen( g_szLineBuffer[i] ) ) );
+				if ( buf )
+				{
+					//char buf[MAX_PLAYER_NAME_LENGTH+32];
 
-				// draw the first x characters in the player color
-				strncpy( buf, g_szLineBuffer[i], min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+32) );
-				buf[ min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+31) ] = 0;
-				gEngfuncs.pfnDrawSetTextColor( g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2] );
-				int x = DrawConsoleString( LINE_START, y, buf );
-
-				// color is reset after each string draw
-				DrawConsoleString( x, y, g_szLineBuffer[i] + g_iNameLengths[i] );
+					// draw the first x characters in the player color
+					strncpy( buf, g_szLineBuffer[i], min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+32) );
+					buf[ min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+31) ] = 0;
+					gEngfuncs.pfnDrawSetTextColor( g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2] );
+					int x = DrawConsoleString( LINE_START, y, buf + 1 ); // don't draw the control code at the start
+					strncpy( buf, g_szLineBuffer[i] + g_iNameLengths[i], strlen( g_szLineBuffer[i] ));
+					buf[ strlen( g_szLineBuffer[i] + g_iNameLengths[i] ) - 1 ] = '\0';
+					// color is reset after each string draw
+					DrawConsoleString( x, y, buf ); 
+				}
+				else
+				{
+					assert( "Not able to alloca chat buffer!\n");
+				}
 			}
 			else
 			{
@@ -149,7 +158,6 @@ int CHudSayText :: Draw( float flTime )
 
 		y += line_height;
 	}
-
 
 	return 1;
 }
@@ -173,8 +181,8 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 		return;
 	}
 
-	// find an empty string slot
 	int i;
+	// find an empty string slot
 	for ( i = 0; i < MAX_LINES; i++ )
 	{
 		if ( ! *g_szLineBuffer[i] )
@@ -193,7 +201,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	// if it's a say message, search for the players name in the string
 	if ( *pszBuf == 2 && clientIndex > 0 )
 	{
-		GetPlayerInfo( clientIndex, &g_PlayerInfoList[clientIndex] );
+		gEngfuncs.pfnGetPlayerInfo( clientIndex, &g_PlayerInfoList[clientIndex] );
 		const char *pName = g_PlayerInfoList[clientIndex].name;
 
 		if ( pName )
@@ -208,7 +216,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 		}
 	}
 
-	strncpy( g_szLineBuffer[i], pszBuf, max(iBufSize -1, MAX_CHARS_PER_LINE-1) );
+	strncpy( g_szLineBuffer[i], pszBuf, max(iBufSize , MAX_CHARS_PER_LINE) );
 
 	// make sure the text fits in one line
 	EnsureTextFitsInOneLineAndWrapIfHaveTo( i );
@@ -222,12 +230,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	m_iFlags |= HUD_ACTIVE;
 	PlaySound( "misc/talk.wav", 1 );
 
-	if ( ScreenHeight >= 480 )
-		Y_START = ScreenHeight - 60;
-	else
-		Y_START = ScreenHeight - 45;
-	Y_START -= (line_height * (MAX_LINES+1));
-
+	Y_START = ScreenHeight - 60 - ( line_height * (MAX_LINES+2) );
 }
 
 void CHudSayText :: EnsureTextFitsInOneLineAndWrapIfHaveTo( int line )

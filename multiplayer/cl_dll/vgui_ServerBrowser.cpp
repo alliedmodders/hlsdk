@@ -88,7 +88,7 @@ public:
 		m_nMouseOverRow	= row;
 	}
 
-	void DoSort( char *sortkey )
+	void DoSort( const char *sortkey )
 	{
 		// Request server list and refresh servers...
 		SortServers( sortkey );
@@ -115,7 +115,7 @@ public:
 
 	void DoCancel( void )
 	{
-		ClientCmd( "togglebrowser\n" );
+		EngineClientCmd( "togglebrowser\n" );
 	}
 
 	void DoConnect( void )
@@ -133,7 +133,7 @@ public:
 
 		sprintf( sz, "connect %s\n", address );
 
-		ClientCmd( sz );
+		EngineClientCmd( sz );
 
 		DoCancel();
 	}
@@ -439,7 +439,7 @@ private:
 	ServerBrowserTablePanel *m_pBrowser;
 
 public:
-	CSBLabel( char *name, char *sortkey ) : Label( name )
+	CSBLabel( const char *name, const char *sortkey ) : Label( name )
 	{
 		m_pBrowser = NULL;
 

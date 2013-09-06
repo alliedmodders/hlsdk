@@ -117,8 +117,8 @@ public:
 	int	m_bitsDamage;
 
 private:
-	HSPRITE m_hSprite;
-	HSPRITE m_hDamage;
+	HLSPRITE m_hSprite;
+//	HLSPRITE m_hDamage;
 	
 	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
 	int DrawPain(float fTime);

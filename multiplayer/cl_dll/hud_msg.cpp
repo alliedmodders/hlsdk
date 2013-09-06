@@ -21,10 +21,19 @@
 #include "parsemsg.h"
 #include "r_efx.h"
 
+#include "particleman.h"
+extern IParticleMan *g_pParticleMan;
+
 #define MAX_CLIENTS 32
 
+#if !defined( _TFC )
 extern BEAM *pBeam;
 extern BEAM *pBeam2;
+#endif 
+
+#if defined( _TFC )
+void ClearEventList( void );
+#endif
 
 /// USER-DEFINED SERVER MESSAGE HANDLERS
 
@@ -70,8 +79,20 @@ void CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 		pList = pList->pNext;
 	}
 
+#if defined( _TFC )
+	ClearEventList();
+
+	// catch up on any building events that are going on
+	gEngfuncs.pfnServerCmd("sendevents");
+#endif
+
+	if ( g_pParticleMan )
+		 g_pParticleMan->ResetParticles();
+
+#if !defined( _TFC )
 	//Probably not a good place to put this.
 	pBeam = pBeam2 = NULL;
+#endif
 }
 
 

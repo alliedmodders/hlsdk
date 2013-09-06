@@ -22,7 +22,7 @@
 
 // Allow "DEBUG" in addition to default "_DEBUG"
 #ifdef _DEBUG
-	#define DEBUG 1
+#define DEBUG 1
 #endif
 
 // Silence certain warnings
@@ -38,9 +38,15 @@
 			#define _CRT_SECURE_NO_DEPRECATE
 		#endif
 
+		#ifndef _CRT_SECURE_NO_WARNINGS
+			#define _CRT_SECURE_NO_WARNINGS
+		#endif
+
 		#pragma warning(disable: 4996) // deprecated functions
 	#endif
 #endif
+
+#include "archtypes.h"     // DAL
 
 // Prevent tons of unused windows definitions
 #ifdef _WIN32
@@ -57,18 +63,20 @@
 #ifndef TRUE
 #define TRUE (!FALSE)
 #endif
-typedef unsigned long ULONG;
+typedef uint32 ULONG;
 typedef unsigned char BYTE;
 typedef int BOOL;
 #define MAX_PATH PATH_MAX
 #include <limits.h>
 #include <stdarg.h>
-#include <ctype.h>
+#include <string.h> // memset 
 #ifndef min
 #define min(a,b)  (((a) < (b)) ? (a) : (b))
 #endif
 #ifndef max
 #define max(a,b)  (((a) > (b)) ? (a) : (b))
+#endif
+#ifndef _vsnprintf
 #define _vsnprintf(a,b,c,d) vsnprintf(a,b,c,d)
 #endif
 #endif //_WIN32
@@ -79,8 +87,8 @@ typedef int BOOL;
 #include "math.h"
 
 // Header file containing definition of globalvars_t and entvars_t
-typedef int	func_t;					//
-typedef int	string_t;				// from engine's pr_comp.h;
+typedef unsigned int func_t;					//
+typedef unsigned int string_t;				// from engine's pr_comp.h;
 typedef float vec_t;				// needed before including progdefs.h
 
 // Vector class

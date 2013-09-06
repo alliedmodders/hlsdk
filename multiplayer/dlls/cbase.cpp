@@ -25,7 +25,7 @@ void EntvarsKeyvalue( entvars_t *pev, KeyValueData *pkvd );
 
 extern "C" void PM_Move ( struct playermove_s *ppmove, int server );
 extern "C" void PM_Init ( struct playermove_s *ppmove  );
-extern "C" char PM_FindTextureType( char *name );
+extern "C" char PM_FindTextureType( const char *name );
 
 extern Vector VecBModelOrigin( entvars_t* pevBModel );
 extern DLL_GLOBAL Vector		g_vecAttackDir;
@@ -97,10 +97,9 @@ static DLL_FUNCTIONS gFunctionTable =
 
 static void SetObjectCollisionBox( entvars_t *pev );
 
-#ifndef _WIN32
 extern "C" {
-#endif
-int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion )
+
+	int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion )
 {
 	if ( !pFunctionTable || interfaceVersion != INTERFACE_VERSION )
 	{
@@ -124,9 +123,7 @@ int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion )
 	return TRUE;
 }
 
-#ifndef _WIN32
 }
-#endif
 
 
 int DispatchSpawn( edict_t *pent )
@@ -752,7 +749,7 @@ int	CBaseEntity :: DamageDecal( int bitsDamageType )
 
 // NOTE: szName must be a pointer to constant memory, e.g. "monster_class" because the entity
 // will keep a pointer to it after this call.
-CBaseEntity * CBaseEntity::Create( char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner )
+CBaseEntity * CBaseEntity::Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner )
 {
 	edict_t	*pent;
 	CBaseEntity *pEntity;

@@ -31,10 +31,10 @@ extern "C"
 
 extern "C" 
 {
-	struct kbutton_s DLLEXPORT *KB_Find( const char *name );
-	void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int active );
-	void DLLEXPORT HUD_Shutdown( void );
-	int DLLEXPORT HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding );
+	struct kbutton_s EXPORT *KB_Find( const char *name );
+	void EXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int active );
+	void EXPORT HUD_Shutdown( void );
+	int EXPORT HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding );
 }
 
 extern int g_weaponselect;
@@ -215,7 +215,7 @@ KB_Find
 Allows the engine to get a kbutton_t directly ( so it can check +mlook state, etc ) for saving out to .cfg files
 ============
 */
-struct kbutton_s DLLEXPORT *KB_Find( const char *name )
+struct kbutton_s EXPORT *KB_Find( const char *name )
 {
 	kblist_t *p;
 	p = g_kbkeys;
@@ -372,15 +372,13 @@ HUD_Key_Event
 Return 1 to allow engine to process the key, otherwise, act on it as needed
 ============
 */
-int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding )
+int EXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding )
 {
-	/*
-	if ( keynum == K_ESCAPE )
+	if (gViewPort)
 	{
-		// Trap escape key and do something
-		return 0;
+		return gViewPort->KeyInput(down, keynum, pszCurrentBinding);
 	}
-	*/
+
 	return 1;
 }
 
@@ -660,7 +658,7 @@ if active == 1 then we are 1) not playing back demos ( where our commands are ig
 2 ) we have finished signing on to server
 ================
 */
-void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int active )
+void EXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int active )
 {	
 	float spd;
 	vec3_t viewangles;
@@ -1020,7 +1018,22 @@ void ShutdownInput (void)
 	KB_Shutdown();
 }
 
-void DLLEXPORT HUD_Shutdown( void )
+#include "interface.h"
+
+void EXPORT HUD_Shutdown( void )
 {
 	ShutdownInput();
+
+	extern CSysModule *g_hTrackerModule;
+	if (g_hTrackerModule)
+	{
+		Sys_UnloadModule(g_hTrackerModule);
+	}
+
+	extern CSysModule *g_pFileSystemModule;
+	if (g_pFileSystemModule)
+	{
+		Sys_UnloadModule(g_pFileSystemModule);
+	}
+
 }

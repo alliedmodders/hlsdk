@@ -31,6 +31,12 @@
 char gszQ_DeathType[128];
 DLL_GLOBAL	short	g_sModelIndexNail;
 
+#ifdef THREEWAVE
+extern unsigned short g_usHook;	
+extern unsigned short g_usCable;
+extern unsigned short g_usCarried;
+#endif
+
 #ifdef CLIENT_DLL
 #include "cl_entity.h"
 struct cl_entity_s *GetViewEntity( void );
@@ -105,6 +111,11 @@ void QuakeClassicPrecache( void )
 	PRECACHE_SOUND("weapons/pkup.wav");
 	PRECACHE_SOUND("items/itembk2.wav");
 	PRECACHE_MODEL("models/backpack.mdl");
+
+#ifdef THREEWAVE
+	PRECACHE_MODEL("models/v_grapple.mdl");
+#endif
+
 }
 
 //================================================================================================
@@ -131,83 +142,113 @@ int CBasePlayer::W_BestWeapon()
 void CBasePlayer::W_SetCurrentAmmo( int sendanim /* = 1 */ )
 {
 	m_iQuakeItems &= ~(IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS);
+	const char *viewmodel = "";
+#if !defined( CLIENT_DLL )
 	int	iszViewModel = 0;
-	char *viewmodel = "";
 	int iszWeaponModel = 0;
-	char *szAnimExt = NULL;
+	const char *szAnimExt = NULL;
+#endif
 	
 	// Find out what weapon the player's using
 	if (m_iQuakeWeapon == IT_AXE)
 	{
 		m_pCurrentAmmo = NULL;
 		viewmodel = "models/v_crowbar.mdl";
+#if !defined( CLIENT_DLL )
 		iszViewModel = MAKE_STRING(viewmodel);
 		szAnimExt = "crowbar";
 		iszWeaponModel = MAKE_STRING("models/p_crowbar.mdl");
+#endif
 	}
 	else if (m_iQuakeWeapon == IT_SHOTGUN)
 	{
 		m_pCurrentAmmo = &m_iAmmoShells;
 		viewmodel = "models/v_shot.mdl";
+		m_iQuakeItems |= IT_SHELLS;
+#if !defined( CLIENT_DLL )
 		iszViewModel = MAKE_STRING(viewmodel);
 		iszWeaponModel = MAKE_STRING("models/p_shot.mdl");
-		m_iQuakeItems |= IT_SHELLS;
 		szAnimExt = "shotgun";
+#endif
 	}
 	else if (m_iQuakeWeapon == IT_SUPER_SHOTGUN)
 	{
 		m_pCurrentAmmo = &m_iAmmoShells;
 		viewmodel = "models/v_shot2.mdl";
+		m_iQuakeItems |= IT_SHELLS;
+#if !defined( CLIENT_DLL )
 		iszViewModel = MAKE_STRING(viewmodel);
 		iszWeaponModel = MAKE_STRING("models/p_shot2.mdl");
-		m_iQuakeItems |= IT_SHELLS;
 		szAnimExt = "shotgun";
+#endif
 	}
 	else if (m_iQuakeWeapon == IT_NAILGUN)
 	{
 		m_pCurrentAmmo = &m_iAmmoNails;
 		viewmodel = "models/v_nail.mdl";
+		m_iQuakeItems |= IT_NAILS;
+#if !defined( CLIENT_DLL )
 		iszViewModel = MAKE_STRING(viewmodel);
 		iszWeaponModel = MAKE_STRING("models/p_nail.mdl");
-		m_iQuakeItems |= IT_NAILS;
 		szAnimExt = "mp5";
+#endif
 	}
 	else if (m_iQuakeWeapon == IT_SUPER_NAILGUN)
 	{
 		m_pCurrentAmmo = &m_iAmmoNails;
 		viewmodel = "models/v_nail2.mdl";
+		m_iQuakeItems |= IT_NAILS;
+#if !defined( CLIENT_DLL )
 		iszViewModel = MAKE_STRING(viewmodel);
 		iszWeaponModel = MAKE_STRING("models/p_nail2.mdl");
-		m_iQuakeItems |= IT_NAILS;
 		szAnimExt = "mp5";
+#endif
 	}
 	else if (m_iQuakeWeapon == IT_GRENADE_LAUNCHER)
 	{
 		m_pCurrentAmmo = &m_iAmmoRockets;
 		viewmodel = "models/v_rock.mdl";
-		iszViewModel = MAKE_STRING(viewmodel);
 		m_iQuakeItems |= IT_ROCKETS;
+#if !defined( CLIENT_DLL )
+		iszViewModel = MAKE_STRING(viewmodel);
 		iszWeaponModel = MAKE_STRING("models/p_rock.mdl");
 		szAnimExt = "gauss";
+#endif
 	}
 	else if (m_iQuakeWeapon == IT_ROCKET_LAUNCHER)
 	{
 		m_pCurrentAmmo = &m_iAmmoRockets;
 		viewmodel = "models/v_rock2.mdl";
-		iszViewModel = MAKE_STRING(viewmodel);
 		m_iQuakeItems |= IT_ROCKETS;
+#if !defined( CLIENT_DLL )
+		iszViewModel = MAKE_STRING(viewmodel);
 		iszWeaponModel = MAKE_STRING("models/p_rock2.mdl");
 		szAnimExt = "gauss";
+#endif
 	}
 	else if (m_iQuakeWeapon == IT_LIGHTNING)
 	{
 		m_pCurrentAmmo = &m_iAmmoCells;
 		viewmodel = "models/v_light.mdl";
+		m_iQuakeItems |= IT_CELLS;
+#if !defined( CLIENT_DLL )
 		iszViewModel = MAKE_STRING(viewmodel);
 		iszWeaponModel = MAKE_STRING("models/p_light.mdl");
-		m_iQuakeItems |= IT_CELLS;
 		szAnimExt = "gauss";
+#endif
 	}
+#ifdef THREEWAVE
+	else if (m_iQuakeWeapon == IT_EXTRA_WEAPON)
+	{
+		m_pCurrentAmmo = NULL;
+		viewmodel = "models/v_grapple.mdl";
+#if !defined( CLIENT_DLL )
+		iszViewModel = MAKE_STRING(viewmodel);
+		szAnimExt = "crowbar";
+#endif
+	}
+#endif
+
 	else
 	{
 		m_pCurrentAmmo = NULL;
@@ -223,7 +264,7 @@ void CBasePlayer::W_SetCurrentAmmo( int sendanim /* = 1 */ )
 #else
 	{
 
-		int HUD_GetModelIndex( char *modelname );
+		int HUD_GetModelIndex( const char *modelname );
 		pev->viewmodel = HUD_GetModelIndex( viewmodel );
 		
 		cl_entity_t *view;
@@ -297,6 +338,11 @@ BOOL CBasePlayer::W_CheckNoAmmo()
 	if ( m_iQuakeWeapon == IT_AXE )
 		return TRUE;
 
+#ifdef THREEWAVE
+	if ( m_iQuakeWeapon == IT_EXTRA_WEAPON )
+		return TRUE;
+#endif
+	
 	if ( m_iQuakeWeapon == IT_LIGHTNING )
 	{
 		 PLAYBACK_EVENT_FULL( FEV_NOTHOST, edict(), m_usLightning, 0, (float *)&pev->origin, (float *)&pev->angles, 0.0, 0.0, 0, 1, 0, 0 );
@@ -371,6 +417,12 @@ void CBasePlayer::W_ChangeWeapon( int iWeaponNumber )
 		if (m_iAmmoCells < 1)
 			bHaveAmmo = FALSE;
 	}
+#ifdef THREEWAVE
+	else if (iWeaponNumber == 9)
+	{
+		iWeapon = IT_EXTRA_WEAPON;
+	}
+#endif
 
 	// Have the weapon?
 	if ( !(m_iQuakeItems & iWeapon) )
@@ -712,8 +764,10 @@ void CBasePlayer::W_FireAxe()
 	UTIL_TraceLine( vecSrc, vecSrc + (gpGlobals->v_forward * 64), dont_ignore_monsters, ENT(pev), &trace );
 	if (trace.flFraction == 1.0)
 		return;
-	
+
+#ifndef CLIENT_DLL
 	Vector vecOrg = trace.vecEndPos - gpGlobals->v_forward * 4;
+#endif
 
 	CBaseEntity *pEntity = CBaseEntity::Instance(trace.pHit);
 	if (pEntity && pEntity->pev->takedamage)
@@ -743,6 +797,29 @@ void CBasePlayer::W_FireShotgun( int iQuadSound )
 	Vector vecDir = GetAutoaimVector( AUTOAIM_5DEGREES );
 	Q_FireBullets(6, vecDir, Vector(0.04, 0.04, 0) );
 }
+
+
+#ifdef THREEWAVE
+void CBasePlayer::W_FireHook( void )
+{
+	PLAYBACK_EVENT_FULL( FEV_NOTHOST | FEV_GLOBAL, edict(), g_usHook, 0, (float *)&pev->origin, (float *)&pev->angles, 0.0, 0.0, 0, 0, 0, 0 );
+
+	Throw_Grapple();
+}
+#endif
+
+#ifdef THREEWAVE
+
+#ifdef CLIENT_DLL
+unsigned short g_usCable;
+unsigned short g_usHook;	
+unsigned short g_usCarried;
+
+void CBasePlayer::Throw_Grapple( void )
+{
+}
+#endif
+#endif
 
 // Double barrel shotgun
 void CBasePlayer::W_FireSuperShotgun( int iQuadSound )
@@ -840,7 +917,9 @@ void CBasePlayer::W_FireLightning( int iQuadSound )
 		}
 		else
 		{
+#if !defined( CLIENT_DLL )
 			float flCellsBurnt = *m_pCurrentAmmo;
+#endif
 			*m_pCurrentAmmo = 0;
 			W_SetCurrentAmmo();
 #if !defined( CLIENT_DLL )
@@ -934,7 +1013,12 @@ void CBasePlayer::W_Attack( int iQuadSound )
 
 	if (m_iQuakeWeapon == IT_AXE)
 	{
-		m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
+#ifdef THREEWAVE
+		if ( m_iRuneStatus == ITEM_RUNE3_FLAG )
+			m_flNextAttack = UTIL_WeaponTimeBase() + 0.3;
+		else
+#endif
+			m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
 
 		PLAYBACK_EVENT_FULL( FEV_NOTHOST, edict(), m_usAxeSwing, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0.0, 0.0, iQuadSound, 0, 0, 0 );
 
@@ -946,13 +1030,23 @@ void CBasePlayer::W_Attack( int iQuadSound )
 	}
 	else if (m_iQuakeWeapon == IT_SHOTGUN)
 	{
-		m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
+#ifdef THREEWAVE
+		if ( m_iRuneStatus == ITEM_RUNE3_FLAG )
+			m_flNextAttack = UTIL_WeaponTimeBase() + 0.3;
+		else
+#endif
+			m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
 
 		W_FireShotgun( iQuadSound );
 	}
 	else if (m_iQuakeWeapon == IT_SUPER_SHOTGUN)
 	{
-		m_flNextAttack = UTIL_WeaponTimeBase() + 0.7;
+#ifdef THREEWAVE
+		if ( m_iRuneStatus == ITEM_RUNE3_FLAG )
+			m_flNextAttack = UTIL_WeaponTimeBase() + 0.4;
+		else
+#endif
+			m_flNextAttack = UTIL_WeaponTimeBase() + 0.7;
 
 		W_FireSuperShotgun( iQuadSound );
 	}
@@ -969,13 +1063,23 @@ void CBasePlayer::W_Attack( int iQuadSound )
 	}
 	else if (m_iQuakeWeapon == IT_GRENADE_LAUNCHER)
 	{
-		m_flNextAttack = UTIL_WeaponTimeBase() + 0.6;
+#ifdef THREEWAVE
+		if ( m_iRuneStatus == ITEM_RUNE3_FLAG )
+			m_flNextAttack = UTIL_WeaponTimeBase() + 0.3;
+		else
+#endif
+			m_flNextAttack = UTIL_WeaponTimeBase() + 0.6;
 
 		W_FireGrenade( iQuadSound );
 	}
 	else if (m_iQuakeWeapon == IT_ROCKET_LAUNCHER)
 	{
-		m_flNextAttack = UTIL_WeaponTimeBase() + 0.8;
+#ifdef THREEWAVE
+		if ( m_iRuneStatus == ITEM_RUNE3_FLAG )
+			m_flNextAttack = UTIL_WeaponTimeBase() + 0.4;
+		else
+#endif
+			m_flNextAttack = UTIL_WeaponTimeBase() + 0.8;
 			
 		W_FireRocket( iQuadSound );
 	}
@@ -989,6 +1093,17 @@ void CBasePlayer::W_Attack( int iQuadSound )
 
 		W_FireLightning( iQuadSound );
 	}
+
+#ifdef THREEWAVE
+	else if ( m_iQuakeWeapon == IT_EXTRA_WEAPON )
+	{
+
+		if ( !m_bHook_Out )
+			W_FireHook ();
+				
+		m_flNextAttack = UTIL_WeaponTimeBase() + 0.1;
+	}
+#endif
 
 	// Make player attack
 	if ( pev->health >= 0 )

@@ -10,6 +10,7 @@
 #ifndef _WIN32
 
 #include <unistd.h>
+#include <sys/types.h>
 
 #endif //!_WIN32
 #endif //INC_NOWIN_H

@@ -108,7 +108,6 @@ void CQuakeGun::UpdateEffect( void )
 	TraceResult tr;
 
 	pentIgnore = m_pPlayer->edict();
-	Vector tmpSrc = vecSrc + gpGlobals->v_up * -8 + gpGlobals->v_right * 3;
 
 	// ALERT( at_console, "." );
 	

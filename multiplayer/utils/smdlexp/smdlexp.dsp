@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "\3DSMAX2.5\MAXSDK\INCLUDE" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "c:\3dsmax42\maxsdk\include" /I "c:\3dsmax42\cstudio\sdk" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib COMCTL32.LIB /nologo /subsystem:windows /dll /machine:I386 /out:"\3dsmax2.5\Plugins\smdlexp.dle"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib COMCTL32.LIB maxutil.lib geom.lib mesh.lib core.lib /nologo /subsystem:windows /dll /machine:I386 /out:"c:\3dsmax42\plugins\smdlexp.dle" /libpath:"c:\3dsmax42\maxsdk\lib"
 
 !ELSEIF  "$(CFG)" == "smdlexp - Win32 Debug"
 
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MD /W3 /Gm /GX /ZI /Od /I "\3DSMAX2.5\MAXSDK\INCLUDE" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "c:\3dsmax42\maxsdk\INCLUDE" /I "c:\3dsmax42\cstudio\sdk" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib /nologo /subsystem:windows /dll /debug /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib COMCTL32.LIB /nologo /subsystem:windows /dll /debug /machine:I386 /out:"\3DSMAX2.5\plugins\SMDLEXP.DLE"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib COMCTL32.LIB geom.lib mesh.lib core.lib maxutil.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"c:\3dsmax42\plugins\SMDLEXP.DLE" /libpath:"c:\3dsmax42\maxsdk\lib"
 
 !ENDIF 
 
@@ -115,21 +115,5 @@ SOURCE=.\smedefs.h
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
 # End Group
-# Begin Source File
-
-SOURCE=\3DSMAX2.5\Maxsdk\LIB\UTIL.LIB
-# End Source File
-# Begin Source File
-
-SOURCE=\3DSMAX2.5\Maxsdk\LIB\GEOM.LIB
-# End Source File
-# Begin Source File
-
-SOURCE=\3DSMAX2.5\Maxsdk\LIB\MESH.LIB
-# End Source File
-# Begin Source File
-
-SOURCE=\3DSMAX2.5\Maxsdk\LIB\CORE.LIB
-# End Source File
 # End Target
 # End Project

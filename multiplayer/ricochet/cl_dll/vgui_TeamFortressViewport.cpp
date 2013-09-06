@@ -44,7 +44,7 @@
 #include "camera.h"
 #include "in_defs.h"
 #include "parsemsg.h"
-#include "../engine/keydefs.h"
+#include "keydefs.h"
 #include "demo.h"
 #include "demo_api.h"
 #include "ammohistory.h"
@@ -90,7 +90,7 @@ int iTeamColors[5][3] =
 };
 
 // Used for Class specific buttons
-char *sTFClasses[] =
+const char *sTFClasses[] =
 {
 	"",
 	"SCOUT",
@@ -105,7 +105,7 @@ char *sTFClasses[] =
 	"CIVILIAN",
 };
 
-char *sLocalisedClasses[] = 
+const char *sLocalisedClasses[] = 
 {
 	"#Civilian",
 	"#Scout",
@@ -121,7 +121,7 @@ char *sLocalisedClasses[] =
 	"#Civilian",
 };
 
-char *sTFClassSelection[] = 
+const char *sTFClassSelection[] = 
 {
 	"civilian",
 	"scout",
@@ -612,8 +612,10 @@ void TeamFortressViewport::CreateCommandMenu( void )
 		return;
 	}
 
+#ifdef _WIN32
 try
 {
+#endif
 	// First, read in the localisation strings
 
 	// Detpack strings
@@ -794,6 +796,7 @@ try
 
 		pfile = gEngfuncs.COM_ParseFile(pfile, token);
 	}
+#ifdef _WIN32
 }
 catch( CException *e )
 {
@@ -803,6 +806,7 @@ catch( CException *e )
 	m_iInitialized = false;
 	return;
 }
+#endif
 
 	SetCurrentMenu( NULL );
 	SetCurrentCommandMenu( NULL );
@@ -1382,7 +1386,7 @@ void TeamFortressViewport::SetCurrentMenu( CMenuPanel *pMenu )
 CMenuPanel* TeamFortressViewport::CreateTextWindow( int iTextToShow )
 {
 	char sz[256];
-	char *cText;
+	char *cText = NULL;
 	char *pfile = NULL;
 	static const int MAX_TITLE_LENGTH = 32;
 	char cTitle[MAX_TITLE_LENGTH];
@@ -1702,6 +1706,10 @@ void TeamFortressViewport::GetAllPlayersInfo( void )
 
 void TeamFortressViewport::paintBackground()
 {
+	int wide, tall;
+	getParent()->getSize( wide, tall );
+	setSize( wide, tall );
+
 	if (m_pScoreBoard)
 	{
 		int x, y;

@@ -267,30 +267,24 @@ Open the .bsp and read in the entity lump
 */
 char *Ricochet_LoadEntityLump( const char *filename )
 {
-	FILE		*fp;
 	int			i;
 	dheader_t	header;
-	int			size;
+	int			size = 0;
 	lump_t		*curLump;
-	char		*buffer = NULL;
+	char		*fileBuffer = NULL, *buffer, *entlump;
 
-	fp = fopen( filename, "rb" );
-	if ( !fp )
+	fileBuffer = (char *)gEngfuncs.COM_LoadFile((char *)filename, 5, &size);
+	if (size < (int)sizeof(dheader_t))
 		return NULL;
 
 	// Read in the .bsp header
-	if ( fread(&header, sizeof(dheader_t), 1, fp) != 1 )
-	{
-		gEngfuncs.Con_Printf("Ricochet_LoadEntityLump:  Could not read BSP header for map [%s].\n", filename);
-		fclose(fp);
-		return NULL;
-	}
+	memcpy(&header, fileBuffer, sizeof(dheader_t));
 
 	// Check the version
 	i = header.version;
 	if ( i != 29 && i != 30)
 	{
-		fclose(fp);
+		gEngfuncs.COM_FreeFile(fileBuffer);
 		gEngfuncs.Con_Printf("Ricochet_LoadEntityLump:  Map [%s] has incorrect BSP version (%i should be %i).\n", filename, i, BSPVERSION);
 		return NULL;
 	}
@@ -301,26 +295,26 @@ char *Ricochet_LoadEntityLump( const char *filename )
 	size = curLump->filelen;
 
 	// Jump to it
-	fseek( fp, curLump->fileofs, SEEK_SET );
+	entlump = fileBuffer + curLump->fileofs;
 
 	// Allocate sufficient memmory
 	buffer = (char *)malloc( size + 1 );
 	if ( !buffer )
 	{
-		fclose(fp);
+		gEngfuncs.COM_FreeFile(fileBuffer);
 		gEngfuncs.Con_Printf("Ricochet_LoadEntityLump:  Couldn't allocate %i bytes\n", size + 1 );
 		return NULL;
 	}
 
 	// Read in the entity lump
-	fread( buffer, size, 1, fp );
+	memcpy( buffer, entlump, size );
 
 	// Terminate the string
 	buffer[ size ] = '\0';
 
-	if ( fp )
+	if (fileBuffer)
 	{
-		fclose(fp);
+		gEngfuncs.COM_FreeFile(fileBuffer);
 	}
 
 	return buffer;

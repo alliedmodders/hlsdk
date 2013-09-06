@@ -300,7 +300,7 @@ void CMortar::MortarExplode( void )
 	}
 	*/
 
-	SetThink( SUB_Remove );
+	SetThink( &CMortar::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.1;
 #endif
 

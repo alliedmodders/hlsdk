@@ -32,10 +32,10 @@
 #include "vgui_int.h"
 #include "vgui_TeamFortressViewport.h"
 #include "vgui_ServerBrowser.h"
-#include "vgui_LoadTGA.h"
+#include "vgui_loadtga.h"
 
 // Arrow filenames
-char *sArrowFilenames[] =
+const char *sArrowFilenames[] =
 {
 	"arrowup",
 	"arrowdn", 

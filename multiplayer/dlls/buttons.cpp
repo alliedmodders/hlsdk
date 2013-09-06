@@ -26,6 +26,9 @@
 #include "saverestore.h"
 #include "doors.h"
 
+#if !defined ( _WIN32 )
+#include <string.h> // memset())))
+#endif
 
 #define SF_BUTTON_DONTMOVE		1
 #define SF_ROTBUTTON_NOTSOLID	1
@@ -240,7 +243,7 @@ void CMultiSource::Register(void)
 	m_iTotal = 0;
 	memset( m_rgEntities, 0, MS_MAX_TARGETS * sizeof(EHANDLE) );
 
-	SetThink(&CBaseEntity::SUB_DoNothing);
+	SetThink(&CMultiSource::SUB_DoNothing);
 
 	// search for all entities which target this multisource (pev->targetname)
 
@@ -288,7 +291,7 @@ IMPLEMENT_SAVERESTORE( CBaseButton, CBaseToggle );
 
 void CBaseButton::Precache( void )
 {
-	char *pszSound;
+	const char *pszSound;
 
 	if ( FBitSet ( pev->spawnflags, SF_BUTTON_SPARK_IF_OFF ) )// this button should spark in OFF state
 	{
@@ -441,7 +444,7 @@ LINK_ENTITY_TO_CLASS( func_button, CBaseButton );
 
 void CBaseButton::Spawn( )
 { 
-	char  *pszSound;
+	const char *pszSound;
 
 	//----------------------------------------------------
 	//determine sounds for buttons
@@ -508,9 +511,9 @@ void CBaseButton::Spawn( )
 // Button sound table. 
 // Also used by CBaseDoor to get 'touched' door lock/unlock sounds
 
-char *ButtonSound( int sound )
+const char *ButtonSound( int sound )
 { 
-	char *pszSound;
+	const char *pszSound;
 
 	switch ( sound )
 	{
@@ -809,7 +812,7 @@ LINK_ENTITY_TO_CLASS( func_rot_button, CRotButton );
 
 void CRotButton::Spawn( void )
 {
-	char *pszSound;
+	const char *pszSound;
 	//----------------------------------------------------
 	//determine sounds for buttons
 	//a sound of 0 should not make a sound
@@ -857,10 +860,10 @@ void CRotButton::Spawn( void )
 	if ( !FBitSet ( pev->spawnflags, SF_BUTTON_TOUCH_ONLY ) )
 	{
 		SetTouch ( NULL );
-		SetUse	 ( &CBaseButton::ButtonUse );
+		SetUse	 ( &CRotButton::ButtonUse );
 	}
 	else // touchable button
-		SetTouch( &CBaseButton::ButtonTouch );
+		SetTouch( &CRotButton::ButtonTouch );
 
 	//SetTouch( ButtonTouch );
 }
@@ -951,7 +954,7 @@ void CMomentaryRotButton::Spawn( void )
 	UTIL_SetOrigin(pev, pev->origin);
 	SET_MODEL(ENT(pev), STRING(pev->model) );
 
-	char *pszSound = ButtonSound( m_sounds );
+	const char *pszSound = ButtonSound( m_sounds );
 	PRECACHE_SOUND(pszSound);
 	pev->noise = ALLOC_STRING(pszSound);
 	m_lastUsed = 0;
@@ -986,7 +989,12 @@ void CMomentaryRotButton::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 	pev->ideal_yaw = CBaseToggle::AxisDelta( pev->spawnflags, pev->angles, m_start ) / m_flMoveDistance;
 
 	UpdateAllButtons( pev->ideal_yaw, 1 );
-	UpdateTarget( pev->ideal_yaw );
+
+	// Calculate destination angle and use it to predict value, this prevents sending target in wrong direction on retriggering
+	Vector dest = pev->angles + pev->avelocity * (pev->nextthink - pev->ltime);
+	float value1 = CBaseToggle::AxisDelta( pev->spawnflags, dest, m_start ) / m_flMoveDistance;
+	UpdateTarget( value1 );
+
 }
 
 void CMomentaryRotButton::UpdateAllButtons( float value, int start )

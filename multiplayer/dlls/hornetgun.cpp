@@ -167,7 +167,7 @@ void CHgun::PrimaryAttack()
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-	m_flNextPrimaryAttack = m_flNextPrimaryAttack + 0.25;
+	m_flNextPrimaryAttack = GetNextAttackDelay(0.25);
 
 	if (m_flNextPrimaryAttack < UTIL_WeaponTimeBase() )
 	{

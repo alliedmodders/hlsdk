@@ -1003,7 +1003,9 @@ float UTIL_VecToYaw( const Vector &vec )
 
 void UTIL_SetOrigin( entvars_t *pev, const Vector &vecOrigin )
 {
-	SET_ORIGIN(ENT(pev), vecOrigin );
+	edict_t *ent = ENT(pev);
+	if ( ent )
+		SET_ORIGIN( ent, vecOrigin );
 }
 
 void UTIL_ParticleEffect( const Vector &vecOrigin, const Vector &vecDirection, ULONG ulColor, ULONG ulCount )
@@ -1077,7 +1079,7 @@ float UTIL_SplineFraction( float value, float scale )
 }
 
 
-char* UTIL_VarArgs( char *format, ... )
+char* UTIL_VarArgs( const char *format, ... )
 {
 	va_list		argptr;
 	static char		string[1024];
@@ -1655,7 +1657,11 @@ static int gSizes[FIELD_TYPECOUNT] =
 	sizeof(float)*3,	// FIELD_POSITION_VECTOR
 	sizeof(int *),		// FIELD_POINTER
 	sizeof(int),		// FIELD_INTEGER
-	sizeof(int *),		// FIELD_FUNCTION
+#ifdef GNUC
+	sizeof(int *)*2,		// FIELD_FUNCTION
+#else
+	sizeof(int *),		// FIELD_FUNCTION	
+#endif
 	sizeof(int),		// FIELD_BOOLEAN
 	sizeof(short),		// FIELD_SHORT
 	sizeof(char),		// FIELD_CHARACTER
@@ -1965,11 +1971,11 @@ void CSave :: WritePositionVector( const char *pname, const float *value, int co
 }
 
 
-void CSave :: WriteFunction( const char *pname, const int *data, int count )
+void CSave :: WriteFunction( const char *pname, void **data, int count )
 {
 	const char *functionName;
 
-	functionName = NAME_FOR_FUNCTION( *data );
+	functionName = NAME_FOR_FUNCTION( (uint32)*data );
 	if ( functionName )
 		BufferField( pname, strlen(functionName) + 1, functionName );
 	else
@@ -2135,7 +2141,7 @@ int CSave :: WriteFields( const char *pname, void *pBaseData, TYPEDESCRIPTION *p
 		break;
 
 		case FIELD_FUNCTION:
-			WriteFunction( pTest->fieldName, (int *)(char *)pOutputData, pTest->fieldSize );
+			WriteFunction( pTest->fieldName, (void **)pOutputData, pTest->fieldSize );
 		break;
 		default:
 			ALERT( at_error, "Bad field type\n" );

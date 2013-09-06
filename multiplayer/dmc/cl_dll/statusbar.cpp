@@ -117,7 +117,7 @@ int CHudStatusBar :: Draw( float fTime )
 	// Draw the status bar lines
 	for ( int i = 0; i < MAX_STATUSBAR_LINES; i++ )
 	{
-		int TextHeight = 0;
+		//int TextHeight = 0;
 		int TotalTextWidth = 0;
 
 		//Ugly way to get
@@ -127,12 +127,12 @@ int CHudStatusBar :: Draw( float fTime )
 			TotalTextWidth += gHUD.ReturnStringPixelLength ( m_szHealth[i] );
 			TotalTextWidth += gHUD.ReturnStringPixelLength ( m_szArmor[i] );
 			TotalTextWidth += 48;
-			TextHeight = gHUD.m_scrinfo.iCharHeight;
+			//TextHeight = gHUD.m_scrinfo.iCharHeight;
 		}
 		else
 			TotalTextWidth += gHUD.ReturnStringPixelLength ( m_szName[i] );
 
-		TextHeight = gHUD.m_scrinfo.iCharHeight;
+		//TextHeight = gHUD.m_scrinfo.iCharHeight;
 	
 		if ( g_iNameColors == 1 )
 		{

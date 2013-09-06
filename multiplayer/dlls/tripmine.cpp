@@ -191,7 +191,7 @@ void CTripmineGrenade :: PowerupThink( void  )
 		{
 			STOP_SOUND( ENT(pev), CHAN_VOICE, "weapons/mine_deploy.wav" );
 			STOP_SOUND( ENT(pev), CHAN_BODY, "weapons/mine_charge.wav" );
-			SetThink( &CBaseEntity::SUB_Remove );
+			SetThink(&CTripmineGrenade::SUB_Remove );
 			pev->nextthink = gpGlobals->time + 0.1;
 			ALERT( at_console, "WARNING:Tripmine at %.0f, %.0f, %.0f removed\n", pev->origin.x, pev->origin.y, pev->origin.z );
 			KillBeam();
@@ -206,7 +206,7 @@ void CTripmineGrenade :: PowerupThink( void  )
 		CBaseEntity *pMine = Create( "weapon_tripmine", pev->origin + m_vecDir * 24, pev->angles );
 		pMine->pev->spawnflags |= SF_NORESPAWN;
 
-		SetThink( &CBaseEntity::SUB_Remove );
+		SetThink( &CTripmineGrenade::SUB_Remove );
 		KillBeam();
 		pev->nextthink = gpGlobals->time + 0.1;
 		return;
@@ -317,7 +317,7 @@ int CTripmineGrenade :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttac
 	{
 		// disable
 		// Create( "weapon_tripmine", pev->origin + m_vecDir * 24, pev->angles );
-		SetThink( &CBaseEntity::SUB_Remove );
+		SetThink( &CTripmineGrenade::SUB_Remove );
 		pev->nextthink = gpGlobals->time + 0.1;
 		KillBeam();
 		return FALSE;
@@ -420,7 +420,7 @@ void CTripmine::Holster( int skiplocal /* = 0 */ )
 	{
 		// out of mines
 		m_pPlayer->pev->weapons &= ~(1<<WEAPON_TRIPMINE);
-		SetThink( &CBasePlayerItem::DestroyItem );
+		SetThink( &CTripmine::DestroyItem );
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
 
@@ -481,7 +481,7 @@ void CTripmine::PrimaryAttack( void )
 
 	}
 	
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.3;
+	m_flNextPrimaryAttack = GetNextAttackDelay(0.3);
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );
 }
 

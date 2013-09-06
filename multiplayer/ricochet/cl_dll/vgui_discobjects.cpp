@@ -228,7 +228,7 @@ void CDiscArena_RoundStart::RecalculateText( void )
 	char szTemp[256];
 	char szTemp2[256];
 	char szTemp3[256];
-	char *pszLocalized = NULL;
+	const char *pszLocalized = NULL;
 
 	// Round started?
 	if (m_iSecondsToGo == 0)
@@ -282,7 +282,7 @@ void CDiscArena_RoundStart::RecalculateText( void )
 	// Team 1
 	strcpy( sz, "" );
 	int i;
-	for ( i = 0; i < (m_iNumPlayers / 2); i++ )
+	for (i = 0; i < (m_iNumPlayers / 2); i++ )
 	{
 		if ( g_PlayerInfoList[ m_iClients[i] ].name && g_PlayerInfoList[ m_iClients[i] ].name[0] )
 			strcat( sz, g_PlayerInfoList[ m_iClients[i] ].name );
@@ -419,7 +419,7 @@ void CDiscArena_RoundEnd::RecalculateText( void )
 		}
 		else 
 		{
-			char *pszTemp = NULL;
+			const char *pszTemp = NULL;
 
 			GetClientList( sz );
 
@@ -478,7 +478,7 @@ void CDiscPowerups::RecalculateText( int iPowerup )
 			return;
 	}
 
-	sprintf(sz, "");
+	sprintf(sz, "%s", "");
 
 	if ( iPowerup & POW_TRIPLE )
 	{
@@ -512,7 +512,7 @@ void CDiscPowerups::RecalculateText( int iPowerup )
 	m_pLabel->setText( sz );
 
 	// Become visible
-	if (sz && sz[0])
+	if (sz[0])
 		setVisible(true);
 	else
 		setVisible(false);
@@ -555,17 +555,17 @@ void CDiscRewards::RecalculateText( int iReward )
 
 	// Rewards
 	if ( iReward & REWARD_BOUNCE_NONE )
-		sprintf( sz, CHudTextMessage::BufferedLocaliseTextString( "#Hit_Direct" ) );
+		sprintf( sz, "%s", CHudTextMessage::BufferedLocaliseTextString( "#Hit_Direct" ) );
 	if ( iReward & REWARD_BOUNCE_ONE )
-		sprintf( sz, CHudTextMessage::BufferedLocaliseTextString( "#Hit_One" ) );
+		sprintf( sz, "%s", CHudTextMessage::BufferedLocaliseTextString( "#Hit_One" ) );
 	if ( iReward & REWARD_BOUNCE_TWO )
-		sprintf( sz, CHudTextMessage::BufferedLocaliseTextString( "#Hit_Two" ) );
+		sprintf( sz, "%s", CHudTextMessage::BufferedLocaliseTextString( "#Hit_Two" ) );
 	if ( iReward & REWARD_BOUNCE_THREE )
-		sprintf( sz, CHudTextMessage::BufferedLocaliseTextString( "#Hit_Three" ) );
+		sprintf( sz, "%s", CHudTextMessage::BufferedLocaliseTextString( "#Hit_Three" ) );
 	if ( iReward & REWARD_DECAPITATE )
-		sprintf( sz, CHudTextMessage::BufferedLocaliseTextString( "#Hit_Decap" ) );
+		sprintf( sz, "%s", CHudTextMessage::BufferedLocaliseTextString( "#Hit_Decap" ) );
 	if ( iReward & REWARD_DOUBLEKILL )
-		sprintf( sz, CHudTextMessage::BufferedLocaliseTextString( "#Hit_Multiple" ) );
+		sprintf( sz, "%s", CHudTextMessage::BufferedLocaliseTextString( "#Hit_Multiple" ) );
 
 	if ( iReward & REWARD_TELEPORT )
 		m_pTeleBonus->setVisible( true );

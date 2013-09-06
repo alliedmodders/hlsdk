@@ -29,7 +29,11 @@
 DECLARE_MESSAGE( m_StatusBar, StatusText );
 DECLARE_MESSAGE( m_StatusBar, StatusValue );
 
+#ifdef _TFC
+#define STATUSBAR_ID_LINE		2
+#else
 #define STATUSBAR_ID_LINE		1
+#endif
 
 float *GetClientColor( int clientIndex );
 extern float g_ColorYellow[3];
@@ -138,7 +142,7 @@ void CHudStatusBar :: ParseStatusString( int line_num )
 						switch ( valtype )
 						{
 						case 'p':  // player name
-							GetPlayerInfo( indexval, &g_PlayerInfoList[indexval] );
+							gEngfuncs.pfnGetPlayerInfo( indexval, &g_PlayerInfoList[indexval] );
 							if ( g_PlayerInfoList[indexval].name != NULL )
 							{
 								strncpy( szRepString, g_PlayerInfoList[indexval].name, MAX_PLAYER_NAME_LENGTH );
@@ -184,15 +188,15 @@ int CHudStatusBar :: Draw( float fTime )
 		m_bReparseString = FALSE;
 	}
 
-	int Y_START = ScreenHeight - YRES(32 + 4);
-
+	int Y_START = ScreenHeight - 52;
+	
 	// Draw the status bar lines
 	for ( int i = 0; i < MAX_STATUSBAR_LINES; i++ )
 	{
 		int TextHeight, TextWidth;
 		GetConsoleStringSize( m_szStatusBar[i], &TextWidth, &TextHeight );
-
-		int x = 4;
+		
+		int x = 8;
 		int y = Y_START - ( 4 + TextHeight * i ); // draw along bottom of screen
 
 		// let user set status ID bar centering
@@ -229,17 +233,13 @@ int CHudStatusBar :: MsgFunc_StatusText( const char *pszName, int iSize, void *p
 
 	int line = READ_BYTE();
 
-	if ( line < 0 || line >= MAX_STATUSBAR_LINES )
+	if ( line < 0 || line > MAX_STATUSBAR_LINES )
 		return 1;
 
 	strncpy( m_szStatusText[line], READ_STRING(), MAX_STATUSTEXT_LENGTH );
 	m_szStatusText[line][MAX_STATUSTEXT_LENGTH-1] = 0;  // ensure it's null terminated ( strncpy() won't null terminate if read string too long)
 
-	if ( m_szStatusText[0] == 0 )
-		m_iFlags &= ~HUD_ACTIVE;
-	else
-		m_iFlags |= HUD_ACTIVE;  // we have status text, so turn on the status bar
-
+	m_iFlags |= HUD_ACTIVE;
 	m_bReparseString = TRUE;
 
 	return 1;
@@ -254,7 +254,7 @@ int CHudStatusBar :: MsgFunc_StatusValue( const char *pszName, int iSize, void *
 	BEGIN_READ( pbuf, iSize );
 
 	int index = READ_BYTE();
-	if ( index < 1 || index >= MAX_STATUSBAR_VALUES )
+	if ( index < 1 || index > MAX_STATUSBAR_VALUES )
 		return 1; // index out of range
 
 	m_iStatusValues[index] = READ_SHORT();

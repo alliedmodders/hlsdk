@@ -16,6 +16,5 @@
 // fall over
 #define	ROLL	2 
 
-#define DLLEXPORT __declspec( dllexport )
 
 #endif

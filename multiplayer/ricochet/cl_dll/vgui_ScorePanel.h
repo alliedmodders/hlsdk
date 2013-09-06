@@ -258,6 +258,9 @@ private:
 //	CommandButton				*m_pCloseButton;
 	CLabelHeader*	GetPlayerEntry(int x, int y)	{return &m_PlayerEntries[x][y];}
 
+	vgui::BitmapTGA *m_pTrackerIcon;
+
+
 public:
 	
 	int				m_iNumTeams;
@@ -298,7 +301,7 @@ public:
 	virtual void mousePressed(MouseCode code, Panel* panel);
 	virtual void cursorMoved(int x, int y, Panel *panel);
 
-	friend CLabelHeader;
+	friend class CLabelHeader;
 };
 
 #endif

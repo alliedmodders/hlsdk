@@ -113,7 +113,7 @@ void CBaseMonster :: MonsterInitDead( void ) { }
 BOOL CBaseMonster :: BBoxFlat ( void ) { return TRUE; }
 BOOL CBaseMonster :: GetEnemy ( void ) { return FALSE; }
 void CBaseMonster :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) { }
-CBaseEntity* CBaseMonster :: DropItem ( char *pszItemName, const Vector &vecPos, const Vector &vecAng ) { return NULL; }
+CBaseEntity* CBaseMonster :: DropItem ( const char *pszItemName, const Vector &vecPos, const Vector &vecAng ) { return NULL; }
 BOOL CBaseMonster :: ShouldFadeOnDeath( void ) { return FALSE; }
 void CBaseMonster::FadeMonster( void ) { }
 BOOL CBaseMonster :: HasHumanGibs( void ) { return TRUE; }

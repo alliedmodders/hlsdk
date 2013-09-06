@@ -282,7 +282,7 @@ void CDisc::DiscTouch ( CBaseEntity *pOther )
 
 					((CBasePlayer*)pOther)->m_hLastPlayerToHitMe = m_hOwner;
 					((CBasePlayer*)pOther)->m_flLastDiscHit = gpGlobals->time;
-					((CBasePlayer*)pOther)->m_flLastDiscBounces = m_iBounces;
+					((CBasePlayer*)pOther)->m_iLastDiscBounces = m_iBounces;
 					if ( m_bTeleported )
 						((CBasePlayer*)pOther)->m_flLastDiscHitTeleport = gpGlobals->time;
 
@@ -518,7 +518,7 @@ void CDiscWeapon::Holster( int skiplocal /* = 0 */ )
 	{
 		// no more grenades!
 		m_pPlayer->pev->weapons &= ~(1<<WEAPON_DISC);
-		SetThink( &CBasePlayerItem::DestroyItem );
+		SetThink( &CDiscWeapon::DestroyItem );
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
 
@@ -748,3 +748,6 @@ int CDiscWeapon::AddDuplicate( CBasePlayerItem *pOriginal )
 	pev->flags |= FL_KILLME;
 	return FALSE;
 }
+
+
+

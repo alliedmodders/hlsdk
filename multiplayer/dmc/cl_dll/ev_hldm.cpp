@@ -59,6 +59,14 @@ void EV_DMC_DoorGoDown( struct event_args_s *args  );
 void EV_DMC_DoorHitTop( struct event_args_s *args  );
 void EV_DMC_DoorHitBottom( struct event_args_s *args  );
 
+#ifdef THREEWAVE
+	void EV_Hook( event_args_t *args  );
+	void EV_Cable( struct event_args_s *args  );
+	void EV_FollowCarrier( struct event_args_s *args  );
+	void EV_FlagSpawn( struct event_args_s *args  );
+#endif
+
+	
 void EV_TrainPitchAdjust( struct event_args_s *args );
 }
 
@@ -84,7 +92,7 @@ float EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *v
 	char chTextureType = CHAR_TEX_CONCRETE;
 	float fvol;
 	float fvolbar;
-	char *rgsz[4];
+	const char *rgsz[4];
 	int cnt;
 	float fattn = ATTN_NORM;
 	int entity;
@@ -356,7 +364,13 @@ void EV_HLDM_DecalGunshot( pmtrace_t *pTrace, int iBulletType )
 
 void EV_Quake_PlayQuadSound ( int idx, float *origin, int iFlag )
 {
-	if ( iFlag == 1 )
+	if ( iFlag == 3 )
+     	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_ITEM, "rune/rune22.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+	else if ( iFlag == 2 )
+		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_ITEM, "rune/rune2.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+	else if ( iFlag == 4 )
+		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_ITEM, "rune/rune3.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+	else if ( iFlag == 1 )
 		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_ITEM, "items/damage3.wav", 1, ATTN_NORM, 0, PITCH_NORM);
 }
 
@@ -447,7 +461,6 @@ void EV_FireShotGunDouble( event_args_t *args )
 	vec3_t vecSrc, vecAiming;
 	vec3_t vecSpread;
 	vec3_t up, right, forward;
-	float flSpread = 0.01;
 
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );
@@ -489,7 +502,6 @@ void EV_FireShotGunSingle( event_args_t *args )
 	vec3_t vecSrc, vecAiming;
 	vec3_t vecSpread;
 	vec3_t up, right, forward;
-	float flSpread = 0.01;
 
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );
@@ -548,9 +560,6 @@ void EV_Quake_PlayAxeSound( int idx, float *origin, int iSoundType )
 void EV_FireAxe( event_args_t *args )
 {
 	int ent;
-
-	int fDidHit = 0;
-	int m_bHullHit = 1;
 
 	vec3_t vecSrc, vecEnd;
 	vec3_t up, right, forward;
@@ -612,6 +621,203 @@ void EV_FireAxeSwing( event_args_t *args  )
 
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/ax1.wav", 1.0, ATTN_NORM, 0, 100 );
 }
+
+
+#ifdef THREEWAVE
+
+void EV_Hook( event_args_t *args  )
+{
+	return;
+}
+
+void EV_Cable( event_args_t *args  )
+{
+	int idx, attached, team, modelIndex;
+	
+	float r, g, b;
+	
+	idx = args->entindex;
+	attached = args->iparam1;
+	team = args->iparam2;
+
+	modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/smoke.spr" );
+
+	if ( !modelIndex )
+		return;
+
+	if ( team == 1 )
+	{
+		r = 500;
+		g = 0;
+		b = 0;
+	}
+	else if ( team == 2 )
+	{
+		r = 0;
+		g = 0;
+		b = 500;
+	}
+
+	if ( args->bparam1 == 1)
+		gEngfuncs.pEfxAPI->R_BeamKill ( attached );
+	else
+		gEngfuncs.pEfxAPI->R_BeamEnts ( idx, attached, modelIndex, 9999, 1, 0.001, 0.8, 0.0, 0.0, 0.0, r, g, b );
+}
+
+void EV_GenericParticleCallback( struct particle_s *particle, float frametime )
+{
+	int i;
+
+	for ( i = 0; i < 3; i++ )
+	{
+		particle->org[ i ] += particle->vel[ i ] * frametime;
+	}
+}
+
+void EV_TrailCallback ( struct tempent_s *ent, float frametime, float currenttime )
+{
+
+	//If the Player is not on our PVS, then go back
+	if ( !CheckPVS( ent->clientIndex ) )
+		return;
+
+	dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight ( 0 );
+
+	cl_entity_t *player = gEngfuncs.GetEntityByIndex( ent->clientIndex );
+
+	if ( !player )
+		return;
+	   
+	VectorCopy ( player->origin, dl->origin );
+
+	dl->radius = 240;
+	dl->die = gEngfuncs.GetClientTime() + 0.001; //Kill it right away
+
+	if ( ent->entity.baseline.movetype == 2 )
+	{
+		dl->color.r = 240;
+		dl->color.g = 25;
+		dl->color.b = 25;
+	}
+	else
+	{
+		dl->color.r = 25;
+		dl->color.g = 25;
+		dl->color.b = 240;
+	}
+
+	//I know what you are thinking and yes, this was the only place I could find on where to put the timer
+	//Hacky; Yes, Works; Yes!.
+	if ( ent->entity.baseline.animtime > gEngfuncs.GetClientTime() )
+		return;
+
+	for ( int i = 0; i < 4; i++ )
+	{
+		particle_t  *bPart = gEngfuncs.pEfxAPI->R_AllocParticle (EV_GenericParticleCallback);
+
+		if ( bPart )
+			{
+				VectorCopy ( ent->entity.origin, bPart->org);
+				bPart->org[0] += gEngfuncs.pfnRandomFloat (-2, 2);
+				bPart->org[1] += gEngfuncs.pfnRandomFloat (-2, 2);
+				bPart->org[2] += gEngfuncs.pfnRandomFloat (-2, 2);
+				bPart->vel[0] = gEngfuncs.pfnRandomFloat (-50, 50);
+				bPart->vel[1] = gEngfuncs.pfnRandomFloat (-50, 50);
+				bPart->vel[2] = gEngfuncs.pfnRandomFloat (75, 80);
+				
+				//Check team and color the particle correctly
+				if ( ent->entity.baseline.movetype == 2 )
+					bPart->color = 70;
+				else
+					bPart->color = 43;
+
+				bPart->type = pt_slowgrav;
+				bPart->die = gEngfuncs.GetClientTime() + 0.5;
+			}
+	}
+
+	ent->entity.baseline.animtime = gEngfuncs.GetClientTime() + 0.3;
+}
+
+
+void EV_FollowCarrier (event_args_t *args)
+{
+	int iEntIndex = args->iparam1;
+	int iTeam	  = args->iparam2;
+	float r,g,b;
+
+	int modelIndex; 
+	char *model = "sprites/smoke.spr";
+
+	modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex ( model );
+
+	if ( iTeam == 2 )
+	{
+		r = 500;
+		g = 0;
+		b = 0;
+	}
+	else if ( iTeam == 1 )
+	{
+		r = 0;
+		g = 0;
+		b = 500;
+	}
+
+	if ( args->bparam1 == 1)
+		gEngfuncs.pEfxAPI->R_KillAttachedTents ( iEntIndex );
+	else
+	{
+		TEMPENTITY *pTrailSpawner = NULL;
+		pTrailSpawner = gEngfuncs.pEfxAPI->R_TempModel ( args->origin, args->velocity, args->angles, 9999, modelIndex, TE_BOUNCE_NULL );
+
+		if ( pTrailSpawner != NULL)
+		{
+		   pTrailSpawner->flags |= ( FTENT_PLYRATTACHMENT | FTENT_PERSIST | FTENT_NOMODEL | FTENT_CLIENTCUSTOM );
+		   pTrailSpawner->clientIndex = iEntIndex;  
+
+		   pTrailSpawner->entity.baseline.movetype = iTeam; // Hack to store the team number on this temp ent.
+		   pTrailSpawner->entity.baseline.animtime = gEngfuncs.GetClientTime() + 0.3;
+		   pTrailSpawner->callback = EV_TrailCallback;
+		}
+	}
+}
+
+void EV_FlagSpawn (event_args_t *args)
+{
+	vec3_t origin;
+	VectorCopy( args->origin, origin );
+	
+	gEngfuncs.pEfxAPI->R_Implosion ( origin, 50, 20, 0.5 );
+
+	for ( int i = 0; i < 20; i++ )
+	{
+		particle_t  *bPart = gEngfuncs.pEfxAPI->R_AllocParticle  ( EV_GenericParticleCallback );
+
+		if ( bPart )
+			{
+				VectorCopy ( args->origin, bPart->org);
+				bPart->org[0] += gEngfuncs.pfnRandomFloat (-4, 4);
+				bPart->org[1] += gEngfuncs.pfnRandomFloat (-4, 4);
+				bPart->org[2] += gEngfuncs.pfnRandomFloat (-4, 4);
+				bPart->vel[0] = gEngfuncs.pfnRandomFloat (-50, 50);
+				bPart->vel[1] = gEngfuncs.pfnRandomFloat (-50, 50);
+				bPart->vel[2] = gEngfuncs.pfnRandomFloat (250, 350);
+				
+				//Check team and color the particle correctly
+				if ( args->iparam1 == 1 )
+					bPart->color = 70;
+				else
+					bPart->color = 43;
+
+				bPart->type = pt_grav;
+				bPart->die = gEngfuncs.GetClientTime() + 3;
+			}
+	}
+}
+
+#endif
+
 
 void EV_PowerupCallback ( struct tempent_s *ent, float frametime, float currenttime )
 {
@@ -684,7 +890,7 @@ void EV_PlayerPowerup (event_args_t *args)
 	int iPowerUp  = (int)args->fparam1;
 
 	int modelIndex; 
-	char *model = "sprites/smoke.spr";
+	const char *model = "sprites/smoke.spr";
 
 	modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex ( model );
 
@@ -721,8 +927,6 @@ void EV_FireLightning( event_args_t *args )
 	vec3_t up, right, forward;
 	int iShutDown;
 	
-	cl_entity_t *player;
-	
 	pmtrace_t tr;
 	int modelIndex;
 
@@ -737,7 +941,7 @@ void EV_FireLightning( event_args_t *args )
 	modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/laserbeam.spr" );
 
 	// Load it up with some bogus data
-	player = gEngfuncs.GetLocalPlayer();
+	gEngfuncs.GetLocalPlayer();
 
 	AngleVectors( angles, forward, right, up );
 
@@ -1051,9 +1255,9 @@ void EV_Gibbed (event_args_t *args)
         int modelindex, i;
         TEMPENTITY *pGib = NULL;
         int gibs = 5;
-        char *model1 = "models/gib_1.mdl";
-		char *model2 = "models/gib_2.mdl";
-		char *model3 = "models/gib_3.mdl";
+        const char *model1 = "models/gib_1.mdl";
+	const char *model2 = "models/gib_2.mdl";
+	const char *model3 = "models/gib_3.mdl";
 
       	VectorCopy( args->origin, origin );
 
@@ -1176,7 +1380,7 @@ void EV_Explosion (event_args_t *args)
 {
 	vec3_t origin, scorch_origin, velocity, forward, right, up;
 	int modelIndex;
-	char *model = "sprites/zerogxplode.spr";
+	const char *model = "sprites/zerogxplode.spr";
 	modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex (model);
 	pmtrace_t tr;
 	

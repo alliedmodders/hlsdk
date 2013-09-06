@@ -617,14 +617,14 @@ int CBasePlayerItem::AddToPlayer( CBasePlayer *pPlayer )
 void CBasePlayerItem::Drop( void )
 {
 	SetTouch( NULL );
-	SetThink(&CBaseEntity::SUB_Remove);
+	SetThink(&CBasePlayerItem::SUB_Remove);
 	pev->nextthink = gpGlobals->time + .1;
 }
 
 void CBasePlayerItem::Kill( void )
 {
 	SetTouch( NULL );
-	SetThink(&CBaseEntity::SUB_Remove);
+	SetThink(&CBasePlayerItem::SUB_Remove);
 	pev->nextthink = gpGlobals->time + .1;
 }
 
@@ -853,7 +853,7 @@ BOOL CBasePlayerWeapon :: CanDeploy( void )
 	return TRUE;
 }
 
-BOOL CBasePlayerWeapon :: DefaultDeploy( char *szViewModel, char *szWeaponModel, int iAnim, char *szAnimExt, int skiplocal /* = 0 */ )
+BOOL CBasePlayerWeapon :: DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int skiplocal /* = 0 */ )
 {
 	if (!CanDeploy( ))
 		return FALSE;
@@ -980,7 +980,7 @@ void CBasePlayerAmmo :: DefaultTouch( CBaseEntity *pOther )
 		else
 		{
 			SetTouch( NULL );
-			SetThink(&CBaseEntity::SUB_Remove);
+			SetThink(&CBasePlayerAmmo::SUB_Remove);
 			pev->nextthink = gpGlobals->time + .1;
 		}
 	}
@@ -988,7 +988,7 @@ void CBasePlayerAmmo :: DefaultTouch( CBaseEntity *pOther )
 	{
 		// evil impulse 101 hack, kill always
 		SetTouch( NULL );
-		SetThink(&CBaseEntity::SUB_Remove);
+		SetThink(&CBasePlayerAmmo::SUB_Remove);
 		pev->nextthink = gpGlobals->time + .1;
 	}
 }

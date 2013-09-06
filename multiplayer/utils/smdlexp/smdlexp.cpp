@@ -114,7 +114,7 @@ DESTRUCTOR SmdExportClass::~SmdExportClass(void)
 }
 
 
-int SmdExportClass::DoExport(const TCHAR *name,ExpInterface *ei,Interface *i, BOOL suppressPrompts) 
+int SmdExportClass::DoExport(const TCHAR *name,ExpInterface *ei,Interface *i, BOOL suppressPrompts, DWORD options) 
 {
 	ExpInterface	*pexpiface = ei;	// Hungarian
 	Interface		*piface = i;		// Hungarian
@@ -122,10 +122,23 @@ int SmdExportClass::DoExport(const TCHAR *name,ExpInterface *ei,Interface *i, BO
 	// Reset the name-map property manager
 	g_inmMac = 0;
 
-	// Present the user with the Export Options dialog
-	if (DialogBoxParam(hInstance, MAKEINTRESOURCE(IDD_EXPORTOPTIONS), GetActiveWindow(),
-						ExportOptionsDlgProc, (LPARAM)this) <= 0)
-		return 0;		// error or cancel
+	if ( hasStringPropertyValue( "referenceFrame", "YES", i ) )
+	{
+		m_fReferenceFrame	= TRUE ;
+		suppressPrompts		= TRUE ;
+	}
+	else if ( hasStringPropertyValue( "referenceFrame", "NO", i ) )
+	{
+		m_fReferenceFrame	= FALSE ;
+		suppressPrompts		= TRUE ;
+	}
+
+	// Present the user with the Export Options dialog if desired
+	if ( !suppressPrompts )
+	{
+		if (DialogBoxParam( hInstance, MAKEINTRESOURCE(IDD_EXPORTOPTIONS), GetActiveWindow(), ExportOptionsDlgProc, (LPARAM)this) <= 0)
+			return 0;		// error or cancel
+	}
 
 	// Break up filename, re-assemble longer versions
 	TSTR strPath, strFile, strExt;
@@ -170,10 +183,13 @@ int SmdExportClass::DoExport(const TCHAR *name,ExpInterface *ei,Interface *i, BO
 		DumpModel(pFile, pexpiface);
 	}
 
-	// Tell user that exporting is finished (it can take a while with no feedback)
-	char szExportComplete[300];
-	sprintf(szExportComplete, "Exported %s.", szFile);
-	MessageBox(GetActiveWindow(), szExportComplete, "Status", MB_OK);
+	if ( !suppressPrompts )
+	{
+		// Tell user that exporting is finished (it can take a while with no feedback)
+		char szExportComplete[300];
+		sprintf(szExportComplete, "Exported %s.", szFile);
+		MessageBox(GetActiveWindow(), szExportComplete, "Status", MB_OK);
+	}
 
 	fclose( pFile );
 
@@ -660,6 +676,20 @@ int DumpModelTEP::callback(INode *pnode)
 		UVVert UVvertex1( 1, 0, 0 );
 		UVVert UVvertex2( 0, 1, 0 );
 		
+		int numberMaps = pmesh->getNumMaps();
+		for (int mapIdx = 1; mapIdx < numberMaps; ++mapIdx) 
+		{
+			if (pmesh->getNumMapVerts(mapIdx) ) 
+			{
+				UVvertex0 = pmesh->mapVerts( mapIdx )[pmesh->mapFaces(mapIdx)[iFace].getTVert( 0 )];
+				UVvertex1 = pmesh->mapVerts( mapIdx )[pmesh->mapFaces(mapIdx)[iFace].getTVert( 1 )];
+				UVvertex2 = pmesh->mapVerts( mapIdx )[pmesh->mapFaces(mapIdx)[iFace].getTVert( 2 )];
+				break;
+			}
+		}		
+
+
+		/*
 		// All faces must have textures assigned to them
 		if (pface->flags & HAS_TVERTS)
 		{
@@ -677,19 +707,6 @@ int DumpModelTEP::callback(INode *pnode)
 			UVvertex1 = pmesh->getTVert(iTVertex1);
 			UVvertex2 = pmesh->getTVert(iTVertex2);
 		}
-		else 
-		{
-			//sprintf(st_szDBG, "ERROR--Node %s has a textureless face.  All faces must have an applied texture.", (char*)strNodeName);
-			//ASSERT_AND_ABORT(FALSE, st_szDBG);
-		}
-		
-		/*
-		const char *szExpectedExtension = ".bmp";
-		if (stricmp(szBitmapName+strlen(szBitmapName)-strlen(szExpectedExtension), szExpectedExtension) != 0)
-			{
-			sprintf(st_szDBG, "Node %s uses %s, which is not a %s file", (char*)strNodeName, szBitmapName, szExpectedExtension);
-			ASSERT_AND_ABORT(FALSE, st_szDBG);
-			}
 		*/
 
 		// Determine owning bones for the vertices.
@@ -949,3 +966,116 @@ static float FlReduceRotation(float fl)
 		fl += TWOPI;
 	return fl;
 }
+
+
+
+//===============================================================
+// Name:		hasStringPropertyValue
+// Class:		
+//
+// Description: Determines if a Custom Property has been set on
+//				the scene to the specified value.
+// 
+// Parameters:	const char* -- the property
+//				const char* -- the expected value
+//				Interface*	-- the max interface pointer
+//
+// Returns:		bool -- true if the property is there and has the
+//						specified value.
+// 
+//===============================================================
+bool SmdExportClass::hasStringPropertyValue
+(
+	const char	*propertyName,
+	const char	*propertyValue,
+	Interface	*ip
+)
+{
+	const PROPVARIANT *propertyVariant = getPropertyVariant( propertyName, ip );
+	if ( !propertyVariant ) return false ;
+
+	TCHAR buffer[80] ;
+	VariantToString( propertyVariant, buffer, 80 );
+
+	if ( strcmp( buffer, propertyValue )==0)
+		return true ;
+	return false ;
+}
+
+//===============================================================
+// Name:		getPropertyVariant
+// Class:		
+//
+// Description: Retrieves the specified property variant by name.
+//				Returns 0 (NULL) if not found.
+// 
+// Parameters:	const char* -- the property's name
+//				Interface*	-- the max interface pointer
+//
+// Returns:		const PROPVARIANT* -- the property.  Returns 0
+//										(NULL) if not found.
+// 
+//===============================================================
+const PROPVARIANT* SmdExportClass::getPropertyVariant
+(
+	const char	*propertyName,
+	Interface	*ip
+)
+{
+	TCHAR	szBuf[80];
+	int		bufSize		= 80;
+	int		numProps	= ip->GetNumProperties(PROPSET_USERDEFINED);
+
+	for (int i=0; i<numProps; i++) {
+		const PROPSPEC		*pPropSpec	= ip->GetPropertySpec(PROPSET_USERDEFINED, i);
+		const PROPVARIANT	*pPropVar	= ip->GetPropertyVariant(PROPSET_USERDEFINED, i);
+
+		if ( pPropSpec->ulKind == PRSPEC_PROPID ) continue ;
+		_tcscpy(szBuf, TSTR(pPropSpec->lpwstr));
+
+		if ( strcmp( propertyName, szBuf ) == 0 )
+			return pPropVar ;
+	}
+
+	return 0 ;
+}
+
+
+// Convert (well, copy) a PROPVARIANT into a string
+//
+void SmdExportClass::VariantToString(const PROPVARIANT* pProp, TCHAR* szString, int bufSize)
+	{
+	switch (pProp->vt) {
+		case VT_LPWSTR:
+			_tcscpy(szString, TSTR(pProp->pwszVal));
+			break;
+		case VT_LPSTR:
+			_tcscpy(szString, TSTR(pProp->pszVal));
+			break;
+		case VT_I4:
+			_stprintf(szString, "%ld", pProp->lVal);
+			break;
+		case VT_R4:
+			_stprintf(szString, "%f", pProp->fltVal);
+			break;
+		case VT_R8:
+			_stprintf(szString, "%lf", pProp->dblVal);
+			break;
+		case VT_BOOL:
+			_stprintf(szString, "%s", pProp->boolVal ? "YES" : "NO" );
+			break;
+		case VT_FILETIME:
+			SYSTEMTIME sysTime;
+			FileTimeToSystemTime(&pProp->filetime, &sysTime);
+			GetDateFormat(LOCALE_SYSTEM_DEFAULT,
+						  DATE_SHORTDATE,
+						  &sysTime,
+						  NULL,
+						  szString,
+						  bufSize);
+			break;
+		default:
+			_tcscpy(szString, "");	
+			break;
+		}
+	}

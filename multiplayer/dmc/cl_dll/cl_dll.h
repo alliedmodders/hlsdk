@@ -39,7 +39,11 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 #endif
 
 #include "util_vector.h"
-#define EXPORT	_declspec( dllexport )
+#ifdef _WIN32
+#define EXPORT                _declspec( dllexport )
+#else
+#define EXPORT __attribute__ ((visibility("default")))
+#endif
 
 #include "../engine/cdll_int.h"
 #include "../dlls/cdll_dll.h"

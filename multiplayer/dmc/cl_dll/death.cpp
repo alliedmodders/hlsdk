@@ -77,7 +77,7 @@ int GetTeamIndex( int clientIndex )
 	const char *teamName = g_PlayerExtraInfo[ clientIndex].teamname;
 
 	if ( !teamName || *teamName == 0 ) 
-		return NULL;
+		return 0;
 
 	if ( !stricmp( "red", teamName ) )
 		return 1;
@@ -201,11 +201,11 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	//gHUD.m_Scoreboard.GetAllPlayersInfo();
 
-	if ( gViewPort )
+	if (gViewPort)
 		gViewPort->GetAllPlayersInfo();
 
-	char *killer_name = g_PlayerInfoList[ killer ].name;
-	char *victim_name = g_PlayerInfoList[ victim ].name;
+	const char *killer_name = g_PlayerInfoList[ killer ].name;
+	const char *victim_name = g_PlayerInfoList[ victim ].name;
 	if ( !killer_name )
 	{
 		killer_name = "";
@@ -271,7 +271,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 		ConsolePrint( rgDeathNoticeList[i].szVictim );
 	}
 
-	if ( killedwith && *killedwith && (*killedwith > 13 ) && strcmp( killedwith, "d_world" ) && !rgDeathNoticeList[i].iTeamKill )
+	if ( *killedwith && (*killedwith > 13 ) && strcmp( killedwith, "d_world" ) && !rgDeathNoticeList[i].iTeamKill )
 	{
 		ConsolePrint( " with " );
 

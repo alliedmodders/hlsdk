@@ -53,7 +53,7 @@ int CBaseEntity :: IsDormant( void ) { return 0; }
 BOOL CBaseEntity :: IsInWorld( void ) { return TRUE; }
 int CBaseEntity::ShouldToggle( USE_TYPE useType, BOOL currentState ) { return 0; }
 int	CBaseEntity :: DamageDecal( int bitsDamageType ) { return -1; }
-CBaseEntity * CBaseEntity::Create( char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner ) { return NULL; }
+CBaseEntity * CBaseEntity::Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner ) { return NULL; }
 void CBaseEntity::SUB_Remove( void ) { }
 
 // CBaseDelay Stubs
@@ -199,7 +199,7 @@ void CBaseMonster :: MonsterInitDead( void ) { }
 BOOL CBaseMonster :: BBoxFlat ( void ) { return TRUE; }
 BOOL CBaseMonster :: GetEnemy ( void ) { return FALSE; }
 void CBaseMonster :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) { }
-CBaseEntity* CBaseMonster :: DropItem ( char *pszItemName, const Vector &vecPos, const Vector &vecAng ) { return NULL; }
+CBaseEntity* CBaseMonster :: DropItem ( const char *pszItemName, const Vector &vecPos, const Vector &vecAng ) { return NULL; }
 BOOL CBaseMonster :: ShouldFadeOnDeath( void ) { return FALSE; }
 void CBaseMonster :: RadiusDamage(entvars_t* pevInflictor, entvars_t*	pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType ) { }
 void CBaseMonster :: RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType ) { }
@@ -245,7 +245,7 @@ void CBasePlayer::PreThink(void) { }
 void CBasePlayer::CheckTimeBasedDamage()  { }
 void CBasePlayer :: UpdateGeigerCounter( void ) { }
 void CBasePlayer::CheckSuitUpdate() { }
-void CBasePlayer::SetSuitUpdate(char *name, int fgroup, int iNoRepeatTime) { }
+void CBasePlayer::SetSuitUpdate(const char *name, int fgroup, int iNoRepeatTime) { }
 void CBasePlayer::PostThink() { }
 int CBasePlayer::Save( CSave &save ) { return 0; }
 void CBasePlayer::RenewItems(void) { }
@@ -283,7 +283,7 @@ BOOL CBasePlayer::HasPlayerItem( CBasePlayerItem *pCheckItem ) { return FALSE; }
 BOOL CBasePlayer :: SwitchWeapon( CBasePlayerItem *pWeapon )  { return FALSE; }
 Vector CBasePlayer :: GetGunPosition( void ) { return g_vecZero; }
 const char *CBasePlayer::TeamID( void ) { return ""; }
-int CBasePlayer :: GiveAmmo( int iCount, char *szName, int iMax ) { return 0; }
+int CBasePlayer :: GiveAmmo( int iCount, const char *szName, int iMax ) { return 0; }
 void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore ) { } 
 void CBasePlayer::AddPointsToTeam( int score, BOOL bAllowNegativeScore ) { } 
 

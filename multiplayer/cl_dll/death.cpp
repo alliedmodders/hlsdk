@@ -115,7 +115,7 @@ int CHudDeathNotice :: Draw( float flTime )
 		if ( gViewPort && gViewPort->AllowedToPrintText() )
 		{
 			// Draw the death notice
-			y = YRES(DEATHNOTICE_TOP) + 2 + (20 * i);  //!!!
+			y = DEATHNOTICE_TOP + 2 + (20 * i);  //!!!
 
 			int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
 			x = ScreenWidth - ConsoleStringLen(rgDeathNoticeList[i].szVictim) - (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
@@ -173,7 +173,6 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 		gViewPort->DeathMsg( killer, victim );
 
 	gHUD.m_Spectator.DeathMessage(victim);
-
 	int i;
 	for ( i = 0; i < MAX_DEATHNOTICES; i++ )
 	{
@@ -190,7 +189,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 		gViewPort->GetAllPlayersInfo();
 
 	// Get the Killer's name
-	char *killer_name = g_PlayerInfoList[ killer ].name;
+	const char *killer_name = g_PlayerInfoList[ killer ].name;
 	if ( !killer_name )
 	{
 		killer_name = "";
@@ -204,7 +203,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	}
 
 	// Get the Victim's name
-	char *victim_name = NULL;
+	const char *victim_name = NULL;
 	// If victim is -1, the killer killed a specific, non-player object (like a sentrygun)
 	if ( ((char)victim) != -1 )
 		victim_name = g_PlayerInfoList[ victim ].name;
@@ -281,7 +280,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 			ConsolePrint( rgDeathNoticeList[i].szVictim );
 		}
 
-		if ( killedwith && *killedwith && (*killedwith > 13 ) && strcmp( killedwith, "d_world" ) && !rgDeathNoticeList[i].iTeamKill )
+		if ( *killedwith && (*killedwith > 13 ) && strcmp( killedwith, "d_world" ) && !rgDeathNoticeList[i].iTeamKill )
 		{
 			ConsolePrint( " with " );
 

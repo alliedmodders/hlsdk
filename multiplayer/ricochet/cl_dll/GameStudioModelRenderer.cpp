@@ -92,10 +92,10 @@ void CGameStudioModelRenderer::StudioSetupBones ( void )
 
 	static float		pos2[MAXSTUDIOBONES][3];
 	static vec4_t		q2[MAXSTUDIOBONES];
-	static float		pos3[MAXSTUDIOBONES][3];
-	static vec4_t		q3[MAXSTUDIOBONES];
-	static float		pos4[MAXSTUDIOBONES][3];
-	static vec4_t		q4[MAXSTUDIOBONES];
+//	static float		pos3[MAXSTUDIOBONES][3];
+//	static vec4_t		q3[MAXSTUDIOBONES];
+//	static float		pos4[MAXSTUDIOBONES][3];
+//	static vec4_t		q4[MAXSTUDIOBONES];
 
 	// Use default bone setup for nonplayers
 	if ( !m_pCurrentEntity->player )
@@ -553,7 +553,7 @@ void CGameStudioModelRenderer::SetupClientAnimation( entity_state_t *pplayer )
 	double curtime, dt;
 
 	client_anim_state_t *st;
-	float fr, gs;
+	float fr = 0.0, gs;
 
 	cl_entity_t *ent = IEngineStudio.GetCurrentEntity();
 	assert( ent );
@@ -962,8 +962,7 @@ HUD_GetStudioModelInterface
 Export this function for the engine to use the studio renderer class to render objects.
 ====================
 */
-#define DLLEXPORT __declspec( dllexport )
-extern "C" int DLLEXPORT HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio )
+extern "C" int EXPORT HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio )
 {
 	if ( version != STUDIO_INTERFACE_VERSION )
 		return 0;

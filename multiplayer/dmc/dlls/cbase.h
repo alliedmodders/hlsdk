@@ -42,6 +42,7 @@ CBaseEntity
 // UNDONE: This will ignore transition volumes (trigger_transition), but not the PVS!!!
 #define		FCAP_FORCE_TRANSITION		0x00000080		// ALWAYS goes across transitions
 
+#include "archtypes.h"     // DAL
 #include "saverestore.h"
 #include "schedule.h"
 
@@ -50,15 +51,18 @@ CBaseEntity
 #endif
 
 // C functions for external declarations that call the appropriate C++ methods
-
+#ifndef CBASE_DLLEXPORT
 #ifdef _WIN32
-#define EXPORT  _declspec( dllexport )
+#define CBASE_DLLEXPORT _declspec( dllexport )
 #else
-#define EXPORT  /* */
+#define CBASE_DLLEXPORT __attribute__ ((visibility("default")))
+#endif
 #endif
 
-extern "C" EXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
-extern "C" EXPORT int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
+#define EXPORT CBASE_DLLEXPORT
+
+extern "C" CBASE_DLLEXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
+extern "C" CBASE_DLLEXPORT int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 
 extern int DispatchSpawn( edict_t *pent );
 extern void DispatchKeyValue( edict_t *pentKeyvalue, KeyValueData *pkvd );
@@ -177,7 +181,7 @@ public:
 	virtual void	AddPointsToTeam( int score, BOOL bAllowNegativeScore ) {}
 	virtual BOOL	AddPlayerItem( CBasePlayerItem *pItem ) { return 0; }
 	virtual BOOL	RemovePlayerItem( CBasePlayerItem *pItem ) { return 0; }
-	virtual int 	GiveAmmo( int iAmount, char *szName, int iMax ) { return -1; };
+	virtual int 	GiveAmmo( int iAmount, const char *szName, int iMax ) { return -1; };
 	virtual float	GetDelay( void ) { return 0; }
 	virtual int		IsMoving( void ) { return pev->velocity != g_vecZero; }
 	virtual void	OverrideReset( void ) {}
@@ -186,7 +190,7 @@ public:
 	virtual void	SetToggleState( int state ) {}
 	virtual void    StartSneaking( void ) {}
 	virtual void    StopSneaking( void ) {}
-	virtual BOOL	OnControls( entvars_t *onpev ) { return FALSE; }
+	virtual BOOL	OnControls( entvars_t *pev ) { return FALSE; }
 	virtual BOOL    IsSneaking( void ) { return FALSE; }
 	virtual BOOL	IsAlive( void ) { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
 	virtual BOOL	IsBSPModel( void ) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
@@ -217,9 +221,9 @@ public:
 	virtual void Blocked( CBaseEntity *pOther ) { if (m_pfnBlocked) (this->*m_pfnBlocked)( pOther ); };
 
 	// allow engine to allocate instance data
-    void *operator new( size_t stAllocateBlock, entvars_t *newpev )
+    void *operator new( size_t stAllocateBlock, entvars_t *pev )
 	{
-		return (void *)ALLOC_PRIVATE(ENT(newpev), stAllocateBlock);
+		return (void *)ALLOC_PRIVATE(ENT(pev), stAllocateBlock);
 	};
 
 	// don't use this.
@@ -258,8 +262,8 @@ public:
 		return pEnt; 
 	}
 
-	static CBaseEntity *Instance( entvars_t *instpev ) { return Instance( ENT( instpev ) ); }
-	static CBaseEntity *Instance( int inst_eoffset) { return Instance( ENT( inst_eoffset) ); }
+	static CBaseEntity *Instance( entvars_t *pev ) { return Instance( ENT( pev ) ); }
+	static CBaseEntity *Instance( int eoffset) { return Instance( ENT( eoffset) ); }
 
 	CBaseMonster *GetMonsterPointer( entvars_t *pevMonster ) 
 	{ 
@@ -282,8 +286,8 @@ public:
 	void FunctionCheck( void *pFunction, char *name ) 
 	{ 
 #ifdef _WIN32
-		if (pFunction && !NAME_FOR_FUNCTION((unsigned long)(pFunction)) )
-			ALERT( at_error, "No EXPORT: %s:%s (%08lx)\n", STRING(pev->classname), name, (unsigned long)pFunction );
+		if (pFunction && !NAME_FOR_FUNCTION((uint32)pFunction) )
+			ALERT( at_error, "No EXPORT: %s:%s (%08lx)\n", STRING(pev->classname), name, pFunction );
 #endif // _WIN32
 	}
 
@@ -322,7 +326,7 @@ public:
 
 
 	//
-	static CBaseEntity *Create( char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL );
+	static CBaseEntity *Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL );
 
 	virtual BOOL FBecomeProne( void ) {return FALSE;};
 	edict_t *edict() { return ENT( pev ); };
@@ -657,7 +661,7 @@ class CSound;
 #include "basemonster.h"
 
 
-char *ButtonSound( int sound );				// get string of button sound number
+const char *ButtonSound( int sound );				// get string of button sound number
 
 
 //
@@ -798,4 +802,4 @@ public:
 };
 
 // QUAKECLASSIC
-extern char *g_szDeathType;
+extern const char *g_szDeathType;

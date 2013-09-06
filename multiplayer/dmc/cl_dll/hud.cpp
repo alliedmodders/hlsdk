@@ -28,7 +28,7 @@
 #include "demo.h"
 #include "demo_api.h"
 #include "voice_status.h"
-#include "vgui_scorepanel.h"
+#include "vgui_ScorePanel.h"
 
 
 class CDMCVoiceStatusHelper : public IVoiceStatusHelper
@@ -38,11 +38,11 @@ public:
 	{
 		color[0] = color[1] = color[2] = 255;
 
-		if( entindex >= 0 && entindex < sizeof(g_PlayerExtraInfo)/sizeof(g_PlayerExtraInfo[0]) )
+		if( entindex >= 0 && size_t(entindex) < sizeof(g_PlayerExtraInfo)/sizeof(g_PlayerExtraInfo[0]) )
 		{
 			int iTeam = g_PlayerExtraInfo[entindex].teamnumber;
 
-			if( iTeam >= 0 && iTeam < sizeof(iTeamColors)/sizeof(iTeamColors[0]) )
+			if( iTeam >= 0 && size_t(iTeam) < sizeof(iTeamColors)/sizeof(iTeamColors[0]) )
 			{
 				color[0] = iTeamColors[iTeam][0];
 				color[1] = iTeamColors[iTeam][1];
@@ -159,6 +159,30 @@ int __MsgFunc_TeamInfo(const char *pszName, int iSize, void *pbuf)
 	return 0;
 }
 
+void __CmdFunc_OpenCommandMenu(void)
+{
+	if ( gViewPort )
+	{
+		gViewPort->ShowCommandMenu( gViewPort->m_StandardMenu );
+	}
+}
+
+void __CmdFunc_CloseCommandMenu(void)
+{
+	if ( gViewPort )
+	{
+		gViewPort->InputSignalHideCommandMenu();
+	}
+}
+
+void __CmdFunc_ForceCloseCommandMenu( void )
+{
+	if ( gViewPort )
+	{
+		gViewPort->HideCommandMenu();
+	}
+}
+
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
 {
@@ -173,6 +197,10 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( ServerName );
 
 	HOOK_COMMAND( "togglebrowser", ToggleServerBrowser );
+
+	HOOK_COMMAND( "+commandmenu", OpenCommandMenu );
+	HOOK_COMMAND( "-commandmenu", CloseCommandMenu );
+	HOOK_COMMAND( "ForceCloseCommandMenu", ForceCloseCommandMenu );
 
 	// QUAKECLASSIC
 	HOOK_MESSAGE( QItems );
@@ -239,7 +267,7 @@ void CHud :: Init( void )
 	MsgFunc_ResetHUD(0, 0, NULL );
 }
 
-CHud::CHud() : m_iSpriteCount(0), m_pHudList(NULL)
+CHud::CHud() : m_pHudList(NULL), m_iSpriteCount(0)
 {
 }
 
@@ -319,7 +347,7 @@ void CHud :: VidInit( void )
 			}
 
 			// allocated memory for sprite handle arrays
- 			m_rghSprites = new HSPRITE[m_iSpriteCount];
+ 			m_rghSprites = new HLSPRITE[m_iSpriteCount];
 			m_rgrcRects = new wrect_t[m_iSpriteCount];
 			m_rgszSpriteNames = new char[m_iSpriteCount * MAX_SPRITE_NAME_LENGTH];
 
@@ -383,8 +411,6 @@ void CHud :: VidInit( void )
 	m_AmmoSecondary.VidInit();
 	m_TextMessage.VidInit();
 	m_StatusIcons.VidInit();
-
-	m_Spectator.VidInit();
 
 	GetClientVoiceMgr()->VidInit();
 }

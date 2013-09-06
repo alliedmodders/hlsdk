@@ -109,7 +109,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 		pWeapon->rcCrosshair = p->rc;
 	}
 	else
-		pWeapon->hCrosshair = NULL;
+		pWeapon->hCrosshair = 0;
 
 	p = GetSpriteList(pList, "autoaim", iRes, i);
 	if (p)
@@ -229,7 +229,7 @@ WEAPON* WeaponsResource :: GetNextActivePos( int iSlot, int iSlotPos )
 
 int giBucketHeight, giBucketWidth, giABHeight, giABWidth; // Ammo Bar width and height
 
-HSPRITE ghsprBuckets;					// Sprite for top row of weapons menu
+HLSPRITE ghsprBuckets;					// Sprite for top row of weapons menu
 
 DECLARE_MESSAGE(m_Ammo, CurWeapon );	// Current weapon and clip
 DECLARE_MESSAGE(m_Ammo, WeaponList);	// new weapon type
@@ -308,9 +308,6 @@ void CHudAmmo::Reset(void)
 
 	gWR.Reset();
 	gHR.Reset();
-
-	//	VidInit();
-
 }
 
 int CHudAmmo::VidInit(void)
@@ -394,7 +391,7 @@ void CHudAmmo::Think(void)
 // Helper function to return a Ammo pointer from id
 //
 
-HSPRITE* WeaponsResource :: GetAmmoPicFromWeapon( int iAmmoId, wrect_t& rect )
+HLSPRITE* WeaponsResource :: GetAmmoPicFromWeapon( int iAmmoId, wrect_t& rect )
 {
 	for ( int i = 0; i < MAX_WEAPONS; i++ )
 	{
@@ -740,7 +737,7 @@ void CHudAmmo::UserCmd_Close(void)
 		PlaySound("common/wpn_hudoff.wav", 1);
 	}
 	else
-		ClientCmd("escape");
+		EngineClientCmd("escape");
 }
 
 
@@ -890,11 +887,11 @@ int CHudAmmo::Draw(float flTime)
 			x = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
 			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, pw->iClip, r, g, b);
 
-			wrect_t rc;
+			/*wrect_t rc;
 			rc.top = 0;
 			rc.left = 0;
 			rc.right = AmmoWidth;
-			rc.bottom = 100;
+			rc.bottom = 100;*/
 
 			int iBarWidth =  AmmoWidth/10;
 

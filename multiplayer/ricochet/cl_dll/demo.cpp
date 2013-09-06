@@ -18,11 +18,9 @@
 #include "demo_api.h"
 #include <memory.h>
 
-#define DLLEXPORT __declspec( dllexport )
-
 extern "C" 
 {
-	void DLLEXPORT Demo_ReadBuffer( int size, unsigned char *buffer );
+	void EXPORT Demo_ReadBuffer( int size, unsigned char *buffer );
 }
 
 /*
@@ -52,7 +50,7 @@ Demo_ReadBuffer
 Engine wants us to parse some data from the demo stream
 =====================
 */
-void DLLEXPORT Demo_ReadBuffer( int size, unsigned char *buffer )
+void EXPORT Demo_ReadBuffer( int size, unsigned char *buffer )
 {
 	int type;
 	int i = 0;

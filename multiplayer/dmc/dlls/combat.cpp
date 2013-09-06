@@ -275,7 +275,7 @@ void CGib :: WaitTillLand ( void )
 
 	if ( pev->velocity == g_vecZero )
 	{
-		SetThink (&CBaseEntity::SUB_StartFadeOut);
+		SetThink (&CGib::SUB_StartFadeOut);
 		pev->nextthink = gpGlobals->time + m_lifeTime;
 	}
 	else
@@ -336,7 +336,7 @@ void CGib :: StickyGibTouch ( CBaseEntity *pOther )
 	Vector	vecSpot;
 	TraceResult	tr;
 	
-	SetThink ( &CBaseEntity::SUB_Remove );
+	SetThink ( &CGib::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 10;
 
 	if ( !FClassnameIs( pOther->pev, "worldspawn" ) )
@@ -363,7 +363,7 @@ void CGib :: StickyGibTouch ( CBaseEntity *pOther )
 void CBaseMonster :: GibMonster( void )
 {
 	TraceResult	tr;
-	BOOL		gibbed = FALSE;
+//	BOOL		gibbed = FALSE;
 
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM);		
 
@@ -378,7 +378,7 @@ void CBaseMonster :: GibMonster( void )
 		/*CGib::SpawnHeadGib( pev );
 		CGib::SpawnRandomGibs( pev, 4, 1 );	// throw some human gibs.*/
 	}
-	gibbed = TRUE;
+//	gibbed = TRUE;
 }
 
 //=========================================================
@@ -509,12 +509,10 @@ Activity CBaseMonster :: GetDeathActivity ( void )
 Activity CBaseMonster :: GetSmallFlinchActivity ( void )
 {
 	Activity	flinchActivity;
-	BOOL		fTriedDirection;
-	float		flDot;
+//	float		flDot;
 
-	fTriedDirection = FALSE;
 	UTIL_MakeVectors ( pev->angles );
-	flDot = DotProduct ( gpGlobals->v_forward, g_vecAttackDir * -1 );
+//	flDot = DotProduct ( gpGlobals->v_forward, g_vecAttackDir * -1 );
 	
 	switch ( m_LastHitGroup )
 	{

@@ -31,6 +31,7 @@ public:
 	virtual void createPopup(Panel* embeddedPanel);
 	virtual bool hasFocus();
 	virtual bool isWithin(int x,int y);
+	virtual void GetMousePos( int &x, int &y );
 protected:
 	virtual int  createNewTextureID(void);
 	virtual void drawSetColor(int r,int g,int b,int a);

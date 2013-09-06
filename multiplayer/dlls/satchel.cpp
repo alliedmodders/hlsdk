@@ -78,7 +78,7 @@ void CSatchelCharge :: Spawn( void )
 	UTIL_SetOrigin( pev, pev->origin );
 
 	SetTouch( &CSatchelCharge::SatchelSlide );
-	SetUse( &CGrenade::DetonateUse );
+	SetUse( &CSatchelCharge::DetonateUse );
 	SetThink( &CSatchelCharge::SatchelThink );
 	pev->nextthink = gpGlobals->time + 0.1;
 
@@ -320,7 +320,7 @@ void CSatchel::Holster( int skiplocal /* = 0 */ )
 	if ( !m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] && !m_chargeReady )
 	{
 		m_pPlayer->pev->weapons &= ~(1<<WEAPON_SATCHEL);
-		SetThink( &CBasePlayerItem::DestroyItem );
+		SetThink( &CSatchel::DestroyItem );
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
 }
@@ -357,7 +357,7 @@ void CSatchel::PrimaryAttack()
 		}
 
 		m_chargeReady = 2;
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.5;
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.5;
 		break;
@@ -385,11 +385,9 @@ void CSatchel::Throw( void )
 {
 	if ( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
 	{
-		Vector vecSrc = m_pPlayer->pev->origin;
-
-		Vector vecThrow = gpGlobals->v_forward * 274 + m_pPlayer->pev->velocity;
-
 #ifndef CLIENT_DLL
+		Vector vecSrc = m_pPlayer->pev->origin;
+		Vector vecThrow = gpGlobals->v_forward * 274 + m_pPlayer->pev->velocity;
 		CBaseEntity *pSatchel = Create( "monster_satchel", vecSrc, Vector( 0, 0, 0), m_pPlayer->edict() );
 		pSatchel->pev->velocity = vecThrow;
 		pSatchel->pev->avelocity.y = 400;
@@ -409,7 +407,7 @@ void CSatchel::Throw( void )
 		
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1.0;
+		m_flNextPrimaryAttack = GetNextAttackDelay(1.0);
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
 	}
 }
@@ -452,7 +450,7 @@ void CSatchel::WeaponIdle( void )
 		// use tripmine animations
 		strcpy( m_pPlayer->m_szAnimExtention, "trip" );
 
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.5;
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
 		m_chargeReady = 0;
 		break;

@@ -36,11 +36,13 @@
 // This is conveniently done for them in extdll.h
 //
 
+/*
 #ifdef _WIN32
 #define DLLEXPORT __stdcall
 #else
-#define DLLEXPORT /* */
+#define DLLEXPORT  __attribute__ ((visibility("default")))
 #endif
+*/
 
 typedef enum
 	{
@@ -147,7 +149,7 @@ typedef struct enginefuncs_s
 	void		(*pfnServerExecute)			(void);
 	void		(*pfnClientCommand)			(edict_t* pEdict, const char* szFmt, ...);
 	void		(*pfnParticleEffect)		(const float *org, const float *dir, float color, float count);
-	void		(*pfnLightStyle)			(int style, char* val);
+	void		(*pfnLightStyle)			(int style, const char* val);
 	int			(*pfnDecalIndex)			(const char *name);
 	int			(*pfnPointContents)			(const float *rgflVector);
 	void		(*pfnMessageBegin)			(int msg_dest, int msg_type, const float *pOrigin, edict_t *ed);
@@ -199,7 +201,7 @@ typedef struct enginefuncs_s
 	void		(*pfnSetView)				(const edict_t *pClient, const edict_t *pViewent );
 	float		(*pfnTime)					( void );
 	void		(*pfnCrosshairAngle)		(const edict_t *pClient, float pitch, float yaw);
-	byte *      (*pfnLoadFileForMe)         (char *filename, int *pLength);
+	byte *      (*pfnLoadFileForMe)         (const char *filename, int *pLength);
 	void        (*pfnFreeFile)              (void *buffer);
 	void        (*pfnEndSection)            (const char *pszSectionName); // trigger_endsection
 	int 		(*pfnCompareFileTime)       (char *filename1, char *filename2, int *iCompare);
@@ -238,7 +240,7 @@ typedef struct enginefuncs_s
 
 	void		(*pfnDeltaSetField)			( struct delta_s *pFields, const char *fieldname );
 	void		(*pfnDeltaUnsetField)		( struct delta_s *pFields, const char *fieldname );
-	void		(*pfnDeltaAddEncoder)		( char *name, void (*conditionalencode)( struct delta_s *pFields, const unsigned char *from, const unsigned char *to ) );
+	void		(*pfnDeltaAddEncoder)		( const char *name, void (*conditionalencode)( struct delta_s *pFields, const unsigned char *from, const unsigned char *to ) );
 	int			(*pfnGetCurrentPlayer)		( void );
 	int			(*pfnCanSkipPlayer)			( const edict_t *player );
 	int			(*pfnDeltaFindField)		( struct delta_s *pFields, const char *fieldname );
@@ -248,7 +250,7 @@ typedef struct enginefuncs_s
 	void		(*pfnSetGroupMask)			( int mask, int op );
 
 	int			(*pfnCreateInstancedBaseline) ( int classname, struct entity_state_s *baseline );
-	void		(*pfnCvar_DirectSet)		( struct cvar_s *var, char *value );
+	void		(*pfnCvar_DirectSet)		( struct cvar_s *var, const char *value );
 
 	// Forces the client and server to be running with the same version of the specified file
 	//  ( e.g., a player model ).
@@ -289,10 +291,10 @@ typedef struct enginefuncs_s
 	int			(*pfnGetTimesTutorMessageShown)			(int mid);
 	void		(*pfnProcessTutorMessageDecayBuffer)	(int *buffer, int bufferLength);
 	void		(*pfnConstructTutorMessageDecayBuffer)	(int *buffer, int bufferLength);
-	void		(*pfnResetTutorMessageDecayData)		( void );
+	void		(*pfnResetTutorMessageDecayData)	( void );
 	void		(*pfnQueryClientCvarValue)				( const edict_t *player, const char *cvarName );
 	void		(*pfnQueryClientCvarValue2)		( const edict_t *player, const char *cvarName, int requestID );
-	int		(*pfnEngCheckParm)			( const char *pchCmdLineToken, char **pchNextVal );
+	int		(*pfnCheckParm)				( const char *pchCmdLineToken, char **ppnext );
 } enginefuncs_t;
 
 
@@ -391,7 +393,7 @@ typedef enum _fieldtypes
 	FIELD_TYPECOUNT,		// MUST BE LAST
 } FIELDTYPE;
 
-#ifndef offsetof
+#if !defined(offsetof) && !defined(GNUC)
 #define offsetof(s,m)	(size_t)&(((s *)0)->m)
 #endif
 
@@ -408,7 +410,7 @@ typedef enum _fieldtypes
 typedef struct 
 {
 	FIELDTYPE		fieldType;
-	char			*fieldName;
+	const char			*fieldName;
 	int				fieldOffset;
 	short			fieldSize;
 	short			flags;

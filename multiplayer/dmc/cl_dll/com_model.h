@@ -78,7 +78,6 @@ typedef struct
 } dmodel_t;
 
 // plane_t structure
-// plane_t structure
 #ifndef _MPLANE_DEFINED_
 #define _MPLANE_DEFINED_
 typedef struct mplane_s

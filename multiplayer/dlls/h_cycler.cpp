@@ -35,7 +35,7 @@
 class CCycler : public CBaseMonster
 {
 public:
-	void GenericCyclerSpawn(char *szModel, Vector vecMin, Vector vecMax);
+	void GenericCyclerSpawn(const char *szModel, Vector vecMin, Vector vecMax);
 	virtual int	ObjectCaps( void ) { return (CBaseEntity :: ObjectCaps() | FCAP_IMPULSE_USE); }
 	int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType );
 	void Spawn( void );
@@ -93,7 +93,7 @@ void CCyclerProbe :: Spawn( void )
 
 // Cycler member functions
 
-void CCycler :: GenericCyclerSpawn(char *szModel, Vector vecMin, Vector vecMax)
+void CCycler :: GenericCyclerSpawn(const char *szModel, Vector vecMin, Vector vecMax)
 {
 	if (!szModel || !*szModel)
 	{
@@ -334,7 +334,7 @@ void CWeaponCycler::Spawn( )
 
 	UTIL_SetOrigin( pev, pev->origin );
 	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
-	SetTouch( &CBasePlayerItem::DefaultTouch );
+	SetTouch( &CWeaponCycler::DefaultTouch );
 }
 
 

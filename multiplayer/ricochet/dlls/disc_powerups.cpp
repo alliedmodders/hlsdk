@@ -33,7 +33,7 @@ extern int gmsgPowerup;
 
 //=========================================================
 // POWERUPS
-char *szPowerupModels[NUM_POWERUPS] =
+const char *szPowerupModels[NUM_POWERUPS] =
 {
 	"models/pow_triple.mdl",
 	"models/pow_fast.mdl",
@@ -231,3 +231,4 @@ bool CBasePlayer::HasPowerup( int iPowerupType )
 {
 	return (m_iPowerups & iPowerupType) != 0;
 }
+

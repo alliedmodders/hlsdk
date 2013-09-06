@@ -238,7 +238,7 @@ void CWallHealth::Recharge(void)
 	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/medshot4.wav", 1.0, ATTN_NORM );
 	m_iJuice = static_cast<int>(gSkillData.healthchargerCapacity);
 	pev->frame = 0;			
-	SetThink( &CBaseEntity::SUB_DoNothing );
+	SetThink( &CWallHealth::SUB_DoNothing );
 }
 
 void CWallHealth::Off(void)
@@ -255,5 +255,5 @@ void CWallHealth::Off(void)
 		SetThink(&CWallHealth::Recharge);
 	}
 	else
-		SetThink( &CBaseEntity::SUB_DoNothing );
+		SetThink( &CWallHealth::SUB_DoNothing );
 }

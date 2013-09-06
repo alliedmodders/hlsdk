@@ -24,7 +24,9 @@
 #include "demo_api.h"
 #include "studio_util.h"
 
+#ifdef _MSC_VER
 #pragma warning(disable: 4244)
+#endif
 
 extern "C" int		iJumpSpectator;
 extern "C" float	vJumpOrigin[3];
@@ -184,7 +186,7 @@ void UTIL_StringToVector( float * pVector, const char *pString )
 	}
 }
 
-int UTIL_FindEntityInMap(char * name, float * origin, float * angle)
+int UTIL_FindEntityInMap(const char * name, float * origin, float * angle)
 {
 	int				n,found = 0;
 	char			keyname[256];
@@ -554,10 +556,9 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 							// gEngfuncs.Con_DPrintf("GUI: Banner %s\n",READ_STRING() ); // name of banner tga eg gfx/temp/7454562234563475.tga
 							gViewPort->m_pSpectatorPanel->m_TopBanner->LoadImage( READ_STRING() );
 							gViewPort->UpdateSpectatorPanel();
-							break; */
-
+							break; 
 		case DRC_CMD_FADE:		
-							/*{
+							{
 								screenfade_t sf;
 								
 								sf.fader = 255;
@@ -574,8 +575,9 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 								stream->ReadLong();	// color	RGB
 
 								CallEnghudSetScreenFade( &sf );
-							}*/
+							}
 							break;
+*/
 
 		case DRC_CMD_STUFFTEXT:
 							ClientCmd( READ_STRING() );
@@ -1059,7 +1061,7 @@ void CHudSpectator::DrawOverviewLayer()
 	if ( hasMapImage)
 	{
 		i = m_MapSprite->numframes / (4*3);
-		i = static_cast<int>(sqrt(static_cast<long double>(i)));
+		i = (int)sqrt((double)i);
 		xTiles = i*4;
 		yTiles = i*3;
 	}
@@ -1407,7 +1409,7 @@ void CHudSpectator::CheckOverviewEntities()
 
 bool CHudSpectator::AddOverviewEntity( int type, struct cl_entity_s *ent, const char *modelname)
 {
-	HSPRITE	hSprite = 0;
+	HLSPRITE	hSprite = 0;
 	double  duration = -1.0f;	// duration -1 means show it only this frame;
 
 	if ( !ent )
@@ -1447,7 +1449,7 @@ void CHudSpectator::DeathMessage(int victim)
 		AddOverviewEntityToList(m_hsprPlayerDead, pl, gEngfuncs.GetClientTime() + 2.0f );
 }
 
-bool CHudSpectator::AddOverviewEntityToList(HSPRITE sprite, cl_entity_t *ent, double killTime)
+bool CHudSpectator::AddOverviewEntityToList(HLSPRITE sprite, cl_entity_t *ent, double killTime)
 {
 	for ( int i = 0; i< MAX_OVERVIEW_ENTITIES; i++ )
 	{

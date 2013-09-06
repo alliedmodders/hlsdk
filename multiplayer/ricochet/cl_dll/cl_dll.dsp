@@ -23,8 +23,8 @@ CFG=cl_dll - Win32 Release
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""
-# PROP Scc_LocalPath ""
+# PROP Scc_ProjName ""$Goldsrc/discwar/cl_dll", HGEBAAAA"
+# PROP Scc_LocalPath "."
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MT /W3 /GX /Zi /O2 /I ".\\" /I "..\\" /I "..\dlls" /I "..\..\engine" /I "..\..\common" /I "..\..\game_shared" /I "..\pm_shared" /I "..\..\utils\vgui\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CLIENT_DLL" /D "RICOCHET_BUILD" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /Zi /O2 /I "..\\" /I "..\dlls" /I ".\\" /I "..\..\game_shared" /I "..\..\engine" /I "..\..\public" /I "..\..\common" /I "..\pm_shared" /I "..\..\utils\vgui\include" /I "..\..\external" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CLIENT_DLL" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -53,8 +53,25 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib winmm.lib ../../utils/vgui/lib/win32_vc6/vgui.lib wsock32.lib /nologo /subsystem:windows /dll /map /machine:I386 /out:".\Release\client.dll"
-# SUBTRACT LINK32 /debug
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib winmm.lib ../../utils/vgui/lib/win32_vc6/vgui.lib wsock32.lib ..\..\lib\public\sdl2.lib /nologo /subsystem:windows /dll /map /debug /machine:I386 /out:".\Release\client.dll"
+# SUBTRACT LINK32 /pdb:none
+# Begin Custom Build - Copying to d:\quiver\ricochet\cl_dlls
+InputDir=.\Release
+ProjDir=.
+InputPath=.\Release\client.dll
+SOURCE="$(InputPath)"
+
+BuildCmds= \
+	call ..\..\filecopy.bat $(InputPath) $(ProjDir)\..\..\..\game\mod\cl_dlls\client.dll \
+	call ..\..\filecopy.bat $(InputDir)\client.pdb $(ProjDir)\..\..\..\game\mod\cl_dlls\client.pdb \
+	
+
+"$(ProjDir)\..\..\..\game\mod\cl_dlls\client.dll" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(ProjDir)\..\..\..\game\mod\cl_dlls\client.pdb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
 
 !ELSEIF  "$(CFG)" == "cl_dll - Win32 Debug"
 
@@ -70,7 +87,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /G5 /MTd /W3 /Gm /GX /ZI /Od /I "..\\" /I "..\dlls" /I ".\\" /I "..\..\game_shared" /I "..\..\engine" /I "..\..\common" /I "..\pm_shared" /I "..\..\utils\vgui\include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "CLIENT_DLL" /D "RICOCHET_BUILD" /FR /YX /FD /c
+# ADD CPP /nologo /G5 /MTd /W3 /Gm /GX /ZI /Od /I "..\\" /I "..\dlls" /I ".\\" /I "..\..\game_shared" /I "..\..\engine" /I "..\..\public" /I "..\..\common" /I "..\pm_shared" /I "..\..\utils\vgui\include" /I "..\..\external" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "CLIENT_DLL" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -80,7 +97,17 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386
-# ADD LINK32 oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib winmm.lib ../../utils/vgui/lib/win32_vc6/vgui.lib wsock32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:".\Debug\client.dll"
+# ADD LINK32 oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib winmm.lib ../../utils/vgui/lib/win32_vc6/vgui.lib wsock32.lib ..\..\lib\public\sdl2.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:".\Debug\client.dll"
+# SUBTRACT LINK32 /pdb:none
+# Begin Custom Build - Copying to \quiver\ricochet\cl_dlls
+ProjDir=.
+InputPath=.\Debug\client.dll
+SOURCE="$(InputPath)"
+
+"$(ProjDir)\..\..\..\game\mod\cl_dlls\client.dll" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	call ..\..\filecopy.bat $(InputPath) $(ProjDir)\..\..\..\game\mod\cl_dlls\client.dll 
+	
+# End Custom Build
 
 !ENDIF 
 
@@ -217,7 +244,7 @@ SOURCE=.\inputw32.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\interface.cpp
+SOURCE=..\..\public\interface.cpp
 # End Source File
 # Begin Source File
 
@@ -229,11 +256,7 @@ SOURCE=.\message.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\parsemsg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\parsemsg.h
+SOURCE=..\..\common\parsemsg.cpp
 # End Source File
 # Begin Source File
 
@@ -361,7 +384,7 @@ SOURCE=..\..\game_shared\voice_banmgr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\game_shared\voice_status.cpp
+SOURCE=.\voice_status.cpp
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -382,6 +405,10 @@ SOURCE=.\camera.h
 # Begin Source File
 
 SOURCE=.\cl_dll.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cl_util.h
 # End Source File
 # Begin Source File
 
@@ -430,6 +457,10 @@ SOURCE=.\in_defs.h
 # Begin Source File
 
 SOURCE=.\kbutton.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\parsemsg.h
 # End Source File
 # Begin Source File
 

@@ -14,7 +14,7 @@
 #include<VGUI_TextGrid.h>
 #include<VGUI_Label.h>
 #include<VGUI_TextImage.h>
-#include "..\game_shared\vgui_listbox.h"
+#include "../game_shared/vgui_listbox.h"
 
 #include <ctype.h>
 
@@ -222,8 +222,8 @@ private:
 
 class ScoreTablePanel;
 
-#include "..\game_shared\vgui_grid.h"
-#include "..\game_shared\vgui_defaultinputsignal.h"
+#include "../game_shared/vgui_grid.h"
+#include "../game_shared/vgui_defaultinputsignal.h"
 
 //-----------------------------------------------------------------------------
 // Purpose: Scoreboard back panel
@@ -304,7 +304,7 @@ public:
 	virtual void mousePressed(MouseCode code, Panel* panel);
 	virtual void cursorMoved(int x, int y, Panel *panel);
 
-	friend CLabelHeader;
+	friend class CLabelHeader;
 };
 
 #endif

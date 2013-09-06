@@ -431,7 +431,7 @@ void CFuncRotating :: Spawn( )
 	// instant-use brush?
 	if ( FBitSet( pev->spawnflags, SF_BRUSH_ROTATE_INSTANT) )
 	{		
-		SetThink( &CBaseEntity::SUB_CallUseToggle );
+		SetThink( &CFuncRotating::SUB_CallUseToggle );
 		pev->nextthink = pev->ltime + 1.5;	// leave a magic delay for client to start up
 	}	
 	// can this brush inflict pain?
@@ -812,7 +812,7 @@ void CPendulum :: Spawn( void )
 
 	if ( FBitSet( pev->spawnflags, SF_BRUSH_ROTATE_INSTANT) )
 	{		
-		SetThink( &CBaseEntity::SUB_CallUseToggle );
+		SetThink( &CPendulum::SUB_CallUseToggle );
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
 	pev->speed = 0;

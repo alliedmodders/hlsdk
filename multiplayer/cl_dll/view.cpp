@@ -22,50 +22,44 @@
 #include "pm_defs.h"
 #include "event_api.h"
 #include "pmtrace.h"
+#include "bench.h"
 #include "screenfade.h"
 #include "shake.h"
 #include "hltv.h"
+#include "Exports.h"
 
-// Spectator Mode
-extern "C" 
-{
-	float	vecNewViewAngles[3];
-	int		iHasNewViewAngles;
-	float	vecNewViewOrigin[3];
-	int		iHasNewViewOrigin;
-	int		iIsSpectator;
-}
 
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
 
-extern "C" 
-{
 	int CL_IsThirdPerson( void );
 	void CL_CameraOffset( float *ofs );
 
-	void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
+	void CL_DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
 
 	void PM_ParticleLine( float *start, float *end, int pcolor, float life, float vert);
 	int		PM_GetVisEntInfo( int ent );
-	int		PM_GetPhysEntInfo( int ent );
+	extern "C" int		PM_GetPhysEntInfo( int ent );
 	void	InterpolateAngles(  float * start, float * end, float * output, float frac );
 	void	NormalizeAngles( float * angles );
-	float	Distance(const float * v1, const float * v2);
+	extern "C" float	Distance(const float * v1, const float * v2);
 	float	AngleBetweenVectors(  const float * v1,  const float * v2 );
 
 	float	vJumpOrigin[3];
 	float	vJumpAngles[3];
-}
+
 
 void V_DropPunchAngle ( float frametime, float *ev_punchangle );
 void VectorAngles( const float *forward, float *angles );
 
 #include "r_studioint.h"
 #include "com_model.h"
+#include "kbutton.h"
 
 extern engine_studio_api_t IEngineStudio;
+
+extern kbutton_t	in_mlook;
 
 /*
 The view is allowed to move slightly from it's true position for bobbing,
@@ -133,6 +127,7 @@ void V_NormalizeAngles( float *angles )
 		}
 	}
 }
+*/
 
 /*
 ===================
@@ -303,18 +298,30 @@ void V_DriftPitch ( struct ref_params_s *pparams )
 	}
 
 	// don't count small mouse motion
-	if (pd.nodrift)
+	if ( pd.nodrift)
 	{
-		if ( fabs( pparams->cmd->forwardmove ) < cl_forwardspeed->value )
-			pd.driftmove = 0;
-		else
-			pd.driftmove += pparams->frametime;
-	
-		if ( pd.driftmove > v_centermove->value)
-		{
-			V_StartPitchDrift ();
+		if ( v_centermove->value > 0 && !(in_mlook.state & 1) )
+		{		
+			// this is for lazy players. if they stopped, looked around and then continued
+			// to move the view will be centered automatically if they move more than
+			// v_centermove units. 
+
+			if ( fabs( pparams->cmd->forwardmove ) < cl_forwardspeed->value )
+				pd.driftmove = 0;
+			else
+				pd.driftmove += pparams->frametime;
+		
+			if ( pd.driftmove > v_centermove->value)
+			{
+				V_StartPitchDrift ();
+			}
+			else
+			{
+				return;	// player didn't move enough
+			}
 		}
-		return;
+
+		return;	// don't drift view
 	}
 	
 	delta = pparams->idealpitch - pparams->cl_viewangles[PITCH];
@@ -326,7 +333,8 @@ void V_DriftPitch ( struct ref_params_s *pparams )
 	}
 
 	move = pparams->frametime * pd.pitchvel;
-	pd.pitchvel += pparams->frametime * v_centerspeed->value;
+	
+	pd.pitchvel *= (1.0f+(pparams->frametime*0.25f)); // get faster by time
 	
 	if (delta > 0)
 	{
@@ -393,7 +401,7 @@ void V_AddIdle ( struct ref_params_s *pparams )
 	pparams->viewangles[YAW] += v_idlescale * sin(pparams->time*v_iyaw_cycle.value) * v_iyaw_level.value;
 }
 
-
+ 
 /*
 ==============
 V_CalcViewRoll
@@ -432,11 +440,11 @@ V_CalcIntermissionRefdef
 */
 void V_CalcIntermissionRefdef ( struct ref_params_s *pparams )
 {
-	cl_entity_t	*ent, *view;
+	cl_entity_t	/**ent,*/ *view;
 	float		old;
 
 	// ent is the player model ( visible when out of body )
-	ent = gEngfuncs.GetLocalPlayer();
+	//ent = gEngfuncs.GetLocalPlayer();
 	
 	// view is the weapon model (only visible from inside body )
 	view = gEngfuncs.GetViewModel();
@@ -1387,7 +1395,27 @@ void V_GetMapChasePosition(int target, float * cl_angles, float * origin, float 
 int V_FindViewModelByWeaponModel(int weaponindex)
 {
 
-	static char * modelmap[][2] =	{
+	static const char *modelmap[][2] =	{
+
+# ifdef _TFC	// TFC models override HL models
+		{ "models/p_mini.mdl",			"models/v_tfac.mdl"			},
+		{ "models/p_sniper.mdl",		"models/v_tfc_sniper.mdl"	},
+		{ "models/p_umbrella.mdl",		"models/v_umbrella.mdl"		},
+		{ "models/p_crowbar.mdl",		"models/v_tfc_crowbar.mdl"	},
+		{ "models/p_spanner.mdl",		"models/v_tfc_spanner.mdl"	},
+		{ "models/p_knife.mdl",			"models/v_tfc_knife.mdl"	},
+		{ "models/p_medkit.mdl",		"models/v_tfc_medkit.mdl"	},
+		{ "models/p_egon.mdl",			"models/v_flame.mdl"		},
+		{ "models/p_glauncher.mdl",		"models/v_tfgl.mdl"			},
+		{ "models/p_rpg.mdl",			"models/v_tfc_rpg.mdl"		},
+		{ "models/p_nailgun.mdl",		"models/v_tfc_nailgun.mdl"	},
+		{ "models/p_snailgun.mdl",		"models/v_tfc_supernailgun.mdl" },
+		{ "models/p_9mmhandgun.mdl",	"models/v_tfc_railgun.mdl"	},
+		{ "models/p_srpg.mdl",			"models/v_tfc_rpg.mdl"		},
+		{ "models/p_smallshotgun.mdl",	"models/v_tfc_12gauge.mdl"	},
+		{ "models/p_shotgun.mdl",		"models/v_tfc_shotgun.mdl"	},
+		{ "models/p_spygun.mdl",		"models/v_tfc_pistol.mdl"	},
+#endif
 		{ "models/p_crossbow.mdl",		"models/v_crossbow.mdl"		},
 		{ "models/p_crowbar.mdl",		"models/v_crowbar.mdl"		},
 		{ "models/p_egon.mdl",			"models/v_egon.mdl"			},
@@ -1473,7 +1501,11 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 		}
 
 		// predict missing client data and set weapon model ( in HLTV mode or inset in eye mode )
+#ifdef _TFC
+		if ( gEngfuncs.IsSpectateOnly() || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE )
+#else
 		if ( gEngfuncs.IsSpectateOnly() )
+#endif
 		{
 			V_GetInEyePos( g_iUser2, pparams->simorg, pparams->cl_viewangles );
 
@@ -1536,6 +1568,9 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 
 			case OBS_ROAMING	:	VectorCopy (v_cl_angles, v_angles);
 									VectorCopy (v_sim_org, v_origin);
+									
+									// override values if director is active
+									gHUD.m_Spectator.GetDirectorCamera(v_origin, v_angles);
 									break;
 
 			case OBS_IN_EYE		:   V_CalcNormalRefdef ( pparams );
@@ -1602,8 +1637,10 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 
 
 
-void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
+void CL_DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 {
+//	RecClCalcRefdef(pparams);
+
 	// intermission / finale rendering
 	if ( pparams->intermission )
 	{	

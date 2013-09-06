@@ -50,7 +50,7 @@ void CGrenade::Explode( Vector vecSrc, Vector vecAim )
 // UNDONE: temporary scorching for PreAlpha - find a less sleazy permenant solution.
 void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 {
-	float		flRndSound;// sound randomizer
+//	float		flRndSound;// sound randomizer
 
 	pev->model = iStringNull;//invisible
 	pev->solid = SOLID_NOT;// intangible
@@ -103,7 +103,7 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 		UTIL_DecalTrace( pTrace, DECAL_SCORCH2 );
 	}
 
-	flRndSound = RANDOM_FLOAT( 0 , 1 );
+//	flRndSound = RANDOM_FLOAT( 0 , 1 );
 
 	switch ( RANDOM_LONG( 0, 2 ) )
 	{
@@ -442,7 +442,7 @@ CGrenade * CGrenade :: ShootSatchelCharge( entvars_t *pevOwner, Vector vecStart,
 	pGrenade->pev->owner = ENT(pevOwner);
 	
 	// Detonate in "time" seconds
-	pGrenade->SetThink( &CBaseEntity::SUB_DoNothing );
+	pGrenade->SetThink( &CGrenade::SUB_DoNothing );
 	pGrenade->SetUse( &CGrenade::DetonateUse );
 	pGrenade->SetTouch( &CGrenade::SlideTouch );
 	pGrenade->pev->spawnflags = SF_DETONATE;

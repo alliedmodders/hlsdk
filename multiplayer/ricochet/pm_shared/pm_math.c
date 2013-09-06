@@ -29,7 +29,9 @@
 #pragma warning(disable : 4244)
 #endif
 
+#ifndef DISABLE_VEC_ORIGIN
 vec3_t vec3_origin = {0,0,0};
+#endif
 int nanmask = 255<<23;
 
 float	anglemod(float a)
@@ -169,84 +171,6 @@ void AngleIMatrix (const vec3_t angles, float matrix[3][4] )
 	matrix[2][3] = 0.0;
 }
 
-void NormalizeAngles( float *angles )
-{
-	int i;
-	// Normalize angles
-	for ( i = 0; i < 3; i++ )
-	{
-		if ( angles[i] > 180.0 )
-		{
-			angles[i] -= 360.0;
-		}
-		else if ( angles[i] < -180.0 )
-		{
-			angles[i] += 360.0;
-		}
-	}
-}
-
-/*
-===================
-InterpolateAngles
-
-Interpolate Euler angles.
-FIXME:  Use Quaternions to avoid discontinuities
-Frac is 0.0 to 1.0 ( i.e., should probably be clamped, but doesn't have to be )
-===================
-*/
-void InterpolateAngles( float *start, float *end, float *output, float frac )
-{
-	int i;
-	float ang1, ang2;
-	float d;
-	
-	NormalizeAngles( start );
-	NormalizeAngles( end );
-
-	for ( i = 0 ; i < 3 ; i++ )
-	{
-		ang1 = start[i];
-		ang2 = end[i];
-
-		d = ang2 - ang1;
-		if ( d > 180 )
-		{
-			d -= 360;
-		}
-		else if ( d < -180 )
-		{	
-			d += 360;
-		}
-
-		output[i] = ang1 + d * frac;
-	}
-
-	NormalizeAngles( output );
-}
- 
-
-/*
-===================
-AngleBetweenVectors
-
-===================
-*/
-float AngleBetweenVectors( const vec3_t v1, const vec3_t v2 )
-{
-	float angle;
-	float l1 = Length( v1 );
-	float l2 = Length( v2 );
-
-	if ( !l1 || !l2 )
-		return 0.0f;
-
-	angle = acos( DotProduct( v1, v2 ) ) / (l1*l2);
-	angle = ( angle  * 180.0f ) / M_PI;
-
-	return angle;
-}
-
 
 void VectorTransform (const vec3_t in1, float in2[3][4], vec3_t out)
 {
@@ -320,13 +244,6 @@ float Length(const vec3_t v)
 	length = sqrt (length);		// FIXME
 
 	return length;
-}
-
-float Distance(const vec3_t v1, const vec3_t v2)
-{
-	vec3_t d;
-	VectorSubtract(v2,v1,d);
-	return Length(d);
 }
 
 float VectorNormalize (vec3_t v)

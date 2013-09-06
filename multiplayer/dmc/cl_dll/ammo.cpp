@@ -111,7 +111,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 		pWeapon->rcCrosshair = p->rc;
 	}
 	else
-		pWeapon->hCrosshair = NULL;
+		pWeapon->hCrosshair = 0;
 
 	p = GetSpriteList(pList, "autoaim", iRes, i);
 	if (p)
@@ -231,7 +231,7 @@ WEAPON* WeaponsResource :: GetNextActivePos( int iSlot, int iSlotPos )
 
 int giBucketHeight, giBucketWidth, giABHeight, giABWidth; // Ammo Bar width and height
 
-HSPRITE ghsprBuckets;					// Sprite for top row of weapons menu
+HLSPRITE ghsprBuckets;					// Sprite for top row of weapons menu
 
 DECLARE_MESSAGE(m_Ammo, CurWeapon );	// Current weapon and clip
 DECLARE_MESSAGE(m_Ammo, WeaponList);	// new weapon type
@@ -396,7 +396,7 @@ void CHudAmmo::Think(void)
 // Helper function to return a Ammo pointer from id
 //
 
-HSPRITE* WeaponsResource :: GetAmmoPicFromWeapon( int iAmmoId, wrect_t& rect )
+HLSPRITE* WeaponsResource :: GetAmmoPicFromWeapon( int iAmmoId, wrect_t& rect )
 {
 	for ( int i = 0; i < MAX_WEAPONS; i++ )
 	{
@@ -550,7 +550,7 @@ int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 {
 	static wrect_t nullrc;
-	int fOnTarget = FALSE;
+	//int fOnTarget = FALSE;
 	
 
 	BEGIN_READ( pbuf, iSize );
@@ -560,10 +560,10 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 	int iClip = READ_CHAR();
 
 	// detect if we're also on target
-	if ( iState > 1 )
-	{
-		fOnTarget = TRUE;
-	}
+	//if ( iState > 1 )
+	//{
+	//	fOnTarget = TRUE;
+	//}
 
 	if ( iId < 1 )
 	{
@@ -794,13 +794,13 @@ void CHudAmmo::UserCmd_PrevWeapon(void)
 
 int CHudAmmo::Draw(float flTime)
 {
-	int a, x, y, r, g, b;
+	int a, x = 0, y, r, g, b;
 	int AmmoWidth;
 
 	int iCrossX;
 	int iCrossY;
 	int	iCrossLength;
-	char *chCrossHair = "+"; // Heh
+	const char *chCrossHair = "+"; // Heh
 
 	/*if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
 		return 1;*/
@@ -844,7 +844,7 @@ int CHudAmmo::Draw(float flTime)
 	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight/2;
 
 	/******************* DRAW CROSSHAIR *********************/
-	iCrossLength = gHUD.m_scrinfo.charWidths[ *chCrossHair ];
+	iCrossLength = gHUD.m_scrinfo.charWidths[ size_t(*chCrossHair) ];
 	iCrossY = ScreenHeight / 2 - gHUD.m_scrinfo.iCharHeight / 2;
 	iCrossX = ScreenWidth / 2 - iCrossLength / 2;
 	
@@ -965,7 +965,7 @@ int CHudAmmo::DrawWList(float flTime)
 	// Draw top line
 	for ( i = 0; i < MAX_WEAPON_SLOTS; i++ )
 	{
-		int iWidth;
+		int iWidth = 0;
 
 		UnpackRGB(r,g,b, RGB_YELLOWISH);
 	

@@ -83,7 +83,8 @@ int CHudMenu :: Draw( float flTime )
 	// draw the menu, along the left-hand side of the screen
 
 	// count the number of newlines
-	int nlc = 0, i = 0;
+	int nlc = 0;
+	int i;
 	for ( i = 0; i < MAX_MENU_STRING && g_szMenuString[i] != '\0'; i++ )
 	{
 		if ( g_szMenuString[i] == '\n' )
@@ -102,7 +103,7 @@ int CHudMenu :: Draw( float flTime )
 
 		while ( i < MAX_MENU_STRING && g_szMenuString[i] != '\0' && g_szMenuString[i] != '\n' )
 			i++;
-		if ( g_szMenuString[i] == '\n' )
+		if ( i != MAX_MENU_STRING && g_szMenuString[i] == '\n' )
 			i++;
 	}
 	

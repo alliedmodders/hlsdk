@@ -162,7 +162,7 @@ void CSqueakGrenade::Precache( void )
 void CSqueakGrenade :: Killed( entvars_t *pevAttacker, int iGib )
 {
 	pev->model = iStringNull;// make invisible
-	SetThink( &CBaseEntity::SUB_Remove );
+	SetThink( &CSqueakGrenade::SUB_Remove );
 	SetTouch( NULL );
 	pev->nextthink = gpGlobals->time + 0.1;
 
@@ -482,7 +482,7 @@ void CSqueak::Holster( int skiplocal /* = 0 */ )
 	if ( !m_pPlayer->m_rgAmmo[ m_iPrimaryAmmoType ] )
 	{
 		m_pPlayer->pev->weapons &= ~(1<<WEAPON_SNARK);
-		SetThink( &CBasePlayerItem::DestroyItem );
+		SetThink( &CSqueak::DestroyItem );
 		pev->nextthink = gpGlobals->time + 0.1;
 		return;
 	}
@@ -544,7 +544,7 @@ void CSqueak::PrimaryAttack()
 
 			m_fJustThrown = 1;
 
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.3;
+			m_flNextPrimaryAttack = GetNextAttackDelay(0.3);
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
 		}
 	}

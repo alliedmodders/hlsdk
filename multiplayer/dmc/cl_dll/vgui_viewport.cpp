@@ -45,7 +45,7 @@
 #include "in_defs.h"
 #include "pm_shared.h"
 #include "parsemsg.h"
-#include "../engine/keydefs.h"
+#include "keydefs.h"
 #include "demo.h"
 #include "demo_api.h"
 
@@ -60,9 +60,9 @@ extern int g_iVisibleMouse;
 class CCommandMenu;
 int g_iPlayerClass;
 int g_iTeamNumber;
-int g_iUser1;
-int g_iUser2;
-int g_iUser3;
+int g_iUser1 = 0;
+int g_iUser2 = 0;
+int g_iUser3 = 0;
 
 // Scoreboard positions
 #define SBOARD_INDENT_X			XRES(104)
@@ -94,7 +94,7 @@ int iTeamColors[5][3] =
 };
 
 // Used for Class specific buttons
-char *sTFClasses[] =
+const char *sTFClasses[] =
 {
 	"",
 	"SCOUT",
@@ -109,7 +109,7 @@ char *sTFClasses[] =
 	"CIVILIAN",
 };
 
-char *sLocalisedClasses[] = 
+const char *sLocalisedClasses[] = 
 {
 	"#Civilian",
 	"#Scout",
@@ -125,7 +125,7 @@ char *sLocalisedClasses[] =
 	"#Civilian",
 };
 
-char *sTFClassSelection[] = 
+const char *sTFClassSelection[] = 
 {
 	"civilian",
 	"scout",
@@ -623,7 +623,7 @@ class CException;
 // Purpose: Read the Command Menu structure from the txt file and create the menu.
 //			Returns Index of menu in m_pCommandMenus
 //-----------------------------------------------------------------------------
-int TeamFortressViewport::CreateCommandMenu( char * menuFile, int direction, int yOffset )
+int TeamFortressViewport::CreateCommandMenu( const char * menuFile, int direction, int yOffset )
 {
 	// COMMAND MENU
 	// Create the root of this new Command Menu
@@ -646,8 +646,10 @@ int TeamFortressViewport::CreateCommandMenu( char * menuFile, int direction, int
 		return newIndex;
 	}
 
+#ifdef _WIN32
 try
 {
+#endif
 	// First, read in the localisation strings
 
 	// Detpack strings
@@ -829,6 +831,7 @@ try
 
 		pfile = gEngfuncs.COM_ParseFile(pfile, token);
 	}
+#ifdef _WIN32
 }
 catch( CException *e )
 {
@@ -838,7 +841,7 @@ catch( CException *e )
 	m_iInitialized = false;
 	return newIndex;
 }
-
+#endif
 	SetCurrentMenu( NULL );
 	SetCurrentCommandMenu( NULL );
 	gEngfuncs.COM_FreeFile( pfile );
@@ -869,7 +872,7 @@ CCommandMenu *TeamFortressViewport::CreateDisguiseSubmenu( CommandButton *pButto
 //			*pButtonName - 
 // Output : CommandButton
 //-----------------------------------------------------------------------------
-CommandButton *TeamFortressViewport::CreateCustomButton( char *pButtonText, char *pButtonName, int iYOffset )
+CommandButton *TeamFortressViewport::CreateCustomButton( const char *pButtonText, const char *pButtonName, int iYOffset )
 {
 	CommandButton *pButton = NULL;
 	CCommandMenu  *pMenu = NULL;
@@ -1240,7 +1243,7 @@ void TeamFortressViewport::SetCurrentMenu( CMenuPanel *pMenu )
 CMenuPanel* TeamFortressViewport::CreateTextWindow( int iTextToShow )
 {
 	char sz[256];
-	char *cText;
+	char *cText = NULL;
 	char *pfile = NULL;
 	static const int MAX_TITLE_LENGTH = 32;
 	char cTitle[MAX_TITLE_LENGTH];
@@ -1557,6 +1560,10 @@ void TeamFortressViewport::GetAllPlayersInfo( void )
 
 void TeamFortressViewport::paintBackground()
 {
+	int wide, tall;
+	getParent()->getSize( wide, tall );
+	setSize( wide, tall );
+
 	// See if the command menu is visible and needs recalculating due to some external change
 /*	if ( g_iTeamNumber != m_iCurrentTeamNumber )
 	{

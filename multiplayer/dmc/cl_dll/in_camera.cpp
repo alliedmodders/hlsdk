@@ -15,15 +15,16 @@
 #include "camera.h"
 #include "in_defs.h"
 
-#include "windows.h"
+#include "SDL2/SDL_mouse.h"
+#include "port.h"
 
 float CL_KeyState (kbutton_t *key);
 
 extern "C" 
 {
-	void DLLEXPORT CAM_Think( void );
-	int DLLEXPORT CL_IsThirdPerson( void );
-	void DLLEXPORT CL_CameraOffset( float *ofs );
+	void EXPORT CAM_Think( void );
+	int EXPORT CL_IsThirdPerson( void );
+	void EXPORT CL_CameraOffset( float *ofs );
 }
 
 extern cl_enginefunc_t gEngfuncs;
@@ -79,7 +80,7 @@ POINT		cam_mouse;
 //-------------------------------------------------- Local Variables
 
 static kbutton_t cam_pitchup, cam_pitchdown, cam_yawleft, cam_yawright;
-static kbutton_t cam_in, cam_out, cam_move;
+static kbutton_t cam_in, cam_out;
 
 //-------------------------------------------------- Prototypes
 
@@ -87,6 +88,15 @@ void CAM_ToThirdPerson(void);
 void CAM_ToFirstPerson(void);
 void CAM_StartDistance(void);
 void CAM_EndDistance(void);
+
+void SDL_GetCursorPos( POINT *p )
+{
+	SDL_GetMouseState( (int *)&p->x, (int *)&p->y );
+}
+
+void SDL_SetCursorPos( const int x, const int y )
+{
+}
 
 
 //-------------------------------------------------- Local Functions
@@ -146,7 +156,7 @@ typedef struct
 
 extern trace_t SV_ClipMoveToEntity (edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
 
-void DLLEXPORT CAM_Think( void )
+void EXPORT CAM_Think( void )
 {
 	vec3_t origin;
 	vec3_t ext, pnt, camForward, camRight, camUp;
@@ -194,7 +204,7 @@ void DLLEXPORT CAM_Think( void )
 	if (cam_mousemove)
 	{
 	    //get windows cursor position
-		GetCursorPos (&cam_mouse);
+		SDL_GetCursorPos (&cam_mouse);
 		//check for X delta values and adjust accordingly
 		//eventually adjust YAW based on amount of movement
 	  //don't do any movement of the cam using YAW/PITCH if we are zooming in/out the camera	
@@ -269,7 +279,7 @@ void DLLEXPORT CAM_Think( void )
 			cam_old_mouse_x=cam_mouse.x;
 			cam_old_mouse_y=cam_mouse.y;
 		}
-		SetCursorPos (gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY());
+		SDL_SetCursorPos (gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY());
 	  }
 	}
 
@@ -327,7 +337,7 @@ void DLLEXPORT CAM_Think( void )
 		//since we are done with the mouse
 		cam_old_mouse_x=cam_mouse.x*gHUD.GetSensitivity();
 		cam_old_mouse_y=cam_mouse.y*gHUD.GetSensitivity();
-		SetCursorPos (gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY());
+		SDL_SetCursorPos (gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY());
 	}
 #ifdef LATER
 	if( cam_contain->value )
@@ -537,7 +547,7 @@ void CAM_StartMouseMove(void)
 		{
 			cam_mousemove=1;
 			iMouseInUse=1;
-			GetCursorPos (&cam_mouse);
+			SDL_GetCursorPos (&cam_mouse);
 
 			if ( ( flSensitivity = gHUD.GetSensitivity() ) != 0 )
 			{
@@ -584,7 +594,7 @@ void CAM_StartDistance(void)
 		  cam_distancemove=1;
 		  cam_mousemove=1;
 		  iMouseInUse=1;
-		  GetCursorPos (&cam_mouse);
+		  SDL_GetCursorPos (&cam_mouse);
 		  cam_old_mouse_x=cam_mouse.x*gHUD.GetSensitivity();
 		  cam_old_mouse_y=cam_mouse.y*gHUD.GetSensitivity();
 	  }
@@ -607,12 +617,12 @@ void CAM_EndDistance(void)
    iMouseInUse=0;
 }
 
-int DLLEXPORT CL_IsThirdPerson( void )
+int EXPORT CL_IsThirdPerson( void )
 {
 	return cam_thirdperson ? 1 : 0;
 }
 
-void DLLEXPORT CL_CameraOffset( float *ofs )
+void EXPORT CL_CameraOffset( float *ofs )
 {
 	VectorCopy( cam_ofs, ofs );
 }

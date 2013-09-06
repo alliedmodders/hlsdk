@@ -15,7 +15,6 @@
 //
 // teamplay_gamerules.cpp
 //
-
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
@@ -28,6 +27,10 @@
 #include	"items.h"
 #include	"voice_gamemgr.h"
 #include	"hltv.h"
+
+#if !defined ( _WIN32 )
+#include <ctype.h>
+#endif
 
 extern DLL_GLOBAL CGameRules	*g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
@@ -87,17 +90,7 @@ CHalfLifeMultiplay :: CHalfLifeMultiplay()
 	// share a single config file. (sjb)
 	if ( IS_DEDICATED_SERVER() )
 	{
-		// dedicated server
-		char *servercfgfile = (char *)CVAR_GET_STRING( "servercfgfile" );
-
-		if ( servercfgfile && servercfgfile[0] )
-		{
-			char szCommand[256];
-			
-			ALERT( at_console, "Executing dedicated server config file\n" );
-			sprintf( szCommand, "exec %s\n", servercfgfile );
-			SERVER_COMMAND( szCommand );
-		}
+		// this code has been moved into engine, to only run server.cfg once
 	}
 	else
 	{
@@ -686,8 +679,8 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 	int killer_index = 0;
 	
 	// Hack to fix name change
-	char *tau = "tau_cannon";
-	char *gluon = "gluon gun";
+	const char *tau = "tau_cannon";
+	const char *gluon = "gluon gun";
 
 	if ( pKiller->flags & FL_CLIENT )
 	{

@@ -50,7 +50,7 @@ public:
 	virtual int	Restore( CRestore &restore );
 
 	static	TYPEDESCRIPTION m_SaveData[];
-
+	
 	virtual void SetToggleState( int state );
 
 	// used to selectivly override defaults
@@ -335,7 +335,7 @@ void CBaseDoor :: SetToggleState( int state )
 
 void CBaseDoor::Precache( void )
 {
-	char *pszSound;
+	const char *pszSound;
 
 // set the door's "in-motion" sound
 	switch (m_bMoveSnd)
@@ -520,7 +520,7 @@ void CBaseDoor::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 {
 	m_hActivator = pActivator;
 	// if not ready to be used, ignore "use" command.
-	if (m_toggle_state == TS_AT_BOTTOM || FBitSet(pev->spawnflags, SF_DOOR_NO_AUTO_RETURN) && m_toggle_state == TS_AT_TOP)
+	if (m_toggle_state == TS_AT_BOTTOM || (FBitSet(pev->spawnflags, SF_DOOR_NO_AUTO_RETURN) && m_toggle_state == TS_AT_TOP))
 		DoorActivate();
 }
 
@@ -571,7 +571,10 @@ void CBaseDoor::DoorGoUp( void )
 	// emit door moving and stop sounds on CHAN_STATIC so that the multicast doesn't
 	// filter them out and leave a client stuck with looping door sounds!
 	if ( !FBitSet( pev->spawnflags, SF_DOOR_SILENT ) )
-		EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
+	{
+		if ( m_toggle_state != TS_GOING_UP && m_toggle_state != TS_GOING_DOWN )
+			EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
+	}
 
 	m_toggle_state = TS_GOING_UP;
 	
@@ -652,7 +655,10 @@ void CBaseDoor::DoorHitTop( void )
 void CBaseDoor::DoorGoDown( void )
 {
 	if ( !FBitSet( pev->spawnflags, SF_DOOR_SILENT ) )
-		EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
+	{
+		if ( m_toggle_state != TS_GOING_UP && m_toggle_state != TS_GOING_DOWN )
+			EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
+	}
 	
 #ifdef DOOR_ASSERT
 	ASSERT(m_toggle_state == TS_AT_TOP);
@@ -753,6 +759,9 @@ void CBaseDoor::Blocked( CBaseEntity *pOther )
 								pDoor->pev->avelocity = g_vecZero;
 							}
 						}
+
+						if ( !FBitSet( pev->spawnflags, SF_DOOR_SILENT ) )
+							STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving) );
 
 						if ( pDoor->m_toggle_state == TS_GOING_DOWN)
 							pDoor->DoorGoUp();
@@ -860,7 +869,7 @@ void CRotDoor::Spawn( void )
 		SetTouch ( NULL );
 	}
 	else // touchable button
-		SetTouch( &CBaseDoor::DoorTouch );
+		SetTouch( &CRotDoor::DoorTouch );
 }
 
 
@@ -888,6 +897,8 @@ public:
 	virtual int	Save( CSave &save );
 	virtual int	Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
+
+	void EXPORT DoorMoveDone( void );
 
 	BYTE	m_bMoveSnd;			// sound a door makes while moving	
 };
@@ -1008,19 +1019,34 @@ void CMomentaryDoor::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 
 	if ( value > 1.0 )
 		value = 1.0;
+	if ( value < 0.0 )
+		value = 0.0;
+
 	Vector move = m_vecPosition1 + (value * (m_vecPosition2 - m_vecPosition1));
 	
 	Vector delta = move - pev->origin;
-	float speed = delta.Length() * 10;
+	//float speed = delta.Length() * 10;
+	float speed = delta.Length() / 0.1; // move there in 0.1 sec
+	if ( speed == 0 )
+		return;
 
-	if ( speed != 0 )
-	{
-		// This entity only thinks when it moves, so if it's thinking, it's in the process of moving
-		// play the sound when it starts moving
-		if ( pev->nextthink < pev->ltime || pev->nextthink == 0 )
-			EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
+	// This entity only thinks when it moves, so if it's thinking, it's in the process of moving
+	// play the sound when it starts moving (not yet thinking)
+	if ( pev->nextthink < pev->ltime || pev->nextthink == 0 )
+		EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
+	// If we already moving to designated point, return
+	else if (move == m_vecFinalDest)
+		return;
+	
+	SetMoveDone( &CMomentaryDoor::DoorMoveDone );
+	LinearMove( move, speed );
+}
 
-		LinearMove( move, speed );
-	}
-
+//
+// The door has reached needed position.
+//
+void CMomentaryDoor::DoorMoveDone( void )
+{
+	STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving) );
+	EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseArrived), 1, ATTN_NORM);
 }

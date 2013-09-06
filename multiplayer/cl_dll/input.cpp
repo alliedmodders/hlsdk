@@ -24,19 +24,13 @@ extern "C"
 #include "camera.h"
 #include "in_defs.h"
 #include "view.h"
+#include "bench.h"
 #include <string.h>
 #include <ctype.h>
+#include "Exports.h"
 
 #include "vgui_TeamFortressViewport.h"
 
-
-extern "C" 
-{
-	struct kbutton_s DLLEXPORT *KB_Find( const char *name );
-	void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int active );
-	void DLLEXPORT HUD_Shutdown( void );
-	int DLLEXPORT HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding );
-}
 
 extern int g_iAlive;
 
@@ -219,8 +213,10 @@ KB_Find
 Allows the engine to get a kbutton_t directly ( so it can check +mlook state, etc ) for saving out to .cfg files
 ============
 */
-struct kbutton_s DLLEXPORT *KB_Find( const char *name )
+struct kbutton_s CL_DLLEXPORT *KB_Find( const char *name )
 {
+//	RecClFindKey(name);
+
 	kblist_t *p;
 	p = g_kbkeys;
 	while ( p )
@@ -376,8 +372,10 @@ HUD_Key_Event
 Return 1 to allow engine to process the key, otherwise, act on it as needed
 ============
 */
-int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding )
+int CL_DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding )
 {
+//	RecClKeyEvent(down, keynum, pszCurrentBinding);
+
 	if (gViewPort)
 		return gViewPort->KeyInput(down, keynum, pszCurrentBinding);
 	
@@ -461,6 +459,10 @@ extern void __CmdFunc_InputPlayerSpecial(void);
 void IN_Attack2Down(void) 
 {
 	KeyDown(&in_attack2);
+
+#ifdef _TFC
+	__CmdFunc_InputPlayerSpecial();
+#endif
 
 	gHUD.m_Spectator.HandleButtonsDown( IN_ATTACK2 );
 }
@@ -662,13 +664,15 @@ if active == 1 then we are 1) not playing back demos ( where our commands are ig
 2 ) we have finished signing on to server
 ================
 */
-void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int active )
+void CL_DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int active )
 {	
+//	RecClCL_CreateMove(frametime, cmd, active);
+
 	float spd;
 	vec3_t viewangles;
 	static vec3_t oldangles;
 
-	if ( active )
+	if ( active && !Bench_Active() )
 	{
 		//memset( viewangles, 0, sizeof( vec3_t ) );
 		//viewangles[ 0 ] = viewangles[ 1 ] = viewangles[ 2 ] = 0.0;
@@ -766,6 +770,7 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 		VectorCopy( oldangles, cmd->viewangles );
 	}
 
+	Bench_SetViewAngles( 1, (float *)&cmd->viewangles, frametime, cmd );
 }
 
 /*
@@ -1022,7 +1027,22 @@ void ShutdownInput (void)
 	KB_Shutdown();
 }
 
-void DLLEXPORT HUD_Shutdown( void )
+#include "interface.h"
+void CL_UnloadParticleMan( void );
+
+#if defined( _TFC )
+void ClearEventList( void );
+#endif
+
+void CL_DLLEXPORT HUD_Shutdown( void )
 {
+//	RecClShutdown();
+
 	ShutdownInput();
+
+#if defined( _TFC )
+	ClearEventList();
+#endif
+	
+	CL_UnloadParticleMan();
 }

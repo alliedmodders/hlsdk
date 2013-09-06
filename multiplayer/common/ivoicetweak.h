@@ -17,7 +17,8 @@
 typedef enum
 {
 	MicrophoneVolume=0,			// values 0-1.
-	OtherSpeakerScale			// values 0-1. Scales how loud other players are.
+	OtherSpeakerScale,			// values 0-1. Scales how loud other players are.
+	MicBoost,					// 20 db gain to voice input
 } VoiceTweakControl;
 
 
@@ -31,6 +32,8 @@ typedef struct IVoiceTweak_s
 	// Get/set control values.
 	void			(*SetControlFloat)(VoiceTweakControl iControl, float value);
 	float			(*GetControlFloat)(VoiceTweakControl iControl);
+
+    int             (*GetSpeakingVolume)();
 } IVoiceTweak;
 
 

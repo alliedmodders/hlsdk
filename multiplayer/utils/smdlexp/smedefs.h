@@ -42,7 +42,7 @@ public:
 	virtual unsigned int	Version			(void)		{ return 201;					}
 	virtual void			ShowAbout		(HWND hWnd)	{ return;						}
 	// virtual int				DoExport		(const TCHAR *name, ExpInterface *ei, Interface *i);
-	virtual int		DoExport(const TCHAR *name,ExpInterface *ei,Interface *i, BOOL suppressPrompts=FALSE); // Export	file
+	virtual int		DoExport(const TCHAR *name,ExpInterface *ei,Interface *i, BOOL suppressPrompts=FALSE, DWORD options=0); // Export	file
 
 	// Integer constants for this class
 	enum
@@ -71,12 +71,19 @@ public:
 	TimeValue	m_tvEnd;
 	int			m_tpf;		// ticks-per-frame
 
+protected:
+	// Property stuff
+	bool					hasStringPropertyValue( const char *propertyName, const char *propertyValue, Interface *ip );
+	const PROPVARIANT*		getPropertyVariant( const char *propertyName, Interface *ip );
+	void					VariantToString( const PROPVARIANT *propertyVariant, TCHAR *buffer, int bufferSize );
+
 private:
 	BOOL					CollectNodes	(ExpInterface *expiface);
 	BOOL					DumpBones		(FILE *pFile, ExpInterface *pexpiface);
 	BOOL					DumpRotations	(FILE *pFile, ExpInterface *pexpiface);
 	BOOL					DumpModel		(FILE *pFile, ExpInterface *pexpiface);
 	BOOL					DumpDeforms		(FILE *pFile, ExpInterface *pexpiface);
+
 
 	// Is this MAX file just the reference frame, or an animation?
 	// If TRUE, the "bones" and "mesh" files will be created.

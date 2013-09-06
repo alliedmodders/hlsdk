@@ -1862,14 +1862,14 @@ void CFuncTrackChange :: GoDown( void )
 	// If ROTMOVE, move & rotate
 	if ( FBitSet( pev->spawnflags, SF_TRACK_DONT_MOVE ) )
 	{
-		SetMoveDone( &CFuncPlat::CallHitBottom );
+		SetMoveDone( &CFuncTrackChange::CallHitBottom );
 		m_toggle_state = TS_GOING_DOWN;
 		AngularMove( m_start, pev->speed );
 	}
 	else
 	{
 		CFuncPlat :: GoDown();
-		SetMoveDone( &CFuncPlat::CallHitBottom );
+		SetMoveDone( &CFuncTrackChange::CallHitBottom );
 		RotMove( m_start, pev->nextthink - pev->ltime );
 	}
 	// Otherwise, rotate first, move second
@@ -1898,14 +1898,14 @@ void CFuncTrackChange :: GoUp( void )
 	if ( FBitSet( pev->spawnflags, SF_TRACK_DONT_MOVE ) )
 	{
 		m_toggle_state = TS_GOING_UP;
-		SetMoveDone( &CFuncPlat::CallHitTop );
+		SetMoveDone( &CFuncTrackChange::CallHitTop );
 		AngularMove( m_end, pev->speed );
 	}
 	else
 	{
 		// If ROTMOVE, move & rotate
 		CFuncPlat :: GoUp();
-		SetMoveDone( &CFuncPlat::CallHitTop );
+		SetMoveDone( &CFuncTrackChange::CallHitTop );
 		RotMove( m_end, pev->nextthink - pev->ltime );
 	}
 	

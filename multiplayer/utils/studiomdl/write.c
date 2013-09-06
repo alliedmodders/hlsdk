@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include "archtypes.h"
 #include "cmdlib.h"
 #include "lbmlib.h"
 #include "scriplib.h"
@@ -520,7 +521,7 @@ void WriteModel( )
 
 
 
-#define FILEBUFFER (2 * 1024 * 1024)
+#define FILEBUFFER ( 16 * 1024 * 1024)
 	
 
 void WriteFile (void)

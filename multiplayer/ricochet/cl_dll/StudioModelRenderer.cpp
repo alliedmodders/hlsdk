@@ -354,7 +354,7 @@ mstudioanim_t *CStudioModelRenderer::StudioGetAnim( model_t *m_pSubModel, mstudi
 
 	if (pseqdesc->seqgroup == 0)
 	{
-		return (mstudioanim_t *)((byte *)m_pStudioHeader + pseqgroup->data + pseqdesc->animindex);
+		return (mstudioanim_t *)((byte *)m_pStudioHeader + pseqdesc->animindex);
 	}
 
 	paSequences = (cache_user_t *)m_pSubModel->submodels;
@@ -930,7 +930,6 @@ void CStudioModelRenderer::StudioMergeBones ( model_t *m_pSubModel )
 {
 	int					i, j;
 	double				f;
-	int					do_hunt = true;
 
 	mstudiobone_t		*pbones;
 	mstudioseqdesc_t	*pseqdesc;

@@ -147,7 +147,7 @@ void CGauss::PrimaryAttack()
 	if ( m_pPlayer->pev->waterlevel == 3 )
 	{
 		PlayEmptySound( );
-		m_flNextSecondaryAttack = m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.15;
+		m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
 		return;
 	}
 
@@ -185,7 +185,7 @@ void CGauss::SecondaryAttack()
 			PlayEmptySound( );
 		}
 
-		m_flNextSecondaryAttack = m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.5;
+		m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
 		return;
 	}
 
@@ -364,18 +364,18 @@ void CGauss::StartFire( void )
 void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 {
 	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
+	TraceResult tr, beam_tr;
 
+#ifndef CLIENT_DLL
 	Vector vecSrc = vecOrigSrc;
 	Vector vecDest = vecSrc + vecDir * 8192;
-	edict_t		*pentIgnore;
-	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
-	int	nTotal = 0;
+	int nTotal = 0;
 	int fHasPunched = 0;
 	int fFirstBeam = 1;
-	int	nMaxHits = 10;
-
-	pentIgnore = ENT( m_pPlayer->pev );
+	int nMaxHits = 10;
+	edict_t	*pentIgnore = ENT( m_pPlayer->pev );
+#endif
 
 #ifdef CLIENT_DLL
 	if ( m_fPrimaryFire == false )

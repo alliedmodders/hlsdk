@@ -26,12 +26,12 @@ private:
 
 	CommandButton*	   _connectButton;
 	CommandButton*	   _refreshButton;
-	CommandButton*	   _broadcastRefreshButton;
+//	CommandButton*	   _broadcastRefreshButton;
 	CommandButton*	   _stopButton;
-	CommandButton*	   _sortButton;
+//	CommandButton*	   _sortButton;
 	CommandButton*	   _cancelButton;
 
-	CommandButton*		_pingButton;
+//	CommandButton*		_pingButton;
 
 public:
 	ServerBrowser(int x,int y,int wide,int tall);

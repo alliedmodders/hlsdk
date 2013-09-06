@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include "archtypes.h"
 #include "cmdlib.h"
 #include "lbmlib.h"
 #include "scriplib.h"

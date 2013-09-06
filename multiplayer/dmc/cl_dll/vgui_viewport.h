@@ -64,9 +64,9 @@ class CTransparentPanel;
 char* GetVGUITGAName(const char *pszName);
 BitmapTGA *LoadTGA( const char* pImageName );
 void ScaleColors( int &r, int &g, int &b, int a );
-extern char *sTFClassSelection[];
+extern const char *sTFClassSelection[];
 extern int sTFValidClassInts[];
-extern char *sLocalisedClasses[];
+extern const char *sLocalisedClasses[];
 extern int iTeamColors[5][3];
 
 #define MAX_SERVERNAME_LENGTH	32
@@ -178,7 +178,7 @@ private:
 	char m_sMainText[MAX_BUTTON_SIZE];
 	char m_cBoundKey;
 
-	SchemeHandle_t m_hTextScheme;
+//	SchemeHandle_t m_hTextScheme;
 
 	void RecalculateText( void );
 
@@ -281,8 +281,8 @@ public:
 class TeamFortressViewport : public Panel
 {
 private:
-	vgui::Cursor* _cursorNone;
-	vgui::Cursor* _cursorArrow;
+//	vgui::Cursor* _cursorNone;
+//	vgui::Cursor* _cursorArrow;
 
 	int			 m_iInitialized;
 
@@ -292,7 +292,7 @@ private:
 	float		 m_flScoreBoardLastUpdated;
 	int			 m_iNumMenus;
 	int			 m_iCurrentTeamNumber;
-	int			 m_iCurrentPlayerClass;
+//	int			 m_iCurrentPlayerClass;
 	int			 m_iUser1;
 	int			 m_iUser2;
 
@@ -313,8 +313,8 @@ private:
 	//  Command Menu Team buttons
 	CommandButton *m_pTeamButtons[6];
 	CommandButton *m_pDisguiseButtons[5];
-	BuildButton   *m_pBuildButtons[3];
-	BuildButton   *m_pBuildActiveButtons[3];
+//	BuildButton   *m_pBuildButtons[3];
+//	BuildButton   *m_pBuildActiveButtons[3];
 
 	// Server Browser
 	ServerBrowser *m_pServerBrowser;
@@ -338,10 +338,10 @@ public:
 	TeamFortressViewport(int x,int y,int wide,int tall);
 	void Initialize( void );
 
-	int		CreateCommandMenu( char * menuFile, int direction, int yOffset );
+	int		CreateCommandMenu( const char * menuFile, int direction, int yOffset );
 	void	CreateScoreBoard( void );
 	void	CreateServerBrowser( void );
-	CommandButton * CreateCustomButton( char *pButtonText, char * pButtonName, int  iYOffset );
+	CommandButton * CreateCustomButton( const char *pButtonText, const char * pButtonName, int iYOffset );
 	CCommandMenu *	CreateDisguiseSubmenu( CommandButton *pButton, CCommandMenu *pParentMenu, const char *commandText, int iYOffset );
 
 	void UpdateCursorState( void );
@@ -434,14 +434,14 @@ protected:
 	char	m_pszCommand[MAX_COMMAND_SIZE];
 	int		m_iCloseVGUIMenu;
 public:
-	CMenuHandler_StringCommand( char *pszCommand )
+	CMenuHandler_StringCommand( const char *pszCommand )
 	{
 		strncpy( m_pszCommand, pszCommand, MAX_COMMAND_SIZE);
 		m_pszCommand[MAX_COMMAND_SIZE-1] = '\0';
 		m_iCloseVGUIMenu = false;
 	}
 
-	CMenuHandler_StringCommand( char *pszCommand, int iClose )
+	CMenuHandler_StringCommand( const char *pszCommand, int iClose )
 	{
 		strncpy( m_pszCommand, pszCommand, MAX_COMMAND_SIZE);
 		m_pszCommand[MAX_COMMAND_SIZE-1] = '\0';
@@ -465,11 +465,11 @@ class CMenuHandler_StringCommandWatch : public CMenuHandler_StringCommand
 {
 private:
 public:
-	CMenuHandler_StringCommandWatch( char *pszCommand ) : CMenuHandler_StringCommand( pszCommand )
+	CMenuHandler_StringCommandWatch( const char *pszCommand ) : CMenuHandler_StringCommand( pszCommand )
 	{
 	}
 
-	CMenuHandler_StringCommandWatch( char *pszCommand, int iClose ) : CMenuHandler_StringCommand( pszCommand, iClose )
+	CMenuHandler_StringCommandWatch( const char *pszCommand, int iClose ) : CMenuHandler_StringCommand( pszCommand, iClose )
 	{
 	}
 
@@ -495,11 +495,11 @@ class CMenuHandler_StringCommandClassSelect : public CMenuHandler_StringCommand
 {
 private:
 public:
-	CMenuHandler_StringCommandClassSelect( char *pszCommand ) : CMenuHandler_StringCommand( pszCommand )
+	CMenuHandler_StringCommandClassSelect( const char *pszCommand ) : CMenuHandler_StringCommand( pszCommand )
 	{
 	}
 
-	CMenuHandler_StringCommandClassSelect( char *pszCommand, int iClose ) : CMenuHandler_StringCommand( pszCommand, iClose )
+	CMenuHandler_StringCommandClassSelect( const char *pszCommand, int iClose ) : CMenuHandler_StringCommand( pszCommand, iClose )
 	{
 	}
 
@@ -816,7 +816,7 @@ class DisguiseButton : public CommandButton
 {
 private:
 	int m_iValidTeamsBits;
-	int m_iThisTeam;
+//	int m_iThisTeam;
 public:
 	DisguiseButton( int iValidTeamNumsBits, const char* text,int x,int y,int wide,int tall ) : CommandButton( text,x,y,wide,tall,false )
 	{
@@ -918,11 +918,11 @@ public:
 class TeamOnlyCommandButton : public CommandButton
 {
 private:
-	int m_iTeamNum;
+//	int m_iTeamNum;
 
 public:
 	TeamOnlyCommandButton( int iTeamNum, const char* text,int x,int y,int wide,int tall ) : 
-	  CommandButton( text, x, y, wide, tall ), m_iTeamNum(iTeamNum) {}
+	  CommandButton( text, x, y, wide, tall ) /*, m_iTeamNum(iTeamNum)*/ {}
 
 	virtual int IsNotValid()
 	{

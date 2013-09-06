@@ -130,7 +130,7 @@ void CDecal :: Spawn( void )
 	else
 	{
 		// if there IS a targetname, the decal sprays itself on when it is triggered.
-		SetThink ( &CBaseEntity::SUB_DoNothing );
+		SetThink ( &CDecal::SUB_DoNothing );
 		SetUse(&CDecal::TriggerDecal);
 	}
 }
@@ -156,7 +156,7 @@ void CDecal :: TriggerDecal ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 			WRITE_SHORT( (int)VARS(trace.pHit)->modelindex );
 	MESSAGE_END();
 
-	SetThink( &CBaseEntity::SUB_Remove );
+	SetThink( &CDecal::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
@@ -297,7 +297,7 @@ globalentity_t *CGlobalState :: Find( string_t globalname )
 //#ifdef _DEBUG
 void CGlobalState :: DumpGlobals( void )
 {
-	static char *estates[] = { "Off", "On", "Dead" };
+	static const char *estates[] = { "Off", "On", "Dead" };
 	globalentity_t *pTest;
 
 	ALERT( at_console, "-- Globals --\n" );

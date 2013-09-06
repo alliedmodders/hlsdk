@@ -98,7 +98,7 @@ char *CHudTextMessage::BufferedLocaliseTextString( const char *msg )
 }
 
 // Simplified version of LocaliseTextString;  assumes string is only one word
-char *CHudTextMessage::LookupString( const char *msg, int *msg_dest )
+const char *CHudTextMessage::LookupString( const char *msg, int *msg_dest )
 {
 	if ( !msg )
 		return "";
@@ -110,7 +110,7 @@ char *CHudTextMessage::LookupString( const char *msg, int *msg_dest )
 		client_textmessage_t *clmsg = TextMessageGet( msg+1 );
 
 		if ( !clmsg || !(clmsg->pMessage) )
-			return (char*)msg; // lookup failed, so return the original string
+			return msg; // lookup failed, so return the original string
 		
 		if ( msg_dest )
 		{
@@ -120,11 +120,11 @@ char *CHudTextMessage::LookupString( const char *msg, int *msg_dest )
 				*msg_dest = -clmsg->effect;
 		}
 
-		return (char*)clmsg->pMessage;
+		return clmsg->pMessage;
 	}
 	else
 	{  // nothing special about this message, so just return the same string
-		return (char*)msg;
+		return msg;
 	}
 }
 
@@ -163,22 +163,23 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 
 	int msg_dest = READ_BYTE();
 
-	static char szBuf[6][128];
-	char *msg_text = LookupString( READ_STRING(), &msg_dest );
-	msg_text = strcpy( szBuf[0], msg_text );
+#define MSG_BUF_SIZE 128
+	static char szBuf[6][MSG_BUF_SIZE];
+	const char *msg_text = LookupString( READ_STRING(), &msg_dest );
+	msg_text = safe_strcpy( szBuf[0], msg_text , MSG_BUF_SIZE);
 
 	// keep reading strings and using C format strings for subsituting the strings into the localised text string
-	char *sstr1 = LookupString( READ_STRING() );
-	sstr1 = strcpy( szBuf[1], sstr1 );
+	char *sstr1 = (char*)LookupString( READ_STRING() );
+	sstr1 = safe_strcpy( szBuf[1], sstr1 , MSG_BUF_SIZE);
 	StripEndNewlineFromString( sstr1 );  // these strings are meant for subsitution into the main strings, so cull the automatic end newlines
-	char *sstr2 = LookupString( READ_STRING() );
-	sstr2 = strcpy( szBuf[2], sstr2 );
+	char *sstr2 = (char *)LookupString( READ_STRING() );
+	sstr2 = safe_strcpy( szBuf[2], sstr2 , MSG_BUF_SIZE);
 	StripEndNewlineFromString( sstr2 );
-	char *sstr3 = LookupString( READ_STRING() );
-	sstr3 = strcpy( szBuf[3], sstr3 );
+	char *sstr3 = (char *)LookupString( READ_STRING() );
+	sstr3 = safe_strcpy( szBuf[3], sstr3 , MSG_BUF_SIZE);
 	StripEndNewlineFromString( sstr3 );
-	char *sstr4 = LookupString( READ_STRING() );
-	sstr4 = strcpy( szBuf[4], sstr4 );
+	char *sstr4 = (char *)LookupString( READ_STRING() );
+	sstr4 = safe_strcpy( szBuf[4], sstr4 , MSG_BUF_SIZE);
 	StripEndNewlineFromString( sstr4 );
 	char *psz = szBuf[5];
 
@@ -188,23 +189,23 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	switch ( msg_dest )
 	{
 	case HUD_PRINTCENTER:
-		sprintf( psz, msg_text, sstr1, sstr2, sstr3, sstr4 );
+		safe_sprintf( psz, MSG_BUF_SIZE, msg_text, sstr1, sstr2, sstr3, sstr4 );
 		CenterPrint( ConvertCRtoNL( psz ) );
 		break;
 
 	case HUD_PRINTNOTIFY:
 		psz[0] = 1;  // mark this message to go into the notify buffer
-		sprintf( psz+1, msg_text, sstr1, sstr2, sstr3, sstr4 );
+		safe_sprintf( psz+1, MSG_BUF_SIZE, msg_text, sstr1, sstr2, sstr3, sstr4 );
 		ConsolePrint( ConvertCRtoNL( psz ) );
 		break;
 
 	case HUD_PRINTTALK:
-		sprintf( psz, msg_text, sstr1, sstr2, sstr3, sstr4 );
+		safe_sprintf( psz, MSG_BUF_SIZE, msg_text, sstr1, sstr2, sstr3, sstr4 );
 		gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), 128 );
 		break;
 
 	case HUD_PRINTCONSOLE:
-		sprintf( psz, msg_text, sstr1, sstr2, sstr3, sstr4 );
+		safe_sprintf( psz, MSG_BUF_SIZE, msg_text, sstr1, sstr2, sstr3, sstr4 );
 		ConsolePrint( ConvertCRtoNL( psz ) );
 		break;
 	}

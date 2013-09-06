@@ -139,7 +139,7 @@ void CGib :: SpawnHeadGib( entvars_t *pevVictim )
 	if ( pevVictim )
 	{
 		pGib->pev->origin = pevVictim->origin + pevVictim->view_ofs;
-
+		
 		pGib->pev->velocity = Vector (RANDOM_FLOAT(-100,100), RANDOM_FLOAT(-100,100), RANDOM_FLOAT(300,400));
 
 		pGib->pev->avelocity.x = RANDOM_FLOAT ( 100, 200 );
@@ -316,7 +316,7 @@ void CBaseMonster :: GibMonster( void )
 		if ( gibbed )
 		{
 			// don't remove players!
-			SetThink ( &CBaseEntity::SUB_Remove );
+			SetThink ( &CBaseMonster::SUB_Remove );
 			pev->nextthink = gpGlobals->time;
 		}
 		else
@@ -539,7 +539,7 @@ void CGib :: WaitTillLand ( void )
 
 	if ( pev->velocity == g_vecZero )
 	{
-		SetThink (&CBaseEntity::SUB_StartFadeOut);
+		SetThink (&CGib::SUB_StartFadeOut);
 		pev->nextthink = gpGlobals->time + m_lifeTime;
 
 		// If you bleed, you stink!
@@ -607,7 +607,7 @@ void CGib :: StickyGibTouch ( CBaseEntity *pOther )
 	Vector	vecSpot;
 	TraceResult	tr;
 	
-	SetThink ( &CBaseEntity::SUB_Remove );
+	SetThink ( &CGib::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 10;
 
 	if ( !FClassnameIs( pOther->pev, "worldspawn" ) )

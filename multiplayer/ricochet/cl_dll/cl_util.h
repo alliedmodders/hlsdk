@@ -23,19 +23,23 @@
 #define FALSE 0
 #endif
 
+#include <stdio.h> // for safe_sprintf()
+#include <stdarg.h> // "
+#include <string.h>
+
 // Macros to hook function calls into the HUD object
 #define HOOK_MESSAGE(x) gEngfuncs.pfnHookUserMsg(#x, __MsgFunc_##x );
 
 #define DECLARE_MESSAGE(y, x) int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf) \
 							{ \
-							return gHUD.##y.MsgFunc_##x(pszName, iSize, pbuf ); \
+							return gHUD.y.MsgFunc_##x(pszName, iSize, pbuf ); \
 							}
 
 
 #define HOOK_COMMAND(x, y) gEngfuncs.pfnAddCommand( x, __CmdFunc_##y );
 #define DECLARE_COMMAND(y, x) void __CmdFunc_##x( void ) \
 							{ \
-								gHUD.##y.UserCmd_##x( ); \
+								gHUD.y.UserCmd_##x( ); \
 							}
 
 inline float CVAR_GET_FLOAT( const char *x ) {	return gEngfuncs.pfnGetCvarFloat( (char*)x ); }
@@ -75,8 +79,8 @@ inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int fl
 
 
 // Gets the height & width of a sprite,  at the specified frame
-inline int SPR_Height( HSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Height(x, f); }
-inline int SPR_Width( HSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Width(x, f); }
+inline int SPR_Height( HLSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Height(x, f); }
+inline int SPR_Width( HLSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Width(x, f); }
 
 inline 	client_textmessage_t	*TextMessageGet( const char *pName ) { return gEngfuncs.pfnTextMessageGet( pName ); }
 inline 	int						TextMessageDrawChar( int x, int y, int number, int r, int g, int b ) 
@@ -111,11 +115,45 @@ inline void CenterPrint( const char *string )
 	gEngfuncs.pfnCenterPrint( string );
 }
 
+
+inline char *safe_strcpy( char *dst, const char *src, int len_dst)
+{
+	if( len_dst <= 0 )
+	{
+		return NULL; // this is bad
+	}
+
+	strncpy(dst,src,len_dst);
+	dst[ len_dst - 1 ] = '\0';
+
+	return dst;
+}
+
+inline int safe_sprintf( char *dst, int len_dst, const char *format, ...)
+{
+	if( len_dst <= 0 )
+	{
+		return -1; // this is bad
+	}
+
+	va_list v;
+
+    va_start(v, format);
+
+	_vsnprintf(dst,len_dst,format,v);
+
+	va_end(v);
+
+	dst[ len_dst - 1 ] = '\0';
+
+	return 0;
+}
+
 // returns the players name of entity no.
 #define GetPlayerInfo (*gEngfuncs.pfnGetPlayerInfo)
 
 // sound functions
-inline void PlaySound( char *szSound, float vol ) { gEngfuncs.pfnPlaySoundByName( szSound, vol ); }
+inline void PlaySound( const char *szSound, float vol ) { gEngfuncs.pfnPlaySoundByName( szSound, vol ); }
 inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( iSound, vol ); }
 
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
@@ -136,10 +174,13 @@ float VectorNormalize (float *v);
 void VectorInverse ( float *v );
 
 extern vec3_t vec3_origin;
+
+#ifdef _MSC_VER
 // disable 'possible loss of data converting float to int' warning message
 #pragma warning( disable: 4244 )
 // disable 'truncation from 'const double' to 'float' warning message
 #pragma warning( disable: 4305 )
+#endif
 
 inline void UnpackRGB(int &r, int &g, int &b, unsigned long ulRGB)\
 {\
@@ -148,4 +189,4 @@ inline void UnpackRGB(int &r, int &g, int &b, unsigned long ulRGB)\
 	b = ulRGB & 0xFF;\
 }
 
-HSPRITE LoadSprite(const char *pszName);
+HLSPRITE LoadSprite(const char *pszName);

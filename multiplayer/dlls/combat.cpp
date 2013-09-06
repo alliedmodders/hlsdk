@@ -331,7 +331,7 @@ void CBaseMonster :: GibMonster( void )
 		if ( gibbed )
 		{
 			// don't remove players!
-			SetThink ( &CBaseEntity::SUB_Remove );
+			SetThink ( &CBaseMonster::SUB_Remove );
 			pev->nextthink = gpGlobals->time;
 		}
 		else
@@ -469,12 +469,10 @@ Activity CBaseMonster :: GetDeathActivity ( void )
 Activity CBaseMonster :: GetSmallFlinchActivity ( void )
 {
 	Activity	flinchActivity;
-	BOOL		fTriedDirection;
-	float		flDot;
+//	float		flDot;
 
-	fTriedDirection = FALSE;
 	UTIL_MakeVectors ( pev->angles );
-	flDot = DotProduct ( gpGlobals->v_forward, g_vecAttackDir * -1 );
+//	flDot = DotProduct ( gpGlobals->v_forward, g_vecAttackDir * -1 );
 	
 	switch ( m_LastHitGroup )
 	{
@@ -685,7 +683,7 @@ void CGib :: WaitTillLand ( void )
 
 	if ( pev->velocity == g_vecZero )
 	{
-		SetThink (&CBaseEntity::SUB_StartFadeOut);
+		SetThink (&CGib::SUB_StartFadeOut);
 		pev->nextthink = gpGlobals->time + m_lifeTime;
 
 		// If you bleed, you stink!
@@ -753,7 +751,7 @@ void CGib :: StickyGibTouch ( CBaseEntity *pOther )
 	Vector	vecSpot;
 	TraceResult	tr;
 	
-	SetThink ( &CBaseEntity::SUB_Remove );
+	SetThink ( &CGib::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 10;
 
 	if ( !FClassnameIs( pOther->pev, "worldspawn" ) )
@@ -1505,7 +1503,8 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 	TraceResult tr;
 	Vector vecRight = gpGlobals->v_right;
 	Vector vecUp = gpGlobals->v_up;
-	float x = 0.0f, y = 0.0f, z = 0.0f;
+	float x = 0.0, y = 0.0;
+//	float z;
 
 	if ( pevAttacker == NULL )
 		pevAttacker = pev;  // the default attacker is ourselves
@@ -1519,7 +1518,7 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 		// get circular gaussian spread
 		x = UTIL_SharedRandomFloat( shared_rand + iShot, -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 1 + iShot ) , -0.5, 0.5 );
 		y = UTIL_SharedRandomFloat( shared_rand + ( 2 + iShot ), -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 3 + iShot ), -0.5, 0.5 );
-		z = x * x + y * y;
+//		z = x * x + y * y;
 
 		Vector vecDir = vecDirShooting +
 						x * vecSpread.x * vecRight +

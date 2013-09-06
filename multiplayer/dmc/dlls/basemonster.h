@@ -331,7 +331,7 @@ public:
 	BOOL ExitScriptedSequence( );
 	BOOL CineCleanup( );
 
-	CBaseEntity* DropItem ( char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
+	CBaseEntity* DropItem ( const char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
 };
 
 

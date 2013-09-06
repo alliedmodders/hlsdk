@@ -459,7 +459,7 @@ void CLightning::Spawn( void )
 {
 	if ( FStringNull( m_iszSpriteName ) )
 	{
-		SetThink( &CBaseEntity::SUB_Remove );
+		SetThink( &CLightning::SUB_Remove );
 		return;
 	}
 	pev->solid = SOLID_NOT;							// Remove model & collisions
@@ -677,6 +677,7 @@ void CLightning::StrikeThink( void )
 				return;
 			}
 		}
+
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			if ( IsPointEntity( pStart ) || IsPointEntity( pEnd ) )
 			{
@@ -960,7 +961,7 @@ void CLaser::Spawn( void )
 {
 	if ( FStringNull( pev->model ) )
 	{
-		SetThink( &CBaseEntity::SUB_Remove );
+		SetThink( &CLaser::SUB_Remove );
 		return;
 	}
 	pev->solid = SOLID_NOT;							// Remove model & collisions
@@ -1515,7 +1516,7 @@ void CGibShooter :: ShootThink ( void )
 		}
 		else
 		{
-			SetThink ( &CBaseEntity::SUB_Remove );
+			SetThink ( &CGibShooter::SUB_Remove );
 			pev->nextthink = gpGlobals->time;
 		}
 	}
@@ -1812,9 +1813,9 @@ Vector CBlood::BloodPosition( CBaseEntity *pActivator )
 void CBlood::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	if ( pev->spawnflags & SF_BLOOD_STREAM )
-		UTIL_BloodStream( BloodPosition(pActivator), Direction(), (Color() == BLOOD_COLOR_RED) ? 70 : Color(), static_cast<int>(BloodAmount()) );
+		UTIL_BloodStream( BloodPosition(pActivator), Direction(), Color(), BloodAmount() );
 	else
-		UTIL_BloodDrips( BloodPosition(pActivator), Direction(), Color(), static_cast<int>(BloodAmount()) );
+		UTIL_BloodDrips( BloodPosition(pActivator), Direction(), Color(), BloodAmount() );
 
 	if ( pev->spawnflags & SF_BLOOD_DECAL )
 	{
@@ -2128,7 +2129,7 @@ void CEnvFunnel::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 
 	MESSAGE_END();
 
-	SetThink( &CBaseEntity::SUB_Remove );
+	SetThink( &CEnvFunnel::SUB_Remove );
 	pev->nextthink = gpGlobals->time;
 }
 
@@ -2262,6 +2263,6 @@ void CItemSoda::CanTouch ( CBaseEntity *pOther )
 	pev->movetype = MOVETYPE_NONE;
 	pev->effects = EF_NODRAW;
 	SetTouch ( NULL );
-	SetThink ( &CBaseEntity::SUB_Remove );
+	SetThink ( &CItemSoda::SUB_Remove );
 	pev->nextthink = gpGlobals->time;
 }

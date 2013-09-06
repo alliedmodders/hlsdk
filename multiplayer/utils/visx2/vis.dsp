@@ -23,7 +23,7 @@ CFG=vis - Win32 Release
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/SDKSrc/Tools/utils/visx2", KVGBAAAA"
+# PROP Scc_ProjName ""$/src/utils/visx2", OCFBAAAA"
 # PROP Scc_LocalPath "."
 CPP=cl.exe
 RSC=rc.exe
@@ -41,8 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir ".\Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /YX /c
-# ADD CPP /nologo /MT /GX /O2 /I "..\common" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /YX /FD /c
-# SUBTRACT CPP /Fr
+# ADD CPP /nologo /G6 /MT /GX /I "..\common" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /Fr /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -63,9 +62,10 @@ LINK32=link.exe
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir ".\Debug"
 # PROP Intermediate_Dir ".\Debug"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /YX /c
-# ADD CPP /nologo /MT /Gm /GX /ZI /Od /I "..\common" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /Fr /YX /FD /c
+# ADD CPP /nologo /G6 /MT /Gm /GX /ZI /Od /I "..\common" /I "..\..\engine" /I "..\..\common" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /Fr /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -73,7 +73,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /profile /debug /machine:I386
 
 !ENDIF 
 
@@ -83,10 +83,14 @@ LINK32=link.exe
 # Name "vis - Win32 Debug"
 # Begin Group "Source Files"
 
-# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;for;f90"
+# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;hpj;bat;for;f90"
 # Begin Source File
 
-SOURCE=..\common\bspfile.c
+SOURCE=..\common\bsplib.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\bsplib.h
 # End Source File
 # Begin Source File
 
@@ -114,6 +118,10 @@ SOURCE=..\common\threads.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\threads.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\vis.c
 # End Source File
 # Begin Source File
@@ -124,6 +132,10 @@ SOURCE=.\vis.h
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl;fi;fd"
+# Begin Source File
+
+SOURCE=..\qbsp2\bsp5.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\common\bspfile.h
@@ -139,10 +151,6 @@ SOURCE=..\common\mathlib.h
 # Begin Source File
 
 SOURCE=..\common\scriplib.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\common\threads.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

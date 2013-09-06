@@ -25,9 +25,19 @@
 #include "vgui_int.h"
 #include "voice_status.h"
 
-#include "interface.h"
+#include "FileSystem.h"
 
-#define DLLEXPORT __declspec( dllexport )
+#include "interface.h"
+#include "vgui_SchemeManager.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+CSysModule *g_pFileSystemModule = NULL;
+IFileSystem *g_pFileSystem = NULL;
+
+CSysModule *g_hTrackerModule = NULL;
 
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
@@ -53,21 +63,21 @@ Called when the DLL is first loaded.
 */
 extern "C" 
 {
-int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion );
-int DLLEXPORT HUD_VidInit( void );
-int DLLEXPORT HUD_Init( void );
-int DLLEXPORT HUD_Redraw( float flTime, int intermission );
-int DLLEXPORT HUD_UpdateClientData( client_data_t *cdata, float flTime );
-int DLLEXPORT HUD_Reset ( void );
-void DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server );
-void DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove );
-char DLLEXPORT HUD_PlayerMoveTexture( char *name );
-int DLLEXPORT HUD_ConnectionlessPacket( struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
-int DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
-void DLLEXPORT HUD_Frame( double time );
-void DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed );
-void DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
-void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
+int EXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion );
+int EXPORT HUD_VidInit( void );
+int EXPORT HUD_Init( void );
+int EXPORT HUD_Redraw( float flTime, int intermission );
+int EXPORT HUD_UpdateClientData( client_data_t *cdata, float flTime );
+int EXPORT HUD_Reset ( void );
+void EXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server );
+void EXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove );
+char EXPORT HUD_PlayerMoveTexture( char *name );
+int EXPORT HUD_ConnectionlessPacket( struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
+int EXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
+void EXPORT HUD_Frame( double time );
+void EXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed );
+void EXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
+void	EXPORT HUD_DirectorMessage( int iSize, void *pbuf );
 }
 
 /*
@@ -77,7 +87,7 @@ HUD_GetHullBounds
   Engine calls this to enumerate player collision hulls, for prediction.  Return 0 if the hullnumber doesn't exist.
 ================================
 */
-int DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs )
+int EXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs )
 {
 	int iret = 0;
 
@@ -111,11 +121,8 @@ HUD_ConnectionlessPacket
   size of the response_buffer, so you must zero it out if you choose not to respond.
 ================================
 */
-int	DLLEXPORT HUD_ConnectionlessPacket( struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
+int	EXPORT HUD_ConnectionlessPacket( struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
 {
-	// Parse stuff from args
-	int max_buffer_size = *response_buffer_size;
-
 	// Zero it out since we aren't going to respond.
 	// If we wanted to response, we'd write data into response_buffer
 	*response_buffer_size = 0;
@@ -125,22 +132,22 @@ int	DLLEXPORT HUD_ConnectionlessPacket( struct netadr_s *net_from, const char *a
 	return 0;
 }
 
-void DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove )
+void EXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove )
 {
 	PM_Init( ppmove );
 }
 
-char DLLEXPORT HUD_PlayerMoveTexture( char *name )
+char EXPORT HUD_PlayerMoveTexture( char *name )
 {
 	return PM_FindTextureType( name );
 }
 
-void DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
+void EXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
 {
 	PM_Move( ppmove, server );
 }
 
-int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
+int EXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 {
 	gEngfuncs = *pEnginefuncs;
 
@@ -155,6 +162,46 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	EV_HookEvents();
 	
+	// Determine which filesystem to use.
+#if defined ( _WIN32 )
+	const char *szFsModule = "filesystem_stdio.dll";
+#elif defined(OSX)
+	const char *szFsModule = "filesystem_stdio.dylib";	
+#elif defined(LINUX)
+	const char *szFsModule = "filesystem_stdio.so";
+#else
+#error
+#endif
+
+
+	char szFSDir[MAX_PATH];
+	szFSDir[0] = 0;
+	if ( gEngfuncs.COM_ExpandFilename( szFsModule, szFSDir, sizeof( szFSDir ) ) == FALSE )
+	{
+		return false;
+	}
+	
+	// Get filesystem interface.
+	g_pFileSystemModule = Sys_LoadModule( szFSDir );
+	assert( g_pFileSystemModule );
+	if( !g_pFileSystemModule )
+	{
+		return false;
+	}
+
+	CreateInterfaceFn fileSystemFactory = Sys_GetFactory( g_pFileSystemModule );
+	if( !fileSystemFactory )
+	{
+		return false;
+	}
+
+	g_pFileSystem = ( IFileSystem * )fileSystemFactory( FILESYSTEM_INTERFACE_VERSION, NULL );
+	assert( g_pFileSystem );
+	if( !g_pFileSystem )
+	{
+		return false;
+	}
+
 	return 1;
 }
 
@@ -169,7 +216,7 @@ so the HUD can reinitialize itself.
 ==========================
 */
 
-int DLLEXPORT HUD_VidInit( void )
+int EXPORT HUD_VidInit( void )
 {
 	gHUD.VidInit();
 
@@ -188,10 +235,11 @@ the hud variables.
 ==========================
 */
 
-int DLLEXPORT HUD_Init( void )
+int EXPORT HUD_Init( void )
 {
 	InitInput();
 	gHUD.Init();
+	Scheme_Init();
 
 	return 1;
 }
@@ -206,7 +254,7 @@ redraw the HUD.
 ===========================
 */
 
-int DLLEXPORT HUD_Redraw( float time, int intermission )
+int EXPORT HUD_Redraw( float time, int intermission )
 {
 	gHUD.Redraw( time, intermission );
 
@@ -227,7 +275,7 @@ returns 1 if anything has been changed, 0 otherwise.
 ==========================
 */
 
-int DLLEXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime )
+int EXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime )
 {
 	return gHUD.UpdateClientData(pcldata, flTime );
 }
@@ -240,7 +288,7 @@ Called at start and end of demos to restore to "non"HUD state.
 ==========================
 */
 
-int DLLEXPORT HUD_Reset( void )
+int EXPORT HUD_Reset( void )
 {
 	gHUD.VidInit();
 	return 1;
@@ -254,7 +302,7 @@ Called by engine every frame that client .dll is loaded
 ==========================
 */
 
-void DLLEXPORT HUD_Frame( double time )
+void EXPORT HUD_Frame( double time )
 {
 	IN_Commands();
 
@@ -272,20 +320,20 @@ Called when a player starts or stops talking.
 ==========================
 */
 
-void DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
+void EXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
 {
 	GetClientVoiceMgr()->UpdateSpeakerStatus(entindex, bTalking);
 }
 
 /*
 ==========================
-HUD_DirectorEvent
+HUD_DirectorMessage
 
 Called when a director event message was received
 ==========================
 */
 
-void DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
+void EXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 {
 	 gHUD.m_Spectator.DirectorMessage( iSize, pbuf );
 }

@@ -168,7 +168,7 @@ public:
 
 	static CBeam *BeamCreate( const char *pSpriteName, int width );
 
-	inline void LiveForTime( float time ) { SetThink(&CBaseEntity::SUB_Remove); pev->nextthink = gpGlobals->time + time; }
+	inline void LiveForTime( float time ) { SetThink(&CBeam::SUB_Remove); pev->nextthink = gpGlobals->time + time; }
 	inline void	BeamDamageInstant( TraceResult *ptr, float damage ) 
 	{ 
 		pev->dmg = damage; 

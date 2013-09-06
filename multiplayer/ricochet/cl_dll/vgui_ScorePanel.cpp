@@ -28,6 +28,8 @@
 #include "vgui_ScorePanel.h"
 #include "vgui_helpers.h"
 #include "vgui_loadtga.h"
+//#include "ITrackerUser.h"
+//extern ITrackerUser *g_pTrackerUser;
 
 hud_player_info_t	 g_PlayerInfoList[MAX_PLAYERS+1];	   // player info from the engine
 extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];   // additional player info sent directly to the client dll
@@ -48,7 +50,7 @@ int iNumberOfTeamColors = 33;
 class SBColumnInfo
 {
 public:
-	char				*m_pTitle;		// If null, ignore, if starts with #, it's localized, otherwise use the string directly.
+	const char				*m_pTitle;		// If null, ignore, if starts with #, it's localized, otherwise use the string directly.
 	int					m_Width;		// Based on 640 width. Scaled to fit other resolutions.
 	Label::Alignment	m_Alignment;	
 };
@@ -57,7 +59,7 @@ public:
 
 SBColumnInfo g_ColumnInfo[NUM_COLUMNS] =
 {
-	{NULL,			24,			Label::a_east},		
+	{NULL,			24,			Label::a_east},		// tracker column
 	{NULL,			140,		Label::a_east},		// name
 	{"#QUEUE",		56,			Label::a_east},		// class
 	{"#WINS",		40,			Label::a_east},
@@ -103,6 +105,8 @@ ScorePanel::ScorePanel(int x,int y,int wide,int tall) : Panel(x,y,wide,tall)
 	setBgColor(0, 0, 0, 96);
 	m_pCurrentHighlightLabel = NULL;
 	m_iHighlightRow = -1;
+
+	m_pTrackerIcon = vgui_LoadTGANoInvertAlpha("gfx/vgui/640_scoreboardtracker.tga");
 
 	// Initialize the top title.
 	m_TitleLabel.setFont(tfont);
@@ -151,6 +155,7 @@ ScorePanel::ScorePanel(int x,int y,int wide,int tall) : Panel(x,y,wide,tall)
 			}
 			else if (i == 0)
 			{
+				// tracker icon cell
 				xwide -= 8;
 			}
 		}
@@ -289,6 +294,9 @@ void ScorePanel::Update()
 	{
 		m_iSortedRows[i] = 0;
 		m_iIsATeam[i] = TEAM_NO;
+	}
+	for (int i = 0; i < MAX_PLAYERS; i++)
+	{
 		m_bHasBeenSorted[i] = false;
 	}
 
@@ -537,7 +545,8 @@ void ScorePanel::FillGrid()
 
 	Font *sfont = pSchemes->getFont(hScheme);
 	Font *tfont = pSchemes->getFont(hTitleScheme);
-	Font *smallfont = pSchemes->getFont(hSmallScheme);
+	/* Font *smallfont = */
+	pSchemes->getFont(hSmallScheme);
 	int i = 0;
 
 	// update highlight position
@@ -551,8 +560,6 @@ void ScorePanel::FillGrid()
 		m_iHighlightRow = -1;
 	}
 
-	bool bNextRowIsGap = false;
-
 	for(int row=0; row < NUM_ROWS; row++)
 	{
 		CGrid *pGridRow = &m_PlayerGrids[row];
@@ -564,13 +571,6 @@ void ScorePanel::FillGrid()
 				m_PlayerEntries[col][row].setVisible(false);
 		
 			continue;
-		}
-
-		bool bRowIsGap = false;
-		if (bNextRowIsGap)
-		{
-			bNextRowIsGap = false;
-			bRowIsGap = true;
 		}
 
 		for(int col=0; col < NUM_COLUMNS; col++)
@@ -702,15 +702,15 @@ void ScorePanel::FillGrid()
 				case COLUMN_NAME:
 					if ( m_iIsATeam[row] == TEAM_UNASSIGNED )
 					{
-						sprintf( sz2, CHudTextMessage::BufferedLocaliseTextString( "#Queue" ) );
+						sprintf( sz2, "%s", CHudTextMessage::BufferedLocaliseTextString( "#Queue" ) );
 					}
 					else if ( m_iIsATeam[row] == TEAM_SPECTATORS )
 					{
-						sprintf( sz2, CHudTextMessage::BufferedLocaliseTextString( "#Spectators" ) );
+						sprintf( sz2, "%s", CHudTextMessage::BufferedLocaliseTextString( "#Spectators" ) );
 					}
 					else
 					{
-						sprintf( sz2, CHudTextMessage::BufferedLocaliseTextString( team_info->name ) );
+						sprintf( sz2, "%s", CHudTextMessage::BufferedLocaliseTextString( team_info->name ) );
 					}
 
 					// Uppercase it
@@ -724,7 +724,7 @@ void ScorePanel::FillGrid()
 					// Append the number of players
 					if ( m_iIsATeam[row] == TEAM_YES )
 					{
-						char *pszTemp = NULL;
+						const char *pszTemp = NULL;
 
 						if ( team_info->players == 1 )
 						{
@@ -766,21 +766,27 @@ void ScorePanel::FillGrid()
 			}
 			else
 			{
-				bool bShowClass = false;
-
 				switch (col)
 				{
 				case COLUMN_NAME:
-
+					/*
+					if (g_pTrackerUser)
+					{
+						int playerSlot = m_iSortedRows[row];
+						int trackerID = gEngfuncs.GetTrackerIDForPlayer(playerSlot);
+						const char *trackerName = g_pTrackerUser->GetUserName(trackerID);
+						if (trackerName && *trackerName)
+						{
+							sprintf(sz, "   (%s)", trackerName);
+							pLabel->setText2(sz);
+						}
+					}
+					*/
 					sprintf(sz, "%s  ", pl_info->name);
 					break;
 				case COLUMN_VOICE:
 					sz[0] = 0;
-					// in HLTV mode allow spectator to turn on/off commentator voice
-					if (!pl_info->thisplayer || gEngfuncs.IsSpectateOnly() )
-					{
-						GetClientVoiceMgr()->UpdateSpeakerImage(pLabel, m_iSortedRows[row]);
-					}
+					GetClientVoiceMgr()->UpdateSpeakerImage(pLabel, m_iSortedRows[row]);
 					break;
 				case COLUMN_CLASS:
 					
@@ -796,6 +802,19 @@ void ScorePanel::FillGrid()
 					break;
 
 				case COLUMN_TRACKER:
+						/*
+					if (g_pTrackerUser)
+					{
+						int playerSlot = m_iSortedRows[row];
+						int trackerID = gEngfuncs.GetTrackerIDForPlayer(playerSlot);
+
+						if (g_pTrackerUser->IsFriend(trackerID) && trackerID != g_pTrackerUser->GetTrackerID())
+						{
+							pLabel->setImage(m_pTrackerIcon);
+							pLabel->setFgColorAsImageColor(false);
+							m_pTrackerIcon->setColor(Color(255, 255, 255, 0));
+						}
+					}*/
 					break;
 
 				case COLUMN_KILLS: //Wins
@@ -900,7 +919,7 @@ void ScorePanel::mousePressed(MouseCode code, Panel* panel)
 					GetClientVoiceMgr()->SetPlayerBlockedState(iPlayer, true);
 
 					sprintf( string1, CHudTextMessage::BufferedLocaliseTextString( "#Muted" ), pl_info->name );
-					sprintf( string2, CHudTextMessage::BufferedLocaliseTextString( "#No_longer_hear_that_player" ) );
+					sprintf( string2, "%s", CHudTextMessage::BufferedLocaliseTextString( "#No_longer_hear_that_player" ) );
 					sprintf( string, "%c** %s %s\n", HUD_PRINTTALK, string1, string2 );
 
 					gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(string)+1, string );

@@ -10,8 +10,8 @@
 
 #include <windows.h>
 
-#include <gl\GL.h>
-#include <gl\GLU.h>
+#include <gl\gl.h>
+#include <gl\glu.h>
 #include <gl\glut.h>
 
 #include "mathlib.h"

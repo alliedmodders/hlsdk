@@ -68,6 +68,13 @@ typedef enum
 	PLAYER_ATTACK1,
 } PLAYER_ANIM;
 
+#ifdef THREEWAVE
+enum Player_Menu {
+    Team_Menu,
+	Team_Menu_IG,
+};
+#endif
+
 #define MAX_ID_RANGE 2048
 #define SBAR_STRING_SIZE 128
 enum sbar_data
@@ -75,6 +82,7 @@ enum sbar_data
 SBAR_ID_TARGETNAME = 1,
 SBAR_ID_TARGETHEALTH,
 SBAR_ID_TARGETARMOR,
+SBAR_ID_TARGETRUNE,
 SBAR_ID_TARGETTEAM,
 SBAR_END,
 };
@@ -255,7 +263,7 @@ public:
 	void GiveNamedItem( const char *szName );
 	void EnableControl(BOOL fControl);
 
-	int  GiveAmmo( int iAmount, char *szName, int iMax );
+	int  GiveAmmo( int iAmount, const char *szName, int iMax );
 	void SendAmmoUpdate(void);
 
 	void WaterMove( void );
@@ -263,7 +271,7 @@ public:
 	void PlayerUse( void );
 
 	void CheckSuitUpdate();
-	void SetSuitUpdate(char *name, int fgroup, int iNoRepeat);
+	void SetSuitUpdate(const char *name, int fgroup, int iNoRepeat);
 	void UpdateGeigerCounter( void );
 	void CheckTimeBasedDamage( void );
 	void UpdateStepSound( void );
@@ -389,12 +397,56 @@ public:
 	unsigned short m_usLightning;
 	unsigned short m_usSpike;
 	unsigned short m_usSuperSpike;	
+
+
+#ifdef THREEWAVE
+	int		m_bHasFlag;
+	void ShowMenu ( int bitsValidSlots, int nDisplayTime, BOOL fNeedMore, char *pszText );
+	int     m_iMenu;
+
+	float	m_flNextTeamChange;
+
+	CBasePlayer *pFlagCarrierKiller;
+	CBasePlayer *pFlagReturner;
+	CBasePlayer *pCarrierHurter;
+
+	float	m_flCarrierHurtTime;
+	float	m_flCarrierPickupTime;
+	float	m_flFlagCarrierKillTime;
+	float	m_flFlagReturnTime;
+	float	m_flFlagStatusTime;
+
+	float	m_flRegenTime;
+
+	int		m_iRuneStatus;
+
+	void	W_FireHook ( void );
+	void	Throw_Grapple ( void );
+
+	bool	m_bHook_Out;
+	bool    m_bOn_Hook;
+	CBaseEntity *m_ppHook;
+
+	void Service_Grapple ( void );
+
+#endif
+	
+
+//#ifdef THREEWAVE
+
+//#endif
+
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025
 #define AUTOAIM_5DEGREES  0.08715574274766
 #define AUTOAIM_8DEGREES  0.1391731009601
 #define AUTOAIM_10DEGREES 0.1736481776669
+
+
+
+
+
 
 // QUAKECLASSIC
 #define Q_SMALL_PUNCHANGLE_KICK		-2
@@ -427,6 +479,15 @@ public:
 #define IT_INVULNERABILITY              (1 << 20)
 #define IT_SUIT                         (1 << 21)
 #define IT_QUAD                         (1 << 22)
+
+
+#define ITEM_RUNE1_FLAG                 1
+#define ITEM_RUNE2_FLAG                 2
+#define ITEM_RUNE3_FLAG                 3
+#define ITEM_RUNE4_FLAG                 4
+
+
+
 
 extern int	gmsgHudText;
 extern BOOL gInitHUD;

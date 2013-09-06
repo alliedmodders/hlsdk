@@ -136,7 +136,7 @@ int CHudMessage::YPosition( float y, int height )
 
 void CHudMessage::MessageScanNextChar( void )
 {
-	int srcRed, srcGreen, srcBlue, destRed, destGreen, destBlue;
+	int srcRed, srcGreen, srcBlue, destRed = 0, destGreen = 0, destBlue = 0;
 	int blend;
 
 	srcRed = m_parms.pMessage->r1;
@@ -263,7 +263,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 			width = 0;
 		}
 		else
-			width += gHUD.m_scrinfo.charWidths[*pText];
+			width += gHUD.m_scrinfo.charWidths[size_t(*pText)];
 		pText++;
 		length++;
 	}
@@ -315,7 +315,7 @@ int CHudMessage::Draw( float fTime )
 {
 	int i, drawn;
 	client_textmessage_t *pMessage;
-	float endTime;
+	float endTime = 0.0;
 
 	drawn = 0;
 

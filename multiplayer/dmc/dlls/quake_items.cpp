@@ -272,7 +272,7 @@ void CItemHealth::MegahealthRot( void )
 	// Respawn if it's not DM==2
 	if (gpGlobals->deathmatch != 2)
 	{
-		SetThink ( &CQuakeItem::Materialize );
+		SetThink ( &CItemHealth::Materialize );
 		pev->nextthink = gpGlobals->time + 20;
 	}
 	else
@@ -500,7 +500,7 @@ void CBasePlayer::Deathmatch_Weapon(int iOldWeapon, int iNewWeapon)
 			W_ChangeWeapon( iPickedWep ); break;
 		case 2:
 
-			if ( iPickedWep == 8 && !FBitSet(pev->flags , FL_INWATER) || iPickedWep > iOldWep )
+			if ( (iPickedWep == 8 && !FBitSet(pev->flags , FL_INWATER)) || iPickedWep > iOldWep )
 				W_ChangeWeapon( iPickedWep );
 			break;
 	}
@@ -1356,7 +1356,7 @@ void CItemBackpack::Spawn()
 	UTIL_SetOrigin( pev, pev->origin );
 	SET_MODEL(ENT(pev), "models/backpack.mdl");
 
-	SetTouch(&CQuakeItem::ItemTouch);
+	SetTouch(&CItemBackpack::ItemTouch);
 }
 
 // Drop a backpack containing this player's ammo/weapons
@@ -1406,7 +1406,7 @@ void CBasePlayer::DropBackpack()
 
 	// Remove after 2 mins
 	pPack->pev->nextthink = gpGlobals->time + 120;
-	pPack->SetThink( &CBaseEntity::SUB_Remove );
+	pPack->SetThink( &CItemBackpack::SUB_Remove );
 
 	// Remove all weapons
 	m_iQuakeItems = 0;
@@ -1459,15 +1459,11 @@ BOOL CItemBackpack::MyTouch( CBasePlayer *pPlayer )
 		return FALSE;
 	}
 
-	BOOL bPrintComma = FALSE;
-
 	// Get the weapon from the pack
 	if (m_iItems)
 	{
 		if ( !(pPlayer->m_iQuakeItems & m_iItems) )
 		{
-			bPrintComma = TRUE;
-
 			switch ( m_iItems )
 			{
 			case IT_SUPER_SHOTGUN:

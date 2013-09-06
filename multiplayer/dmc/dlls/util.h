@@ -12,12 +12,11 @@
 *   without written permission from Valve LLC.
 *
 ****/
+#include "archtypes.h"     // DAL
+
 //
 // Misc utility code
 //
-
-#include <string.h>
-
 #ifndef ACTIVITY_H
 #include "activity.h"
 #endif
@@ -30,8 +29,9 @@ inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, ent
 extern globalvars_t				*gpGlobals;
 
 // Use this instead of ALLOC_STRING on constant strings
-#define STRING(offset)		(const char *)(gpGlobals->pStringBase + (int)offset)
-#define MAKE_STRING(str)	((int)str - (int)STRING(0))
+#define STRING(offset)		((const char *)(gpGlobals->pStringBase + (unsigned int)(offset)))
+#define MAKE_STRING(str)	((uint64)(str) - (uint64)STRING(0))
+
 
 inline edict_t *FIND_ENTITY_BY_CLASSNAME(edict_t *entStart, const char *pszName) 
 {
@@ -79,25 +79,29 @@ typedef int EOFFSET;
 typedef int BOOL;
 
 // In case this ever changes
+#ifndef M_PI
 #define M_PI			3.14159265358979323846
+#endif
+
+#ifndef UTIL_DLLEXPORT
+#ifdef _WIN32
+#define UTIL_DLLEXPORT _declspec( dllexport )
+#else
+#define UTIL_DLLEXPORT __attribute__ ((visibility("default")))
+#endif
+#endif
 
 // Keeps clutter down a bit, when declaring external entity/global method prototypes
 #define DECLARE_GLOBAL_METHOD(MethodName) \
-		extern void DLLEXPORT MethodName( void )
-#define GLOBAL_METHOD(funcname)					void DLLEXPORT funcname(void)
+		extern void UTIL_DLLEXPORT MethodName( void )
+#define GLOBAL_METHOD(funcname)					void UTIL_DLLEXPORT funcname(void)
 
 // This is the glue that hooks .MAP entity class names to our CPP classes
 // The _declspec forces them to be exported by name so we can do a lookup with GetProcAddress()
 // The function is used to intialize / allocate the object for the entity
-#ifdef _WIN32
 #define LINK_ENTITY_TO_CLASS(mapClassName,DLLClassName) \
-        extern "C" _declspec( dllexport ) void mapClassName( entvars_t *pev ); \
+        extern "C" UTIL_DLLEXPORT void mapClassName( entvars_t *pev ); \
         void mapClassName( entvars_t *pev ) { GetClassPtr( (DLLClassName *)pev ); }
-#else
-#define LINK_ENTITY_TO_CLASS(mapClassName,DLLClassName) \
-		extern "C" void mapClassName( entvars_t *pev ); \
-		void mapClassName( entvars_t *pev ) { GetClassPtr( (DLLClassName *)pev ); }
-#endif
 
 
 //
@@ -252,7 +256,7 @@ typedef enum { ignore_monsters=1, dont_ignore_monsters=0, missile=2 } IGNORE_MON
 typedef enum { ignore_glass=1, dont_ignore_glass=0 } IGNORE_GLASS;
 extern void			UTIL_TraceLine			(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult *ptr);
 extern void			UTIL_TraceLine			(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, edict_t *pentIgnore, TraceResult *ptr);
-typedef enum { point_hull=0, human_hull=1, large_hull=2, head_hull=3 };
+typedef enum { point_hull=0, human_hull=1, large_hull=2, head_hull=3 } HULL_TYPE;
 extern void			UTIL_TraceHull			(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t *pentIgnore, TraceResult *ptr);
 extern TraceResult	UTIL_GetGlobalTrace		(void);
 extern void			UTIL_TraceModel			(const Vector &vecStart, const Vector &vecEnd, int hullNumber, edict_t *pentModel, TraceResult *ptr);
@@ -277,7 +281,7 @@ extern float		UTIL_Approach( float target, float value, float speed );
 extern float		UTIL_ApproachAngle( float target, float value, float speed );
 extern float		UTIL_AngleDistance( float next, float cur );
 
-extern char			*UTIL_VarArgs( char *format, ... );
+extern char			*UTIL_VarArgs( const char *format, ... );
 extern void			UTIL_Remove( CBaseEntity *pEntity );
 extern BOOL			UTIL_IsValidEntity( edict_t *pent );
 extern BOOL			UTIL_TeamsMatch( const char *pTeamName1, const char *pTeamName2 );
@@ -340,7 +344,7 @@ extern char *UTIL_dtos3( int d );
 extern char *UTIL_dtos4( int d );
 
 // Writes message to console with timestamp and FragLog header.
-extern void			UTIL_LogPrintf( char *fmt, ... );
+extern void			UTIL_LogPrintf( const char *fmt, ... );
 
 // Sorta like FInViewCone, but for nonmonsters. 
 extern float UTIL_DotPoints ( const Vector &vecSrc, const Vector &vecCheck, const Vector &vecDir );

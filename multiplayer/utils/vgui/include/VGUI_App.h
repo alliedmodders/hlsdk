@@ -17,8 +17,6 @@
 namespace vgui
 {
 
-enum MouseCode;
-enum KeyCode;
 class Panel;
 class TickSignal;
 class Scheme;

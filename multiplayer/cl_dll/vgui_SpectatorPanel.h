@@ -26,6 +26,21 @@ using namespace vgui;
 #define	SPECTATOR_PANEL_CMD_HIDEMENU			4
 #define	SPECTATOR_PANEL_CMD_TOGGLE_INSET		5
 #define SPECTATOR_PANEL_CMD_CAMERA				6
+#define SPECTATOR_PANEL_CMD_PLAYERS				7
+
+// spectator panel sizes
+#define PANEL_HEIGHT 64
+
+#define BANNER_WIDTH	256
+#define BANNER_HEIGHT	64
+
+#define OPTIONS_BUTTON_X 96
+#define CAMOPTIONS_BUTTON_X 200
+
+
+#define SEPERATOR_WIDTH 15
+#define SEPERATOR_HEIGHT 15
+
 
 #define TEAM_NUMBER 2
 
@@ -50,20 +65,22 @@ public:
 	void EnableInsetView(bool isEnabled);
 	void ShowMenu(bool isVisible);
 
-	
-	ColorButton		  *	m_OptionButton;
+	DropDownButton		  *	m_OptionButton;
 //	CommandButton     *	m_HideButton;
-	ColorButton	  *	m_PrevPlayerButton;
-	ColorButton	  *	m_NextPlayerButton;
-	ColorButton     *	m_CamButton;	
+	//ColorButton	  *	m_PrevPlayerButton;
+	//ColorButton	  *	m_NextPlayerButton;
+	CImageButton	  *	m_PrevPlayerButton;
+	CImageButton	  *	m_NextPlayerButton;
+	DropDownButton     *	m_CamButton;	
 
 	CTransparentPanel *			m_TopBorder;
 	CTransparentPanel *			m_BottomBorder;
 
 	ColorButton		*m_InsetViewButton;
 	
-	Label			*m_BottomMainLabel;
+	DropDownButton	*m_BottomMainButton;
 	CImageLabel		*m_TimerImage;
+	Label			*m_BottomMainLabel;
 	Label			*m_CurrentTime;
 	Label			*m_ExtraInfo;
 	Panel			*m_Separator;

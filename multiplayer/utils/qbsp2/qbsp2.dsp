@@ -23,7 +23,7 @@ CFG=qbsp2 - Win32 Release
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/SDKSrc/Tools/utils/qbsp2", VUGBAAAA"
+# PROP Scc_ProjName ""$/Goldsrc/utils/qbsp2", VKBBAAAA"
 # PROP Scc_LocalPath "."
 CPP=cl.exe
 RSC=rc.exe
@@ -64,7 +64,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir ".\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /YX /c
-# ADD CPP /nologo /MT /Gm /GX /ZI /Od /I "..\common" /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D "DOUBLEVEC_T" /YX /FD /c
+# ADD CPP /nologo /MT /Gm /GX /ZI /Od /I "..\common" /I "..\..\engine" /I "..\..\common" /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D "DOUBLEVEC_T" /D "_NOENUMQBOOL" /FR /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -82,14 +82,18 @@ LINK32=link.exe
 # Name "qbsp2 - Win32 Debug"
 # Begin Group "Source Files"
 
-# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;for;f90"
+# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;hpj;bat;for;f90"
 # Begin Source File
 
 SOURCE=.\bsp5.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\common\bspfile.c
+SOURCE=..\common\bsplib.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\bsplib.h
 # End Source File
 # Begin Source File
 
@@ -147,10 +151,6 @@ SOURCE=.\writebsp.c
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl;fi;fd"
-# Begin Source File
-
-SOURCE=..\common\bspfile.h
-# End Source File
 # Begin Source File
 
 SOURCE=..\common\cmdlib.h

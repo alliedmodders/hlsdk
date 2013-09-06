@@ -35,6 +35,8 @@
 #define PM_TRACELINE_ANYVISIBLE		0
 #define PM_TRACELINE_PHYSENTSONLY	1
 
+#include "archtypes.h"     // DAL
+
 #if defined _MSC_VER && _MSC_VER >= 1400
 	#ifndef _CRT_SECURE_NO_DEPRECATE
 		#define _CRT_SECURE_NO_DEPRECATE
@@ -105,7 +107,6 @@ typedef struct
 } dclipnode_t;
 #endif
 
-// plane_t structure
 #ifndef _MPLANE_DEFINED_
 #define _MPLANE_DEFINED_
 typedef struct mplane_s
@@ -131,8 +132,9 @@ typedef struct hull_s
 } hull_t;
 #endif
 
+typedef struct playermove_s playermove_t;
 
-typedef struct playermove_s
+struct playermove_s
 {
 	int				player_index;  // So we don't try to run the PM_CheckStuck nudging too quickly.
 	qboolean		server;        // For debugging, are we running physics code on server side?
@@ -243,7 +245,7 @@ typedef struct playermove_s
 	int				(*PM_HullPointContents) ( struct hull_s *hull, int num, vec3_t p);   
 	pmtrace_t		(*PM_PlayerTrace) (vec3_t start, vec3_t end, int traceFlags, int ignore_pe );
 	struct pmtrace_s *(*PM_TraceLine)( float *start, float *end, int flags, int usehulll, int ignore_pe );
-	long			(*RandomLong)( long lLow, long lHigh );
+	int32			(*RandomLong)( int32 lLow, int32 lHigh );
 	float			(*RandomFloat)( float flLow, float flHigh );
 	int				(*PM_GetModelType)( struct model_s *mod );
 	void			(*PM_GetModelBounds)( struct model_s *mod, vec3_t mins, vec3_t maxs );
@@ -260,6 +262,6 @@ typedef struct playermove_s
 	void			(*PM_PlaySound) ( int channel, const char *sample, float volume, float attenuation, int fFlags, int pitch );
 	const char		*(*PM_TraceTexture) ( int ground, vec3_t vstart, vec3_t vend );
 	void			(*PM_PlaybackEventFull) ( int flags, int clientindex, unsigned short eventindex, float delay, float *origin, float *angles, float fparam1, float fparam2, int iparam1, int iparam2, int bparam1, int bparam2 );
-} playermove_t;
+};
 
 #endif

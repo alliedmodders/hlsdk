@@ -40,7 +40,7 @@ extern "C"
 	int CL_IsThirdPerson( void );
 	void CL_CameraOffset( float *ofs );
 
-	void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
+	void EXPORT V_CalcRefdef( struct ref_params_s *pparams );
 
 	void PM_ParticleLine( float *start, float *end, int pcolor, float life, float vert);
 	int PM_GetInfo( int ent );
@@ -409,7 +409,7 @@ V_CalcIntermissionRefdef
 */
 void V_CalcIntermissionRefdef ( struct ref_params_s *pparams )
 {
-	cl_entity_t	*ent, *view;
+	cl_entity_t	/**ent,*/ *view;
 	float		old;
 
 // don't allow cheats in multiplayer
@@ -423,7 +423,7 @@ void V_CalcIntermissionRefdef ( struct ref_params_s *pparams )
 #endif
 
 	// ent is the player model ( visible when out of body )
-	ent = gEngfuncs.GetLocalPlayer();
+	//ent = gEngfuncs.GetLocalPlayer();
 	
 	// view is the weapon model (only visible from inside body )
 	view = gEngfuncs.GetViewModel();
@@ -468,7 +468,7 @@ V_CalcRefdef
 */
 void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 {
-	cl_entity_t		*ent, *view;
+	cl_entity_t		/**ent,*/ *view;
 	int				i;
 	vec3_t			angles;
 	float			bob, waterOffset;
@@ -495,7 +495,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	V_DriftPitch ( pparams );
 
 	// ent is the player model ( visible when out of body )
-	ent = gEngfuncs.GetLocalPlayer();
+	//ent = gEngfuncs.GetLocalPlayer();
 	
 	// view is the weapon model (only visible from inside body )
 	view = gEngfuncs.GetViewModel();
@@ -895,7 +895,7 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	v_origin = pparams->vieworg;
 }
 
-void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
+void EXPORT V_CalcRefdef( struct ref_params_s *pparams )
 {
 	// intermission / finale rendering
 	if ( pparams->intermission )

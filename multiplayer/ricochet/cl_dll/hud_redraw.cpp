@@ -34,6 +34,9 @@ extern int g_iVisibleMouse;
 // Think
 void CHud::Think(void)
 {
+	m_scrinfo.iSize = sizeof(m_scrinfo);
+	GetScreenInfo(&m_scrinfo);
+
 	HUDLIST *pList = m_pHudList;
 	while (pList)
 	{
@@ -117,12 +120,12 @@ void ScaleColors( int &r, int &g, int &b, int a )
 	b = (int)(b * x);
 }
 
-int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, char *szIt, int r, int g, int b )
+int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, const char *szIt, int r, int g, int b )
 {
 	// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
-		int next = xpos + gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
+		int next = xpos + gHUD.m_scrinfo.charWidths[ size_t(*szIt) ]; // variable-width fonts look cool
 		if ( next > iMaxX )
 			return xpos;
 
@@ -142,10 +145,10 @@ int CHud :: DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int
 }
 
 // draws a string from right to left (right-aligned)
-int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b )
+int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b )
 {
 	// find the end of the string
-	char *szIt = NULL;
+	const char *szIt = NULL;
 	for ( szIt = szString; *szIt != 0; szIt++ )
 	{ // we should count the length?		
 	}
@@ -153,7 +156,7 @@ int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString,
 	// iterate throug the string in reverse
 	for ( szIt--;  szIt != (szString-1);  szIt-- )	
 	{
-		int next = xpos - gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
+		int next = xpos - gHUD.m_scrinfo.charWidths[ size_t(*szIt) ]; // variable-width fonts look cool
 		if ( next < iMinX )
 			return xpos;
 		xpos = next;

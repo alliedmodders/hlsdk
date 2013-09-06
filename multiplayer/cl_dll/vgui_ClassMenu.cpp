@@ -56,11 +56,13 @@
 CClassMenuPanel::CClassMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide,int tall) : CMenuPanel(iTrans, iRemoveMe, x,y,wide,tall)
 {
 	// don't show class graphics at below 640x480 resolution
+#ifdef _TFC
 	bool bShowClassGraphic = true;
 	if ( ScreenWidth < 640 )
 	{
 		bShowClassGraphic = false;
 	}
+#endif
 
 	memset( m_pClassImages, 0, sizeof(m_pClassImages) );
 
@@ -69,7 +71,8 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide
 
 	// schemes
 	SchemeHandle_t hTitleScheme = pSchemes->getSchemeHandle( "Title Font" );
-	SchemeHandle_t hClassWindowText = pSchemes->getSchemeHandle( "Briefing Text" );
+	/*SchemeHandle_t hClassWindowText = */
+	pSchemes->getSchemeHandle( "Briefing Text" );
 
 	// color schemes
 	int r, g, b, a;
@@ -94,14 +97,13 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide
 	m_pScrollPanel->setBorder( new LineBorder( Color(255 * 0.7,170 * 0.7,0,0) ) );
 	m_pScrollPanel->validate();
 
-	int clientWide=m_pScrollPanel->getClient()->getWide();
-
 	//turn scrollpanel back into auto show scrollbar mode and validate
 	m_pScrollPanel->setScrollBarAutoVisible(false,true);
 	m_pScrollPanel->setScrollBarVisible(false,false);
 	m_pScrollPanel->validate();
 
 	// Create the Class buttons
+#ifdef _TFC
 	for (int i = 0; i <= PC_RANDOM; i++)
 	{
 		char sz[256]; 
@@ -153,7 +155,7 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide
 		pNameLabel->setBgColor( r, g, b, a );
 		pNameLabel->setContentAlignment( vgui::Label::a_west );
 		//pNameLabel->setBorder(new LineBorder());
-		pNameLabel->setText(localName);
+		pNameLabel->setText( "%s", localName);
 
 		// Create the Class Image
 		if ( bShowClassGraphic )
@@ -239,7 +241,7 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide
 		//m_pClassInfoPanel[i]->setBorder(new LineBorder());
 
 	}
-
+#endif
 	// Create the Cancel button
 	m_pCancelButton = new CommandButton( gHUD.m_TextMessage.BufferedLocaliseTextString( "#Menu_Cancel" ), CLASSMENU_TOPLEFT_BUTTON_X, 0, CLASSMENU_BUTTON_SIZE_X, CLASSMENU_BUTTON_SIZE_Y);
 	m_pCancelButton->setParent( this );
@@ -260,6 +262,7 @@ void CClassMenuPanel::Update()
 	int	 iYPos = CLASSMENU_TOPLEFT_BUTTON_Y;
 
 	// Cycle through the rest of the buttons
+#ifdef _TFC
 	for (int i = 0; i <= PC_RANDOM; i++)
 	{
 		bool bCivilian = (gViewPort->GetValidClasses(g_iTeamNumber) == -1);
@@ -318,7 +321,7 @@ void CClassMenuPanel::Update()
 
 		char sz[256]; 
 		sprintf(sz, m_sPlayersOnTeamString, iTotal);
-		m_pPlayers[i]->setText( sz );
+		m_pPlayers[i]->setText( "%s", sz );
 
 		// Set the text color to the teamcolor
 		m_pPlayers[i]->setFgColor(	iTeamColors[g_iTeamNumber % iNumberOfTeamColors][0],
@@ -346,6 +349,7 @@ void CClassMenuPanel::Update()
 			}
 		}
 	}
+#endif
 
 	// If the player already has a class, make the cancel button visible
 	if ( g_iPlayerClass )
@@ -413,6 +417,7 @@ void CClassMenuPanel::Initialize( void )
 void CClassMenuPanel::SetActiveInfo( int iInput )
 {
 	// Remove all the Info panels and bring up the specified one
+#ifdef _TFC
 	for (int i = 0; i <= PC_RANDOM; i++)
 	{
 		m_pButtons[i]->setArmed( false );
@@ -420,6 +425,7 @@ void CClassMenuPanel::SetActiveInfo( int iInput )
 	}
 
 	if ( iInput > PC_RANDOM || iInput < 0 )
+#endif
 		iInput = 0;
 
 	m_pButtons[iInput]->setArmed( true );

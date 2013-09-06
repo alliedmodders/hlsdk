@@ -5,17 +5,20 @@
 #include "hud_servers.h"
 #include "net_api.h"
 #include <string.h>
+#ifdef _WIN32
 #include <winsock.h>
-
+#else
+#include <arpa/inet.h>
+#endif
 static int	context_id;
 
-// Default master server address in case we can't read any from woncomm.lst file
+// Default master server address in case we can't read any from valvecomm.lst file
 #define VALVE_MASTER_ADDRESS "half-life.east.won.net"
 #define PORT_MASTER	 27010
 #define PORT_SERVER  27015
 
 // File where we really should look for master servers
-#define MASTER_PARSE_FILE "woncomm.lst"
+#define MASTER_PARSE_FILE "valvecomm.lst"
 
 #define MAX_QUERIES 20
 
@@ -611,7 +614,7 @@ int CompareField( CHudServers::server_t *p1, CHudServers::server_t *p2, const ch
 	return stricmp( sz1, sz2 );
 }
 
-int CALLBACK ServerListCompareFunc( CHudServers::server_t *p1, CHudServers::server_t *p2, const char *fieldname )
+int ServerListCompareFunc( CHudServers::server_t *p1, CHudServers::server_t *p2, const char *fieldname )
 {
 	if (!p1 || !p2)  // No meaningful comparison
 		return 0;  
@@ -624,7 +627,9 @@ int CALLBACK ServerListCompareFunc( CHudServers::server_t *p1, CHudServers::serv
 
 	return retval;
 }
-
+#ifndef _WIN32
+#define __cdecl
+#endif
 static char g_fieldname[ 256 ];
 int __cdecl FnServerCompare(const void *elem1, const void *elem2 )
 {

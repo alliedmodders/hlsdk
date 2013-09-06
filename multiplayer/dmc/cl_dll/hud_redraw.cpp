@@ -36,6 +36,9 @@ int grgLogoFrame[MAX_LOGO_FRAMES] =
 // Think
 void CHud::Think(void)
 {
+	m_scrinfo.iSize = sizeof(m_scrinfo);
+	GetScreenInfo(&m_scrinfo);
+
 	HUDLIST *pList = m_pHudList;
 	while (pList)
 	{
@@ -61,7 +64,7 @@ int CHud :: Redraw( float flTime, int intermission )
 	m_fOldTime = m_flTime;	// save time of previous redraw
 	m_flTime = flTime;
 	m_flTimeDelta = (double)m_flTime - m_fOldTime;
-	static int m_flShotTime = 0;
+	static float m_flShotTime = 0;
 	
 	// Clock was reset, reset delta
 	if ( m_flTimeDelta < 0 )
@@ -171,14 +174,14 @@ int CHud :: ReturnStringPixelLength ( char *Hihi )
 	int strleng = ( strlen( Hihi ) );
 
 	for ( int har = 0; har < strleng; har++)
-		iNameLength += gHUD.m_scrinfo.charWidths[ Hihi[har] ];
+		iNameLength += gHUD.m_scrinfo.charWidths[ size_t(Hihi[har]) ];
 
 	return iNameLength;
 }
 
 int LastColor;
 
-int CHud :: DrawHudStringCTF(int xpos, int ypos, int iMaxX, char *szIt, int r, int g, int b )
+int CHud :: DrawHudStringCTF(int xpos, int ypos, int iMaxX, const char *szIt, int r, int g, int b )
 {
 	int WantColor = 0;
 	int Color = 0;
@@ -186,7 +189,7 @@ int CHud :: DrawHudStringCTF(int xpos, int ypos, int iMaxX, char *szIt, int r, i
 	// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
-		int next;// = xpos + gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
+		int next = 0;// = xpos + gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
 		
 	/*	if ( next > iMaxX )
 			return xpos;*/
@@ -265,7 +268,7 @@ int CHud :: DrawHudStringCTF(int xpos, int ypos, int iMaxX, char *szIt, int r, i
 			else if (LastColor == 0)
 				TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );
 
-			next = xpos + gHUD.m_scrinfo.charWidths[ *szIt ];
+			next = xpos + gHUD.m_scrinfo.charWidths[ size_t(*szIt) ];
 		}
 		
 		else if (Color > 0 && WantColor == 0 )
@@ -283,7 +286,7 @@ int CHud :: DrawHudStringCTF(int xpos, int ypos, int iMaxX, char *szIt, int r, i
 			if (Color == 6)
 				TextMessageDrawChar( xpos, ypos, *szIt, 136, 136, 136 );
 
-			next = xpos + gHUD.m_scrinfo.charWidths[ *szIt ];
+			next = xpos + gHUD.m_scrinfo.charWidths[ size_t(*szIt) ];
 		}
 
 		else if (Color > 0 && WantColor == 1)
@@ -300,12 +303,12 @@ int CHud :: DrawHudStringCTF(int xpos, int ypos, int iMaxX, char *szIt, int r, i
 }
 
 
-int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, char *szIt, int r, int g, int b )
+int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, const char *szIt, int r, int g, int b )
 {
 	// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
-		int next = xpos + gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
+		int next = xpos + gHUD.m_scrinfo.charWidths[ size_t(*szIt) ]; // variable-width fonts look cool
 		if ( next > iMaxX )
 			return xpos;
 
@@ -325,10 +328,10 @@ int CHud :: DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int
 }
 
 // draws a string from right to left (right-aligned)
-int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b )
+int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b )
 {
 	// find the end of the string
-	char *szIt = NULL;
+	const char *szIt = NULL;
 	for ( szIt = szString; *szIt != 0; szIt++ )
 	{ // we should count the length?		
 	}
@@ -336,7 +339,7 @@ int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString,
 	// iterate throug the string in reverse
 	for ( szIt--;  szIt != (szString-1);  szIt-- )	
 	{
-		int next = xpos - gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
+		int next = xpos - gHUD.m_scrinfo.charWidths[ size_t(*szIt) ]; // variable-width fonts look cool
 		if ( next < iMinX )
 			return xpos;
 		xpos = next;

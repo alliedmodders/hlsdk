@@ -46,7 +46,7 @@ int					 g_IsSpectator[MAX_PLAYERS+1];
 class SBColumnInfo
 {
 public:
-	char				*m_pTitle;		// If null, ignore, if starts with #, it's localized, otherwise use the string directly.
+	const char				*m_pTitle;		// If null, ignore, if starts with #, it's localized, otherwise use the string directly.
 	int					m_Width;		// Based on 640 width. Scaled to fit other resolutions.
 	Label::Alignment	m_Alignment;	
 };
@@ -55,7 +55,7 @@ public:
 
 SBColumnInfo g_ColumnInfo[NUM_COLUMNS] =
 {
-	{NULL,			24,			Label::a_east},		// blank column
+	{NULL,			24,			Label::a_east},		// tracker column
 	{NULL,			140,		Label::a_west},		// name
 	{"#SCORE",		80,			Label::a_east},
 	{"#DEATHS",		46,			Label::a_east},
@@ -147,6 +147,7 @@ ScorePanel::ScorePanel(int x,int y,int wide,int tall) : Panel(x,y,wide,tall)
 			}
 			else if (i == 0)
 			{
+				// tracker icon cell
 				xwide -= 8;
 			}
 		}
@@ -261,6 +262,9 @@ void ScorePanel::Update()
 	{
 		m_iSortedRows[i] = 0;
 		m_iIsATeam[i] = TEAM_NO;
+	}
+	for (int i = 0; i < MAX_PLAYERS; i++)
+	{
 		m_bHasBeenSorted[i] = false;
 	}
 
@@ -521,8 +525,6 @@ void ScorePanel::FillGrid()
 		m_iHighlightRow = -1;
 	}
 
-	bool bNextRowIsGap = false;
-
 	for(int row=0; row < NUM_ROWS; row++)
 	{
 		CGrid *pGridRow = &m_PlayerGrids[row];
@@ -534,13 +536,6 @@ void ScorePanel::FillGrid()
 				m_PlayerEntries[col][row].setVisible(false);
 		
 			continue;
-		}
-
-		bool bRowIsGap = false;
-		if (bNextRowIsGap)
-		{
-			bNextRowIsGap = false;
-			bRowIsGap = true;
 		}
 
 		for(int col=0; col < NUM_COLUMNS; col++)
@@ -657,11 +652,11 @@ void ScorePanel::FillGrid()
 				case COLUMN_NAME:
 					if ( m_iIsATeam[row] == TEAM_SPECTATORS )
 					{
-						sprintf( sz2, CHudTextMessage::BufferedLocaliseTextString( "#Spectators" ) );
+						sprintf( sz2, "%s", CHudTextMessage::BufferedLocaliseTextString( "#Spectators" ) );
 					}
 					else
 					{
-						sprintf( sz2, CHudTextMessage::BufferedLocaliseTextString( team_info->name ) );
+						sprintf( sz2, "%s", CHudTextMessage::BufferedLocaliseTextString( team_info->name ) );
 					}
 
 					strcpy(sz, sz2);
@@ -702,8 +697,6 @@ void ScorePanel::FillGrid()
 			}
 			else
 			{
-				bool bShowClass = false;
-
 				switch (col)
 				{
 				case COLUMN_NAME:
@@ -711,11 +704,7 @@ void ScorePanel::FillGrid()
 					break;
 				case COLUMN_VOICE:
 					sz[0] = 0;
-					// in HLTV mode allow spectator to turn on/off commentator voice
-					if (!pl_info->thisplayer || gEngfuncs.IsSpectateOnly() )
-					{
-						GetClientVoiceMgr()->UpdateSpeakerImage(pLabel, m_iSortedRows[row]);
-					}
+					GetClientVoiceMgr()->UpdateSpeakerImage(pLabel, m_iSortedRows[row]);
 					break;
 				case COLUMN_KILLS:
 						sprintf(sz, "%d",  g_PlayerExtraInfo[ m_iSortedRows[row] ].frags );
@@ -726,7 +715,6 @@ void ScorePanel::FillGrid()
 				case COLUMN_LATENCY:
 						sprintf(sz, "%d", g_PlayerInfoList[ m_iSortedRows[row] ].ping );
 					break;
-				case COLUMN_TRACKER:
 				default:
 					break;
 				}
@@ -819,7 +807,7 @@ void ScorePanel::mousePressed(MouseCode code, Panel* panel)
 					GetClientVoiceMgr()->SetPlayerBlockedState(iPlayer, true);
 
 					sprintf( string1, CHudTextMessage::BufferedLocaliseTextString( "#Muted" ), pl_info->name );
-					sprintf( string2, CHudTextMessage::BufferedLocaliseTextString( "#No_longer_hear_that_player" ) );
+					sprintf( string2, "%s", CHudTextMessage::BufferedLocaliseTextString( "#No_longer_hear_that_player" ) );
 					sprintf( string, "%c** %s %s\n", HUD_PRINTTALK, string1, string2 );
 
 					gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(string)+1, string );

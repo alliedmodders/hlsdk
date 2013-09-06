@@ -27,6 +27,10 @@
 #include	"discwar.h"
 #include	"voice_gamemgr.h"
 
+#if !defined ( _WIN32 )
+#include <ctype.h>
+#endif
+
 extern DLL_GLOBAL CGameRules	*g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
 extern int gmsgDeathMsg;	// client dll messages
@@ -87,17 +91,7 @@ CHalfLifeMultiplay :: CHalfLifeMultiplay()
 	// share a single config file. (sjb)
 	if ( IS_DEDICATED_SERVER() )
 	{
-		// dedicated server
-		char *servercfgfile = (char *)CVAR_GET_STRING( "servercfgfile" );
-
-		if ( servercfgfile && servercfgfile[0] )
-		{
-			char szCommand[256];
-			
-			ALERT( at_console, "Executing dedicated server config file\n" );
-			sprintf( szCommand, "exec %s\n", servercfgfile );
-			SERVER_COMMAND( szCommand );
-		}
+		// this code has been moved into engine, to only run server.cfg once
 	}
 	else
 	{
@@ -611,10 +605,10 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 	DeathNotice( pVictim, pKiller, pInflictor );
 
 	FireTargets( "game_playerdie", pVictim, pVictim, USE_TOGGLE, 0 );
-	CBasePlayer *peKiller = NULL;
-	CBaseEntity *ktmp = CBaseEntity::Instance( pKiller );
-	if ( ktmp && (ktmp->Classify() == CLASS_PLAYER) )
-		peKiller = (CBasePlayer*)ktmp;
+	//CBasePlayer *peKiller = NULL;
+	//CBaseEntity *ktmp = CBaseEntity::Instance( pKiller );
+	//if ( ktmp && (ktmp->Classify() == CLASS_PLAYER) )
+	//	peKiller = (CBasePlayer*)ktmp;
 
 	CBaseEntity *ep = CBaseEntity::Instance( pKiller );
 	if ( ep && ep->Classify() == CLASS_PLAYER )
@@ -636,6 +630,8 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 
 	const char *killer_weapon_name = "world";		// by default, the player is killed by the world
 	int killer_index = 0;
+	
+	// Hack to fix name change
 
 	if ( pKiller->flags & FL_CLIENT )
 	{
@@ -727,14 +723,14 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 			}
 
 			// Otherwise, calculate number of disc bounces
-			if ( pVictim->m_flLastDiscBounces == 0 )
+			if ( pVictim->m_iLastDiscBounces == 0 )
 			{
 				// Bring up the reward window on the killer's screen
 				MESSAGE_BEGIN( MSG_ONE, gmsgReward, NULL, Killer->edict() );
 					WRITE_SHORT( REWARD_BOUNCE_NONE | iTele );
 				MESSAGE_END();
 			}
-			else if ( pVictim->m_flLastDiscBounces == 1 )
+			else if ( pVictim->m_iLastDiscBounces == 1 )
 			{
 				// Bring up the reward window on the killer's screen
 				MESSAGE_BEGIN( MSG_ONE, gmsgReward, NULL, Killer->edict() );
@@ -743,7 +739,7 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 			}
 			else
 			{
-				if ( pVictim->m_flLastDiscBounces == 2 )
+				if ( pVictim->m_iLastDiscBounces == 2 )
 				{
 					// Bring up the reward window on the killer's screen
 					MESSAGE_BEGIN( MSG_ONE, gmsgReward, NULL, Killer->edict() );
@@ -758,7 +754,7 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 					MESSAGE_END();
 
 					// Cap the number of frags a killer can get to 4
-					pVictim->m_flLastDiscBounces = 3;
+					pVictim->m_iLastDiscBounces = 3;
 				}
 			}
 
@@ -772,10 +768,10 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 				GETPLAYERAUTHID( pVictim->edict() ),
 				GETPLAYERUSERID( pVictim->edict() ),
 				killer_weapon_name,
-				pVictim->m_flLastDiscBounces );
+				pVictim->m_iLastDiscBounces );
 
 			char sz[1024];
-			sprintf( sz, "%dbounce", (int)(pVictim->m_flLastDiscBounces) );
+			sprintf( sz, "%dbounce", pVictim->m_iLastDiscBounces );
 
 			// Tell the client to display the death message
 			MESSAGE_BEGIN( MSG_ALL, gmsgDeathMsg );
@@ -784,7 +780,7 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 				WRITE_STRING( sz );								// what they were killed by (should this be a string?)
 			MESSAGE_END();
 
-			pKiller->frags += (1 + pVictim->m_flLastDiscBounces);
+			pKiller->frags += (1 + pVictim->m_iLastDiscBounces);
 
 			// Bonus point for teleport hit
 			if ( iTele )

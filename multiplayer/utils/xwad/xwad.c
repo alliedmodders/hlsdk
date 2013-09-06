@@ -14,7 +14,7 @@
 // #include "csg.h"
 #include "lbmlib.h"
 #include "mathlib.h"
-#include "bspfile.h"
+#include "bsplib.h"
 
 #define MAXLUMP (640*480*85/64)
 

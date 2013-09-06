@@ -496,7 +496,7 @@ void CBaseToggle :: AngularMove( Vector vecDestAngle, float flSpeed )
 
 	// set nextthink to trigger a call to AngularMoveDone when dest is reached
 	pev->nextthink = pev->ltime + flTravelTime;
-	SetThink( &CBaseToggle::AngularMoveDone );
+	SetThink(  &CBaseToggle::AngularMoveDone );
 
 	// scale the destdelta vector by the time spent traveling to get velocity
 	pev->avelocity = vecDestDelta / flTravelTime;

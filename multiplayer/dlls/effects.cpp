@@ -459,7 +459,7 @@ void CLightning::Spawn( void )
 {
 	if ( FStringNull( m_iszSpriteName ) )
 	{
-		SetThink( &CBaseEntity::SUB_Remove );
+		SetThink( &CLightning::SUB_Remove );
 		return;
 	}
 	pev->solid = SOLID_NOT;							// Remove model & collisions
@@ -961,7 +961,7 @@ void CLaser::Spawn( void )
 {
 	if ( FStringNull( pev->model ) )
 	{
-		SetThink( &CBaseEntity::SUB_Remove );
+		SetThink( &CLaser::SUB_Remove );
 		return;
 	}
 	pev->solid = SOLID_NOT;							// Remove model & collisions
@@ -1003,7 +1003,7 @@ void CLaser::KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "width"))
 	{
-		SetWidth( atoi(pkvd->szValue) );
+		SetWidth( (int) atof(pkvd->szValue) );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "NoiseAmplitude"))
@@ -1516,7 +1516,7 @@ void CGibShooter :: ShootThink ( void )
 		}
 		else
 		{
-			SetThink ( &CBaseEntity::SUB_Remove );
+			SetThink ( &CGibShooter::SUB_Remove );
 			pev->nextthink = gpGlobals->time;
 		}
 	}
@@ -2129,7 +2129,7 @@ void CEnvFunnel::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 
 	MESSAGE_END();
 
-	SetThink( &CBaseEntity::SUB_Remove );
+	SetThink( &CEnvFunnel::SUB_Remove );
 	pev->nextthink = gpGlobals->time;
 }
 
@@ -2263,6 +2263,6 @@ void CItemSoda::CanTouch ( CBaseEntity *pOther )
 	pev->movetype = MOVETYPE_NONE;
 	pev->effects = EF_NODRAW;
 	SetTouch ( NULL );
-	SetThink ( &CBaseEntity::SUB_Remove );
+	SetThink ( &CItemSoda::SUB_Remove );
 	pev->nextthink = gpGlobals->time;
 }

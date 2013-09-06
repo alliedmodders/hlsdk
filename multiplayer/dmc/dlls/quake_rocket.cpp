@@ -53,7 +53,7 @@ CQuakeRocket *CQuakeRocket::CreateRocket( Vector vecOrigin, Vector vecAngles, CB
 
 	// Safety Remove
 	pRocket->pev->nextthink = gpGlobals->time + 5;
-	pRocket->SetThink( &CBaseEntity::SUB_Remove );
+	pRocket->SetThink( &CQuakeRocket::SUB_Remove );
 
 	// Effects
 //	pRocket->pev->effects |= EF_LIGHT;

@@ -41,13 +41,12 @@ static int g_texnum = 1;
 void StudioModel::UploadTexture(mstudiotexture_t *ptexture, byte *data, byte *pal)
 {
 	// unsigned *in, int inwidth, int inheight, unsigned *out,  int outwidth, int outheight;
-	int		i, j;
+	int		i, j, outwidth, outheight;
 	int		row1[256], row2[256], col1[256], col2[256];
 	byte	*pix1, *pix2, *pix3, *pix4;
 	byte	*tex, *out;
 
 	// convert texture to power of 2
-	int outwidth, outheight;
 	for (outwidth = 1; outwidth < ptexture->width; outwidth <<= 1)
 		;
 
@@ -276,10 +275,10 @@ void StudioModel::GetSequenceInfo( float *pflFrameRate, float *pflGroundSpeed )
 
 float StudioModel::SetController( int iController, float flValue )
 {
+	int i;
 	mstudiobonecontroller_t	*pbonecontroller = (mstudiobonecontroller_t *)((byte *)m_pstudiohdr + m_pstudiohdr->bonecontrollerindex);
 
 	// find first controller that matches the index
-	int i;
 	for (i = 0; i < m_pstudiohdr->numbonecontrollers; i++, pbonecontroller++)
 	{
 		if (pbonecontroller->index == iController)

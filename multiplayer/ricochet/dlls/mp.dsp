@@ -19,13 +19,12 @@ CFG=mp - Win32 Release
 !MESSAGE 
 !MESSAGE "mp - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "mp - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "mp - Win32 Profile" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""
-# PROP Scc_LocalPath ""
+# PROP Scc_ProjName ""$/GoldSrc/discwar/dlls", HDKCAAAA"
+# PROP Scc_LocalPath "."
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
@@ -44,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /G5 /MT /W3 /GX /Zi /O2 /I "..\dlls" /I "..\..\engine" /I "..\..\common" /I "..\..\game_shared" /I "..\pm_shared" /I "..\\" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "VALVE_DLL" /YX /FD /c
+# ADD CPP /nologo /G5 /MT /W3 /GX /Zi /O2 /I "." /I "..\dlls" /I "..\..\engine" /I "..\..\common" /I "..\engine" /I "..\common" /I "..\..\public" /I "..\..\game_shared" /I "..\pm_shared" /I "..\\" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "VALVE_DLL" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -56,6 +55,24 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib /nologo /subsystem:windows /dll /map /debug /machine:I386 /def:".\mp.def"
 # SUBTRACT LINK32 /profile
+# Begin Custom Build - Copying to \half-life\ricochet\dlls
+InputDir=.\Releasemp
+ProjDir=.
+InputPath=.\Releasemp\mp.dll
+InputName=mp
+SOURCE="$(InputPath)"
+
+BuildCmds= \
+	call ..\..\filecopy.bat $(InputPath) $(ProjDir)\..\..\..\game\mod\dlls\$(InputName).dll \
+	call ..\..\filecopy.bat $(InputDir)\$(InputName).pdb $(ProjDir)\..\..\..\game\mod\dlls\$(InputName).pdb \
+	
+
+"$(ProjDir)\..\..\..\game\mod\dlls\$(InputName).dll" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(ProjDir)\..\..\..\game\mod\dlls\$(InputName).pdb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
 
 !ELSEIF  "$(CFG)" == "mp - Win32 Debug"
 
@@ -70,7 +87,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir ".\debugmp"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /G5 /MTd /W3 /Gm /GX /ZI /Od /I "..\dlls" /I "..\..\engine" /I "..\..\common" /I "..\..\game_shared" /I "..\pm_shared" /I "..\\" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "VALVE_DLL" /FR /YX /FD /c
+# ADD CPP /nologo /G5 /MTd /W3 /Gm /GX /ZI /Od /I "..\..\engine" /I "..\..\common" /I "..\engine" /I "..\common" /I "..\..\public" /I "." /I "..\..\game_shared" /I "..\dlls" /I "..\pm_shared" /I "..\\" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "VALVE_DLL" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -82,34 +99,16 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386
 # ADD LINK32 user32.lib advapi32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /def:".\mp.def" /implib:".\Debug\mp.lib"
 # SUBTRACT LINK32 /profile
+# Begin Custom Build - Copying to \quiver\ricochet\dlls
+ProjDir=.
+InputPath=.\debugmp\mp.dll
+InputName=mp
+SOURCE="$(InputPath)"
 
-!ELSEIF  "$(CFG)" == "mp - Win32 Profile"
+"$(ProjDir)\..\..\..\game\mod\dlls\$(InputName).dll" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	call ..\..\filecopy.bat $(InputPath) $(ProjDir)\..\..\..\game\mod\dlls\$(InputName).dll
 
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir ".\mp___Win"
-# PROP BASE Intermediate_Dir ".\mp___Win"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir ".\Profilemp"
-# PROP Intermediate_Dir ".\Profilemp"
-# PROP Ignore_Export_Lib 0
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /G5 /MT /W3 /GX /Zi /O2 /I "..\engine" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "QUIVER" /D "VOXEL" /D "QUAKE2" /D "VALVE_DLL" /YX /c
-# SUBTRACT BASE CPP /Fr
-# ADD CPP /nologo /G5 /MT /W3 /GX /Zi /O2 /I "..\dlls" /I "..\engine" /I "..\..\game_shared" /I "..\common" /I "..\pm_shared" /I "..\\" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "VALVE_DLL" /YX /FD /c
-# ADD BASE MTL /nologo /D "NDEBUG" /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x409 /d "NDEBUG"
-# ADD RSC /l 0x409 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib /nologo /subsystem:windows /dll /debug /machine:I386 /def:".\mp.def"
-# SUBTRACT BASE LINK32 /profile
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib /nologo /subsystem:windows /dll /profile /debug /machine:I386 /def:".\mp.def"
+# End Custom Build
 
 !ENDIF 
 
@@ -117,7 +116,6 @@ LINK32=link.exe
 
 # Name "mp - Win32 Release"
 # Name "mp - Win32 Debug"
-# Name "mp - Win32 Profile"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;for;f90"
