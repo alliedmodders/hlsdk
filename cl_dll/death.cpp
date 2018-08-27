@@ -1,3 +1,4 @@
+
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
@@ -165,7 +166,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	int killer = READ_BYTE();
 	int victim = READ_BYTE();
 
-	char killedwith[32];
+	char killedwith[64];
 	strcpy( killedwith, "d_" );
 	strncat( killedwith, READ_STRING(), 32 );
 

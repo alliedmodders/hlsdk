@@ -1250,7 +1250,7 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow( int iTextToShow )
 
 	if ( iTextToShow == SHOW_MOTD )
 	{
-		if (!m_szServerName || !m_szServerName[0])
+		if (!m_szServerName[0])
 			strcpy( cTitle, "Half-Life" );
 		else
 			strncpy( cTitle, m_szServerName, MAX_TITLE_LENGTH );
@@ -1260,7 +1260,7 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow( int iTextToShow )
 	else if ( iTextToShow == SHOW_MAPBRIEFING )
 	{
 		// Get the current mapname, and open it's map briefing text
-		if (m_sMapName && m_sMapName[0])
+		if (m_sMapName[0])
 		{
 			strcpy( sz, "maps/");
 			strcat( sz, m_sMapName );

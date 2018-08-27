@@ -41,18 +41,12 @@ private:
 	
 public:
 
-	void * operator new(size_t size)
+	void * operator new(size_t size) throw()
 	{
 		// Requested size should match size of class.
-        if ( size != sizeof( CCoreTriangleEffect ) )
-#ifdef _WIN32
-             throw "Error in requested size of new particle class instance.";
-#else
+		if ( size != sizeof( CCoreTriangleEffect ) )
 			return NULL;
-#endif
-		
-      return((CCoreTriangleEffect *) CMiniMem::Instance()->newBlock());
-
+		return((CCoreTriangleEffect *) CMiniMem::Instance()->newBlock());
 	}//this asks for a new block of memory from the MiniMen class
 		
 	virtual void Think( float time ) = 0;
