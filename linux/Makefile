@@ -95,7 +95,7 @@ endif
 
 ARCH_CFLAGS="$(ARCH_CFLAGS_I486)"
 
-BASE_CFLAGS=-fno-strict-aliasing -DNDEBUG -DPOSIX -D_POSIX -DLINUX -D_LINUX -DGNUC -DHL1 -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -DQUIVER -DQUAKE2 -DVALVE_DLL -D_alloca=alloca -fno-exceptions -D_vsnprintf=vsnprintf -DNO_MALLOC_OVERRIDE -Wall -Wno-non-virtual-dtor -Wno-invalid-offsetof -Wno-overloaded-virtual -Wno-delete-non-virtual-dtor -Werror 
+BASE_CFLAGS=-fno-strict-aliasing -DNDEBUG -DPOSIX -D_POSIX -DLINUX -D_LINUX -DGNUC -DHL1 -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -DQUIVER -DQUAKE2 -DVALVE_DLL -D_alloca=alloca -fno-exceptions -D_vsnprintf=vsnprintf -DNO_MALLOC_OVERRIDE -Wall -Wno-non-virtual-dtor -Wno-invalid-offsetof -Wno-overloaded-virtual -Wno-delete-non-virtual-dtor -Werror -Wno-unused-result
 
 #-Werror=return-type
 #BASE_CFLAGS+=-w
