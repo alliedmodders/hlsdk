@@ -37,7 +37,7 @@ endif
 ifeq ($(OS),Darwin)
     OSXVER := $(shell sw_vers -productVersion)
 	DEVELOPER_DIR := $(shell /usr/bin/xcode-select -print-path)
-	ifeq (,$(filter 10.7% 10.8% 10.9%, $(OSXVER))) 
+	ifeq (,$(filter 10.7% 10.8% 10.9% 10.10% 10.11% 10.12% 10.13% 10.14%, $(OSXVER))) 
 		BUILDING_ON_LION := 0
 		COMPILER_BIN_DIR := $(DEVELOPER_DIR)/usr/bin
 		SDK_DIR := $(DEVELOPER_DIR)/SDKs
@@ -48,7 +48,7 @@ ifeq ($(OS),Darwin)
 	endif
 
 	#SDKROOT ?= $(SDK_DIR)/MacOSX10.6.sdk
-	SDKROOT ?= $(SDK_DIR)/MacOSX10.8.sdk
+	SDKROOT ?= $(SDK_DIR)/MacOSX10.13.sdk
 
 	ARCH_FLAGS ?= -arch i386 -m32 -march=prescott -gdwarf-2 -g2  -Wno-typedef-redefinition -momit-leaf-frame-pointer -mtune=core2
 	CPP_LIB=-lstdc++ -lpthread
@@ -87,15 +87,15 @@ endif
 
 ifeq ($(OS),Darwin)
 # force 387 for FP math so the precision between win32 and linux and osx match
-ARCH_CFLAGS_I486+=-march=pentium-m -mfpmath=387
-ARCH_CFLAGS_I686+=-march=pentium-m -mfpmath=387
-ARCH_CFLAGS_AMD+=-mfpmath=387
+ARCH_CFLAGS_I486+=-march=pentium-m
+ARCH_CFLAGS_I686+=-march=pentium-m
+ARCH_CFLAGS_AMD+=
 endif
 
 
 ARCH_CFLAGS="$(ARCH_CFLAGS_I486)"
 
-BASE_CFLAGS=-fno-strict-aliasing -DNDEBUG -DPOSIX -D_POSIX -DLINUX -D_LINUX -DGNUC -DHL1 -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -DQUIVER -DQUAKE2 -DVALVE_DLL -D_alloca=alloca -fno-exceptions -fexpensive-optimizations -D_vsnprintf=vsnprintf -DNO_MALLOC_OVERRIDE -Wall -Wno-non-virtual-dtor -Wno-invalid-offsetof -Wno-overloaded-virtual -Wno-delete-non-virtual-dtor -Werror 
+BASE_CFLAGS=-fno-strict-aliasing -DNDEBUG -DPOSIX -D_POSIX -DLINUX -D_LINUX -DGNUC -DHL1 -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -DQUIVER -DQUAKE2 -DVALVE_DLL -D_alloca=alloca -fno-exceptions -D_vsnprintf=vsnprintf -DNO_MALLOC_OVERRIDE -Wall -Wno-non-virtual-dtor -Wno-invalid-offsetof -Wno-overloaded-virtual -Wno-delete-non-virtual-dtor -Werror 
 
 #-Werror=return-type
 #BASE_CFLAGS+=-w

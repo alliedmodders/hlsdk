@@ -402,7 +402,7 @@ void CHudSpectator::SetCameraView( vec3_t pos, vec3_t angle, float fov)
 
 void CHudSpectator::AddWaypoint( float time, vec3_t pos, vec3_t angle, float fov, int flags )
 {
-	if ( !flags == 0 && time == 0.0f)
+	if ( flags != 0 && time == 0.0f)
 	{
 		// switch instantly to this camera view
 		SetCameraView( pos, angle, fov );
