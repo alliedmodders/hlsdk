@@ -48,7 +48,7 @@ ifeq ($(OS),Darwin)
 	endif
 
 	#SDKROOT ?= $(SDK_DIR)/MacOSX10.6.sdk
-	SDKROOT ?= $(SDK_DIR)/MacOSX10.13.sdk
+	SDKROOT ?= $(SDK_DIR)/MacOSX.sdk
 
 	ARCH_FLAGS ?= -arch i386 -m32 -march=prescott -gdwarf-2 -g2  -Wno-typedef-redefinition -momit-leaf-frame-pointer -mtune=core2
 	CPP_LIB=-lstdc++ -lpthread
